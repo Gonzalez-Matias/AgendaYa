@@ -1,0 +1,50 @@
+language: "es"
+
+reviews:
+  profile: "chill"
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: true
+
+  path_instructions:
+    - path: "src/actions/**"
+      instructions: |
+        Entry points (Server Actions). Solo recibir datos, validar formato básico
+        y llamar al service. No poner lógica de negocio ni queries a DB aquí.
+
+    - path: "src/services/**"
+      instructions: |
+        Capa de lógica de negocio. Verificar que valide con Zod antes
+        de llamar al repositorio y que no importe prisma directamente.
+
+    - path: "src/repositories/**"
+      instructions: |
+        Capa de acceso a datos. Verificar que no haya lógica de negocio
+        y que no se importe prisma fuera de esta capa.
+
+    - path: "src/types/**"
+      instructions: |
+        Tipos compartidos del proyecto. Solo definir interfaces y types de TypeScript.
+        No incluir lógica, funciones ni dependencias de Prisma/Next.js aquí.
+        Si un tipo se usa solo en una capa, definirlo en esa capa, no en types/.
+
+    - path: "src/utils/**"
+      instructions: |
+        Funciones helper puras y reutilizables. No deben tener dependencias
+        de Prisma, Next.js ni de otras capas del proyecto. Solo lógica genérica
+        (fechas, strings, validaciones simples).
+
+    - path: "tests/**"
+      instructions: |
+        Proyecto universitario con TDD. Ser comprensivo con el nivel de
+        los tests. Verificar que los tests usen cleanDB() y seed() en beforeAll.
+        Si se eliminan tests, preguntar si otro test cubre ese comportamiento
+        antes de aprobar. Está bien que se agregue código sin tests en PRs
+        intermedios, siempre que los tests lleguen en el mismo PR o el siguiente.
+
+  abort_on_close: true
+
+chat:
+  auto_reply: true

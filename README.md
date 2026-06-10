@@ -43,6 +43,7 @@ Sistema de gestión de agenda y reserva de turnos para profesionales. Permite a 
 - **ORM**: Prisma 7 con adapter `@prisma/adapter-pg`
 - **Testing**: Jest + @swc/jest
 - **CI**: GitHub Actions
+- **Code Review**: CodeRabbit (AI)
 ## Flujo de Trabajo - TDD
 
 El proyecto sigue un enfoque **Test-Driven Development (TDD)** donde los tests validan la capa de base de datos antes de implementar la lógica de negocio.
@@ -59,23 +60,26 @@ El proyecto sigue un enfoque **Test-Driven Development (TDD)** donde los tests v
 
 ```
 ┌─────────────────────────────────────────────────┐
-│  1. Definir requisito (User Story del TP)        │
-│  2. Escribir test en tests/ que falle            │
-│  3. Ejecutar npm test → veo el fallo (RED)       │
-│  4. Implementar repository/service               │
-│  5. Ejecutar npm test → veo el pase (GREEN)      │
-│  6. Refactorizar si es necesario                  │
-│  7. Commit con mensaje descriptivo                │
+│  1. Definir requisito (User Story del TP)       │
+│  2. Escribir test en tests/ que falle           │
+│  3. Ejecutar npm test → veo el fallo (RED)      │
+│  4. Implementar repository/service              │
+│  5. Ejecutar npm test → veo el pase (GREEN)     │
+│  6. Refactorizar si es necesario                │
+│  7. Commit con mensaje descriptivo              │
 └─────────────────────────────────────────────────┘
 ```
 
 ### Estrategia de Testing
 
-- **Tests de DB** (`tests/db.test.ts`): Verifican que el seed inserta la cantidad exacta de registros esperada en cada tabla
-- **Tests de Repository** (futuro): Verifican queries y lógica de acceso a datos
-- **Tests de Service** (futuro): Verifican reglas de negocio
+| Nivel | Directorio | Qué testea | Estado |
+|-------|-----------|-----------|--------|
+| **DB** | `tests/db.test.ts` | Que el seed inserta la cantidad correcta de registros | ✅ |
+| **Repository** | `tests/repositories/*.test.ts` | Queries Prisma (findById, create, count) | Pendiente |
+| **Service** | `tests/services/*.test.ts` | Lógica de negocio y validaciones | Pendiente |
+| **Actions** | `tests/actions/*.test.ts` | Entry points, permisos, respuesta | Pendiente |
 
-Los tests usan `cleanDB()` + `seed()` en `beforeAll` para evitar crear y arrastrar cambios a la DB.
+Todos los tests usan `cleanDB()` + `seed()` en `beforeAll` y son **read-only** (solo `count()` o `findMany()`).
 
 ## Requisitos
 
@@ -100,11 +104,11 @@ docker compose up -d
 cp .env.example .env
 # Editar DATABASE_URL si es necesario
 
-# 5. Ejecutar migraciones
-npx prisma migrate dev
-
-# 6. Generar cliente Prisma
+# 5. Generar cliente Prisma
 npx prisma generate
+
+# 6. Ejecutar migraciones
+npx prisma migrate dev
 
 # 7. Cargar datos de prueba
 npx prisma db seed
@@ -133,12 +137,19 @@ agendaya/
 │   ├── seed.ts                # Datos de prueba (47 registros)
 │   └── migrations/            # Migraciones SQL
 ├── src/
-│   ├── app/                   # Next.js App Router
-│   ├── repositories/          # Capa de acceso a datos (Prisma)
+│   ├── app/                   # Next.js App Router (pages y layouts)
+│   ├── actions/               # Server Actions (entry points)
+│   ├── services/              # Lógica de negocio
+│   ├── repositories/          # Acceso a datos (Prisma)
+│   ├── types/                 # Tipos compartidos
+│   ├── utils/                 # Utilidades
 │   └── generated/             # Cliente Prisma generado (no commitear)
 ├── tests/
 │   ├── helpers.ts             # PrismaClient, cleanDB(), seed()
-│   └── db.test.ts             # Tests de verificación de DB
+│   ├── db.test.ts             # Tests de verificación de seed
+│   ├── repositories/          # Tests de acceso a datos (futuro)
+│   ├── services/              # Tests de lógica de negocio (futuro)
+│   └── actions/               # Tests de entry points (futuro)
 ├── documents/
 │   └── TP Nº1_ *.pdf          # Documento de requisitos del TP
 ├── docker-compose.yml         # PostgreSQL 16
@@ -147,10 +158,28 @@ agendaya/
 └── .github/workflows/ci.yml   # Pipeline de CI
 ```
 
+## Arquitectura
+
+El proyecto sigue una arquitectura por capas. CodeRabbit verifica estas reglas en cada PR:
+
+```
+Actions → Services → Repositories → Prisma → PostgreSQL
+```
+
+| Capa | Responsabilidad | Regla |
+|------|----------------|-------|
+| `src/actions/**` | Entry points (Server Actions) | Solo recibir datos, validar y llamar al service. Sin lógica de negocio. |
+| `src/services/**` | Lógica de negocio | Validar con Zod. No importar Prisma directamente. |
+| `src/repositories/**` | Acceso a datos | Solo queries Prisma. Sin lógica de negocio. |
+| `src/types/**` | Tipos compartidos | Solo interfaces y types. Sin lógica ni dependencias. |
+| `src/utils/**` | Helpers reutilizables | Funciones puras. Sin dependencias de Prisma ni Next.js. |
+| `tests/**` | Tests | Usar `cleanDB()` + `seed()` en `beforeAll`. Read-only. |
+
 ## CI
 
-El pipeline de GitHub Actions ejecuta automáticamente:
+Cuando se abre un PR, se ejecutan dos flujos en paralelo:
 
+### GitHub Actions (ci.yml)
 1. Checkout del código
 2. Instalación de dependencias
 3. `prisma generate`
@@ -158,6 +187,13 @@ El pipeline de GitHub Actions ejecuta automáticamente:
 5. `npm test`
 
 Si algún test falla, el PR no se puede mergear.
+
+### CodeRabbit (review automático)
+- Review de código con AI basado en `.coderabbit.yaml`
+- Reglas específicas por capa: actions, services, repositories, types, utils y tests
+- Comenta suggestions directamente en el PR
+
+Si pide cambios, el PR no se puede mergear (branch protection habilitado)
 
 ## Integrantes
 
