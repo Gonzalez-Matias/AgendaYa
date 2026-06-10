@@ -11,3 +11,132 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model UsuarioAdministrador {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  nombre    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reservas              Reserva[]
+  tiposEvento           TipoEvento[]
+  disponibilidadSemanal DisponibilidadSemanal[]
+  bloqueosAgenda        BloqueoAgenda[]
+
+  @@map("usuario_administrador")
+}
+
+model TipoEvento {
+  id               Int              @id @default(autoincrement())
+  nombre           String
+  duracion         Int
+  descripcion      String?
+  confirmacion     TipoConfirmacion @default(AUTOMATICA)
+  antelacionMinima Int
+  activo           Boolean          @default(true)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  reservas Reserva[]
+
+  administradorId Int
+  administrador   UsuarioAdministrador @relation(fields: [administradorId], references: [id])
+
+  @@index([administradorId])
+  @@map("tipo_evento")
+}
+
+model EstadoReserva {
+  id     Int    @id @default(autoincrement())
+  nombre String @unique
+
+  reservas       Reserva[]
+  historial      ReservaEstadoHistorial[]
+
+  @@map("estado_reserva")
+}
+
+// Seed:
+// PendienteDeConfirmacion
+// PendienteDeReagendar
+// Confirmada
+// Cancelada
+// Completada
+
+model Reserva {
+  id              Int      @id @default(autoincrement())
+  fechaHoraInicio DateTime
+  duracion        Int
+
+  nombreInvitado   String
+  emailInvitado    String
+  telefonoInvitado String?
+  notaInvitado     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tipoEventoId Int
+  tipoEvento   TipoEvento @relation(fields: [tipoEventoId], references: [id])
+
+  administradorId Int
+  administrador   UsuarioAdministrador @relation(fields: [administradorId], references: [id])
+
+  estadoReservaId Int
+  estadoReserva   EstadoReserva @relation(fields: [estadoReservaId], references: [id])
+
+  historialEstados ReservaEstadoHistorial[]
+
+  @@index([tipoEventoId])
+  @@index([administradorId])
+  @@index([estadoReservaId])
+  @@map("reserva")
+}
+
+model ReservaEstadoHistorial {
+  id          Int      @id @default(autoincrement())
+  fechaCambio DateTime @default(now())
+  motivo      String?
+
+  reservaId Int
+  reserva   Reserva @relation(fields: [reservaId], references: [id])
+
+  estadoReservaId Int
+  estadoReserva   EstadoReserva @relation(fields: [estadoReservaId], references: [id])
+
+  @@index([reservaId])
+  @@index([estadoReservaId])
+  @@map("reserva_estado_historial")
+}
+
+model DisponibilidadSemanal {
+  id         Int    @id @default(autoincrement())
+  diaSemana  Int // 0=Domingo, 1=Lunes, ... 6=Sábado
+  horaInicio Int // minutos desde medianoche, ej: 540 = 09:00
+  horaFin    Int // minutos desde medianoche, ej: 1080 = 18:00
+
+  administradorId Int
+  administrador   UsuarioAdministrador @relation(fields: [administradorId], references: [id])
+
+  @@index([administradorId])
+  @@map("disponibilidad_semanal")
+}
+
+model BloqueoAgenda {
+  id          Int      @id @default(autoincrement())
+  fechaInicio DateTime
+  fechaFin    DateTime
+  motivo      String?
+
+  administradorId Int
+  administrador   UsuarioAdministrador @relation(fields: [administradorId], references: [id])
+
+  @@index([administradorId])
+  @@map("bloqueo_agenda")
+}
+
+enum TipoConfirmacion {
+  AUTOMATICA
+  MANUAL
+}
