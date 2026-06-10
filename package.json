@@ -7,7 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "test": "echo \"No tests yet\" && exit 0"
+    "test": "jest"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
@@ -21,12 +21,15 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@swc/jest": "^0.2.39",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.19",
+    "jest": "^30.4.2",
     "typescript": "^5"
   }
 }
