@@ -44,7 +44,7 @@ Sistema de gestión de agenda y reserva de turnos para profesionales. Permite a 
 - **Testing**: Jest + @swc/jest
 - **CI**: GitHub Actions
 - **Code Review**: CodeRabbit (AI)
-## Flujo de Trabajo - TDD
+## Metodología - TDD
 
 El proyecto sigue un enfoque **Test-Driven Development (TDD)** donde los tests validan la capa de base de datos antes de implementar la lógica de negocio.
 
@@ -69,6 +69,38 @@ El proyecto sigue un enfoque **Test-Driven Development (TDD)** donde los tests v
 │  7. Commit con mensaje descriptivo              │
 └─────────────────────────────────────────────────┘
 ```
+
+### Flujo de Git
+
+Cada alumno trabaja en su propia branch. No hay subdivisiones por feature.
+
+1. Crear tu branch personal (una sola vez)
+   ```bash
+   git checkout -b tu-nombre
+   ```
+
+2. Hacer cambios y commitear
+   ```bash
+   git add .
+   git commit -m "Descripción del cambio"
+   ```
+
+3. Push a tu branch
+   ```bash
+   git push -u origin tu-nombre
+   ```
+
+4. Abrir PR en GitHub cuando quieras merge a main
+
+5. Esperar a que pasen:
+   - **Tests** (GitHub Actions)
+   - **CodeRabbit** (review automático)
+
+6. Si ambos pasan → merge habilitado
+
+**Convenciones:**
+- **Commits**: mensajes descriptivos en español ("Agregar validación de email", "Fix en schema de Prisma")
+- **PRs**: título claro + descripción breve de qué se hizo
 
 ### Estrategia de Testing
 
