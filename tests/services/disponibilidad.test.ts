@@ -646,4 +646,40 @@ describe("consultarDisponibilidad", () => {
     expect(miercolesHorarios).toContain("8:45");
     expect(miercolesHorarios).toContain("11:00");
   });
+
+  it("debería rechazar períodos mayores a 30 días", async () => {
+    const admin = await prisma.usuarioAdministrador.create({
+      data: { email: "test@test.com", nombre: "Test" },
+    });
+
+    const tipoEvento = await prisma.tipoEvento.create({
+      data: {
+        nombre: "Reunión",
+        duracion: 30,
+        antelacionMinima: 1,
+        administradorId: admin.id,
+      },
+    });
+
+    await prisma.disponibilidadSemanal.createMany({
+      data: [1, 2, 3, 4, 5].map((d) => ({
+        diaSemana: d,
+        horaInicio: 480,
+        horaFin: 1020,
+        administradorId: admin.id,
+      })),
+    });
+
+    const desde = new Date();
+    const hasta = new Date(desde);
+    hasta.setUTCDate(hasta.getUTCDate() + 31);
+
+    await expect(
+      consultarDisponibilidad({
+        tipoEventoId: tipoEvento.id,
+        fechaDesde: desde,
+        fechaHasta: hasta,
+      })
+    ).rejects.toThrow("El período no puede superar 30 días");
+  });
 });

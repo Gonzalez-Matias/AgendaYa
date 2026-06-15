@@ -12,6 +12,7 @@ import type {
 } from "../types/disponibilidad";
 
 const INTERVALO = 15;
+const MAX_DIAS = 30;
 
 const Schema = z.object({
   tipoEventoId: z.number().int().positive(),
@@ -38,6 +39,12 @@ export async function consultarDisponibilidad(
   input: ConsultarDisponibilidadInput
 ): Promise<DiaDisponible[]> {
   const datos = Schema.parse(input);
+
+  const diffMs = datos.fechaHasta.getTime() - datos.fechaDesde.getTime();
+  const diffDias = diffMs / (1000 * 60 * 60 * 24);
+  if (diffDias > MAX_DIAS) {
+    throw new Error(`El período no puede superar ${MAX_DIAS} días`);
+  }
 
   const tipoEvento = await findTipoEvento(datos.tipoEventoId);
   if (!tipoEvento) throw new Error("Tipo de evento no encontrado");
