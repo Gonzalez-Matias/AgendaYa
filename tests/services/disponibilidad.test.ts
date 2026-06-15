@@ -228,10 +228,9 @@ describe("consultarDisponibilidad", () => {
 
   it("debería respetar antelación mínima del tipo de evento", async () => {
     const ahora = new Date();
-    const horaActual = ahora.getUTCHours();
-    const minutoActual = ahora.getUTCMinutes();
     const antelacionHoras = 2;
-    const horaMinimaEsperada = (horaActual + antelacionHoras) % 24;
+    const fechaMinima = new Date(ahora);
+    fechaMinima.setUTCHours(fechaMinima.getUTCHours() + antelacionHoras);
 
     const admin = await prisma.usuarioAdministrador.create({
       data: { email: "test@test.com", nombre: "Test" },
@@ -266,13 +265,7 @@ describe("consultarDisponibilidad", () => {
     const slots = resultado[0].slots;
 
     if (slots.length > 0) {
-      const primeraHora = slots[0].inicio.getUTCHours();
-      const primerMinuto = slots[0].inicio.getUTCMinutes();
-
-      const minimoEnMinutos = horaMinimaEsperada * 60 + minutoActual;
-      const slotEnMinutos = primeraHora * 60 + primerMinuto;
-
-      expect(slotEnMinutos).toBeGreaterThanOrEqual(minimoEnMinutos);
+      expect(slots[0].inicio.getTime()).toBeGreaterThanOrEqual(fechaMinima.getTime());
     } else {
       expect(slots).toHaveLength(0);
     }

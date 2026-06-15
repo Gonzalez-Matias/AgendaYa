@@ -2,7 +2,11 @@ import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL no está definida en las variables de entorno");
+}
+const adapter = new PrismaPg({ connectionString: databaseUrl });
 export const prisma = new PrismaClient({ adapter });
 
 export async function cleanDB() {
