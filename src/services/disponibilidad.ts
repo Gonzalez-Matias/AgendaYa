@@ -40,6 +40,10 @@ export async function consultarDisponibilidad(
 ): Promise<DiaDisponible[]> {
   const datos = Schema.parse(input);
 
+  if (datos.fechaDesde > datos.fechaHasta) {
+    throw new Error("fechaDesde no puede ser posterior a fechaHasta");
+  }
+
   const diffMs = datos.fechaHasta.getTime() - datos.fechaDesde.getTime();
   const diffDias = diffMs / (1000 * 60 * 60 * 24);
   if (diffDias > MAX_DIAS) {
@@ -70,7 +74,15 @@ export async function consultarDisponibilidad(
     ultimoDia
   );
 
-  const dispMap = new Map(disponibilidades.map((d) => [d.diaSemana, d]));
+  const dispMap = new Map<number, typeof disponibilidades>();
+  for (const d of disponibilidades) {
+    const existing = dispMap.get(d.diaSemana);
+    if (existing) {
+      existing.push(d);
+    } else {
+      dispMap.set(d.diaSemana, [d]);
+    }
+  }
 
   const ahora = new Date();
   const fechaMinima = new Date(ahora);
@@ -81,9 +93,9 @@ export async function consultarDisponibilidad(
 
   while (diaActual <= datos.fechaHasta) {
     const diaSemana = diaActual.getUTCDay();
-    const disp = dispMap.get(diaSemana);
+    const disps = dispMap.get(diaSemana);
 
-    if (!disp) {
+    if (!disps || disps.length === 0) {
       resultado.push({ fecha: new Date(diaActual), slots: [] });
       diaActual.setUTCDate(diaActual.getUTCDate() + 1);
       continue;
@@ -102,30 +114,36 @@ export async function consultarDisponibilidad(
     );
 
     const slots: SlotDisponible[] = [];
+    const minutosVistos = new Set<number>();
 
-    for (
-      let min = disp.horaInicio;
-      min + INTERVALO <= disp.horaFin;
-      min += INTERVALO
-    ) {
-      const slotInicio = minutosAFecha(diaActual, min);
-      const slotFin = minutosAFecha(diaActual, min + INTERVALO);
+    for (const disp of disps) {
+      for (
+        let min = disp.horaInicio;
+        min + INTERVALO <= disp.horaFin;
+        min += INTERVALO
+      ) {
+        if (minutosVistos.has(min)) continue;
+        minutosVistos.add(min);
 
-      if (slotInicio < fechaMinima) continue;
+        const slotInicio = minutosAFecha(diaActual, min);
+        const slotFin = minutosAFecha(diaActual, min + INTERVALO);
 
-      const superponeConReserva = reservasDelDia.some((r) => {
-        const rFin = new Date(r.fechaHoraInicio);
-        rFin.setUTCMinutes(rFin.getUTCMinutes() + r.duracion);
-        return haySuperposicion(slotInicio, slotFin, r.fechaHoraInicio, rFin);
-      });
-      if (superponeConReserva) continue;
+        if (slotInicio < fechaMinima) continue;
 
-      const superponeConBloqueo = bloqueosDelDia.some((b) =>
-        haySuperposicion(slotInicio, slotFin, b.fechaInicio, b.fechaFin)
-      );
-      if (superponeConBloqueo) continue;
+        const superponeConReserva = reservasDelDia.some((r) => {
+          const rFin = new Date(r.fechaHoraInicio);
+          rFin.setUTCMinutes(rFin.getUTCMinutes() + r.duracion);
+          return haySuperposicion(slotInicio, slotFin, r.fechaHoraInicio, rFin);
+        });
+        if (superponeConReserva) continue;
 
-      slots.push({ inicio: slotInicio, fin: slotFin });
+        const superponeConBloqueo = bloqueosDelDia.some((b) =>
+          haySuperposicion(slotInicio, slotFin, b.fechaInicio, b.fechaFin)
+        );
+        if (superponeConBloqueo) continue;
+
+        slots.push({ inicio: slotInicio, fin: slotFin });
+      }
     }
 
     resultado.push({ fecha: new Date(diaActual), slots });
