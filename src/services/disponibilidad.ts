@@ -20,6 +20,11 @@ const Schema = z.object({
   fechaHasta: z.date(),
 });
 
+/**
+ * Determines if two time intervals overlap.
+ *
+ * @returns `true` if the intervals overlap, `false` otherwise.
+ */
 function haySuperposicion(
   slotInicio: Date,
   slotFin: Date,
@@ -29,12 +34,28 @@ function haySuperposicion(
   return slotInicio < objFin && slotFin > objInicio;
 }
 
+/**
+ * Creates a Date with the specified day and time of day in minutes from midnight.
+ *
+ * @param dia - The day to use for the resulting Date.
+ * @param minutos - The time of day in minutes from midnight (UTC).
+ * @returns A new Date with the specified day and UTC time set to the given minute offset.
+ */
 function minutosAFecha(dia: Date, minutos: number): Date {
   const resultado = new Date(dia);
   resultado.setUTCHours(Math.floor(minutos / 60), minutos % 60, 0, 0);
   return resultado;
 }
 
+/**
+ * Queries available booking slots for an event type within a date range.
+ *
+ * Validates the input, retrieves the event type configuration and administrator's availability schedule, then generates available time slots by excluding times before the minimum lead requirement, overlapping reservations, and blocked periods.
+ *
+ * @throws Throws an error if the date range exceeds 30 days.
+ * @throws Throws an error if the event type is not found.
+ * @returns An array of days with available time slots for the specified period.
+ */
 export async function consultarDisponibilidad(
   input: ConsultarDisponibilidadInput
 ): Promise<DiaDisponible[]> {
