@@ -23,7 +23,7 @@
     "@eslint/eslintrc": "^3",
     "@swc/jest": "^0.2.39",
     "@types/jest": "^30.0.0",
-    "@types/node": "^20",
+    "@types/node": "^20.19.43",
     "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
