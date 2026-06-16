@@ -12,6 +12,10 @@ const CancelarReservaInputSchema = z.object({
 
 type CancelarReservaInput = z.infer<typeof CancelarReservaInputSchema>;
 
+/**
+ * Cancela una reserva existente cambiando su estado a "Cancelada".
+ * Lanza un error si la reserva no existe o ya está cancelada.
+ */
 export async function cancelarReserva(input: CancelarReservaInput) {
   const { reservaId, motivo } = CancelarReservaInputSchema.parse(input);
 

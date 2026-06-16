@@ -9,6 +9,7 @@ if (!databaseUrl) {
 const adapter = new PrismaPg({ connectionString: databaseUrl });
 const prisma = new PrismaClient({ adapter });
 
+/** Busca una reserva por ID incluyendo su estado actual. */
 export async function obtenerReservaPorId(reservaId: number) {
   return prisma.reserva.findUnique({
     where: { id: reservaId },
@@ -16,10 +17,12 @@ export async function obtenerReservaPorId(reservaId: number) {
   });
 }
 
+/** Busca un estado de reserva por nombre. */
 export async function obtenerEstadoPorNombre(nombre: string) {
   return prisma.estadoReserva.findUnique({ where: { nombre } });
 }
 
+/** Actualiza el estado de una reserva. */
 export async function actualizarEstadoReserva(reservaId: number, estadoReservaId: number) {
   return prisma.reserva.update({
     where: { id: reservaId },
