@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   obtenerReservaPorId,
   obtenerEstadoPorNombre,
-  actualizarEstadoReserva,
+  cancelarReservaAtomica,
 } from "../repositories/cancelarReserva";
 
 const CancelarReservaInputSchema = z.object({
@@ -17,23 +17,21 @@ type CancelarReservaInput = z.infer<typeof CancelarReservaInputSchema>;
  * Lanza un error si la reserva no existe o ya está cancelada.
  */
 export async function cancelarReserva(input: CancelarReservaInput) {
-  const { reservaId, motivo } = CancelarReservaInputSchema.parse(input);
+  const { reservaId } = CancelarReservaInputSchema.parse(input);
 
   const reserva = await obtenerReservaPorId(reservaId);
-
   if (!reserva) {
     throw new Error("Reserva no encontrada");
   }
 
-  if (reserva.estadoReserva.nombre === "Cancelada") {
-    throw new Error("La reserva ya está cancelada");
-  }
-
   const estadoCancelada = await obtenerEstadoPorNombre("Cancelada");
-
   if (!estadoCancelada) {
     throw new Error("Estado Cancelada no encontrado en la base de datos");
   }
 
-  await actualizarEstadoReserva(reservaId, estadoCancelada.id);
+  const count = await cancelarReservaAtomica(reservaId, estadoCancelada.id);
+
+  if (count === 0) {
+    throw new Error("La reserva ya está cancelada");
+  }
 }

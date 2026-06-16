@@ -22,12 +22,16 @@ export async function obtenerEstadoPorNombre(nombre: string) {
   return prisma.estadoReserva.findUnique({ where: { nombre } });
 }
 
-/** Actualiza el estado de una reserva. */
-export async function actualizarEstadoReserva(reservaId: number, estadoReservaId: number) {
-  return prisma.reserva.update({
-    where: { id: reservaId },
-    data: { estadoReservaId },
+/** Cancela una reserva de forma atómica, solo si no está ya cancelada. Retorna cuántos registros se actualizaron. */
+export async function cancelarReservaAtomica(reservaId: number, estadoCanceladaId: number): Promise<number> {
+  const resultado = await prisma.reserva.updateMany({
+    where: {
+      id: reservaId,
+      NOT: { estadoReservaId: estadoCanceladaId },
+    },
+    data: { estadoReservaId: estadoCanceladaId },
   });
+  return resultado.count;
 }
 
 export default prisma;
