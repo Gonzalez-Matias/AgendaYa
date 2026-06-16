@@ -6,10 +6,11 @@ import {
   getModoVistaDefault,
   cambiarModoVista,
   obtenerDatosReservaEnVista,
+  Reserva,
 } from "../src/services/visualizacion";
 
 // Datos de prueba: reservas simuladas
-const reservasMock = [
+const reservasMock: Reserva[] = [
   {
     id: "1",
     fecha: "2026-06-20",
