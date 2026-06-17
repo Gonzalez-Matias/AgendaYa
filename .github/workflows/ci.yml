@@ -48,4 +48,59 @@ jobs:
         run: npx prisma migrate deploy
 
       - name: Correr tests
+        id: tests
         run: npm test
+        continue-on-error: true
+
+      - name: Generar reporte HTML
+        run: |
+          if [ -f test-report.html ]; then
+            echo "✅ Reporte generado correctamente"
+          else
+            echo "⚠️ No se generó el reporte"
+          fi
+
+      - name: Subir reporte como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: test-report.html
+          if-no-files-found: ignore
+
+      - name: Publicar reporte en GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          destination_dir: test-reports
+          keep_files: true
+          publish_branch: gh-pages
+        continue-on-error: true
+
+      - name: Agregar resumen al workflow
+        if: always()
+        run: |
+          echo "## 📊 Resultados de Tests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f test-report.html ]; then
+            echo "✅ **Reporte generado exitosamente**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 📥 Descargar reporte" >> $GITHUB_STEP_SUMMARY
+            echo "El reporte HTML está disponible en la sección **Artifacts** de esta ejecución." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 📈 Ver reporte en línea" >> $GITHUB_STEP_SUMMARY
+            echo "Si se configuró GitHub Pages, el reporte estará disponible en:" >> $GITHUB_STEP_SUMMARY
+            echo "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/test-reports/test-report.html" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **No se generó el reporte**" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Enlaces útiles" >> $GITHUB_STEP_SUMMARY
+          echo "- [Ver ejecución](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [Ver código](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fallar el workflow si los tests fallaron
+        if: steps.tests.outcome != 'success'
+        run: exit 1
