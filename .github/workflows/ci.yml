@@ -49,8 +49,8 @@ jobs:
 
       - name: Correr tests
         id: tests
-        run: npm test -- --runInBand
-        continue-on-error: true  # Esto permite que el workflow continúe aunque fallen tests
+        run: npm test
+        continue-on-error: true
 
       - name: Generar reporte HTML
         run: |
