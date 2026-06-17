@@ -640,6 +640,41 @@ describe("consultarDisponibilidad", () => {
     expect(miercolesHorarios).toContain("11:00");
   });
 
+  it("debería rechazar el rango cuando fechaDesde es posterior a fechaHasta", async () => {
+    const admin = await prisma.usuarioAdministrador.create({
+      data: { email: "test@test.com", nombre: "Test" },
+    });
+
+    const tipoEvento = await prisma.tipoEvento.create({
+      data: {
+        nombre: "Reunión",
+        duracion: 30,
+        antelacionMinima: 1,
+        administradorId: admin.id,
+      },
+    });
+
+    await prisma.disponibilidadSemanal.createMany({
+      data: [1, 2, 3, 4, 5].map((d) => ({
+        diaSemana: d,
+        horaInicio: 480,
+        horaFin: 1020,
+        administradorId: admin.id,
+      })),
+    });
+
+    const desde = new Date("2026-06-20T12:00:00Z");
+    const hasta = new Date("2026-06-19T12:00:00Z");
+
+    await expect(
+      consultarDisponibilidad({
+        tipoEventoId: tipoEvento.id,
+        fechaDesde: desde,
+        fechaHasta: hasta,
+      })
+    ).rejects.toThrow("fechaDesde no puede ser posterior a fechaHasta");
+  });
+
   it("debería rechazar períodos mayores a 30 días", async () => {
     const admin = await prisma.usuarioAdministrador.create({
       data: { email: "test@test.com", nombre: "Test" },
