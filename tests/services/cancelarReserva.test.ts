@@ -92,6 +92,41 @@ describe("cancelarReserva", () => {
     ).rejects.toThrow("La reserva ya está cancelada");
   });
 
+  it("debería lanzar un error si el estado Cancelada no está configurado", async () => {
+    const admin = await prisma.usuarioAdministrador.create({
+      data: { email: "test2@test.com", nombre: "Test Admin 2" },
+    });
+
+    const tipoEvento = await prisma.tipoEvento.create({
+      data: {
+        nombre: "Consulta",
+        duracion: 60,
+        antelacionMinima: 1,
+        administradorId: admin.id,
+      },
+    });
+
+    const estadoConfirmada = await prisma.estadoReserva.create({
+      data: { nombre: "Confirmada" },
+    });
+
+    const reserva = await prisma.reserva.create({
+      data: {
+        fechaHoraInicio: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        duracion: 60,
+        nombreInvitado: "Laura Silva",
+        emailInvitado: "laura@email.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+        estadoReservaId: estadoConfirmada.id,
+      },
+    });
+
+    await expect(
+      cancelarReserva({ reservaId: reserva.id, motivo: "Intento sin Cancelada" })
+    ).rejects.toThrow("Estado Cancelada no encontrado en la base de datos");
+  });
+
   it("debería lanzar un error si la reserva no existe", async () => {
     await expect(
       cancelarReserva({ reservaId: 99999, motivo: "No existe" })

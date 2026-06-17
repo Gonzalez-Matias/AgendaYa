@@ -74,6 +74,45 @@ describe("reagendarReserva", () => {
     ).rejects.toThrow(ReagendarError);
   });
 
+  it("debería lanzar error si el estado Confirmada no está configurado", async () => {
+    const estadoReagendar = await prisma.estadoReserva.create({
+      data: { nombre: "PendienteDeReagendar" },
+    });
+
+    const admin = await prisma.usuarioAdministrador.create({
+      data: { email: "admin@test.com", nombre: "Admin Test" },
+    });
+
+    const tipoEvento = await prisma.tipoEvento.create({
+      data: {
+        nombre: "Consulta",
+        duracion: 60,
+        confirmacion: "MANUAL",
+        antelacionMinima: 2,
+        administradorId: admin.id,
+      },
+    });
+
+    const reserva = await prisma.reserva.create({
+      data: {
+        fechaHoraInicio: new Date("2026-08-01T10:00:00Z"),
+        duracion: 60,
+        nombreInvitado: "Juan Pérez",
+        emailInvitado: "juan@test.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+        estadoReservaId: estadoReagendar.id,
+      },
+    });
+
+    await expect(
+      reagendarReserva({
+        reservaId: reserva.id,
+        nuevaFechaHoraInicio: new Date("2026-08-01T14:00:00Z"),
+      })
+    ).rejects.toThrow(ReagendarError);
+  });
+
   it("debería lanzar error si el nuevo horario se superpone con una reserva existente", async () => {
     const estadoConfirmada = await prisma.estadoReserva.create({
       data: { nombre: "Confirmada" },
