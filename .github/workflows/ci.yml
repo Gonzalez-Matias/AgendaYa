@@ -67,11 +67,18 @@ jobs:
           path: test-report.html
           if-no-files-found: ignore
 
+      - name: Preparar carpeta para publicar
+        run: |
+          mkdir -p pages-deploy
+          if [ -f test-report.html ]; then
+            cp test-report.html pages-deploy/
+          fi
+
       - name: Publicar reporte en GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
+          publish_dir: ./pages-deploy
           destination_dir: test-reports
           keep_files: true
           publish_branch: gh-pages
@@ -82,7 +89,7 @@ jobs:
         run: |
           echo "## 📊 Resultados de Tests" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ -f test-report.html ]; then
             echo "✅ **Reporte generado exitosamente**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
@@ -95,7 +102,7 @@ jobs:
           else
             echo "❌ **No se generó el reporte**" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🔗 Enlaces útiles" >> $GITHUB_STEP_SUMMARY
           echo "- [Ver ejecución](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
