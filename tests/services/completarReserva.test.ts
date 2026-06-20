@@ -1,5 +1,5 @@
 // src/services/completarReserva.test.ts
-import { completarReserva } from './completarReserva';
+import { completarReserva } from '../../src/services/completarReserva';
 
 describe('Pruebas Unitarias - US_11: Marcar Reserva como Completada', () => {
 
