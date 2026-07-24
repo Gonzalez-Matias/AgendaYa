@@ -1,0 +1,163 @@
+.weekCalendar {
+  background: white;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  outline: 1px solid #C3C5D9;
+  outline-offset: -1px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  background: #F7F9FB;
+  border-bottom: 1px solid #C3C5D9;
+  flex-shrink: 0;
+}
+
+.timeCorner {
+  width: 72px;
+  background: #F2F4F6;
+  border-right: 1px solid #C3C5D9;
+  flex-shrink: 0;
+}
+
+.dayHeader {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  gap: 4px;
+}
+
+.dayHeaderWeekend {
+  background: rgba(242, 244, 246, 0.5);
+}
+
+.dayName {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #434656;
+  letter-spacing: 0.55px;
+}
+
+.dayNameToday {
+  color: #003EC7;
+  font-weight: 700;
+}
+
+.dayNumber {
+  font-size: 18px;
+  font-weight: 600;
+  color: #191C1E;
+  line-height: 24px;
+}
+
+.dayNumberToday {
+  width: 32px;
+  height: 32px;
+  background: #003EC7;
+  border-radius: 12px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.timeColumn {
+  width: 72px;
+  flex-shrink: 0;
+}
+
+.timeSlot {
+  height: 64px;
+  padding: 0 18px;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 23.5px;
+  background: #F2F4F6;
+  border-right: 1px solid rgba(195, 197, 217, 0.3);
+  border-bottom: 1px solid rgba(195, 197, 217, 0.3);
+}
+
+.timeLabel {
+  font-size: 12px;
+  font-weight: 400;
+  color: #6B7280;
+  line-height: 16px;
+}
+
+.dayColumn {
+  flex: 1;
+  position: relative;
+  border-right: 1px solid rgba(195, 197, 217, 0.3);
+}
+
+.dayColumn:last-child {
+  border-right: none;
+}
+
+.dayColumnToday {
+  background: rgba(239, 246, 255, 0.5);
+}
+
+.dayColumnWeekend {
+  background: rgba(249, 250, 251, 0.5);
+}
+
+.timeRow {
+  height: 64px;
+  border-bottom: 1px solid rgba(195, 197, 217, 0.3);
+}
+
+.timeRowEven {
+  background: white;
+}
+
+.timeRowOdd {
+  background: rgba(249, 250, 251, 0.5);
+}
+
+.dayColumnToday .timeRowEven,
+.dayColumnToday .timeRowOdd {
+  background: rgba(239, 246, 255, 0.5);
+}
+
+.eventCard {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  padding: 8px;
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.eventTime {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.eventName {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

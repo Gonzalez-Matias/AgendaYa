@@ -19,5 +19,21 @@ services:
       timeout: 5s
       retries: 5
 
+  app:
+    build: .
+    container_name: agendaya_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./prisma:/app/prisma
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/agendaya
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   postgres_data:
