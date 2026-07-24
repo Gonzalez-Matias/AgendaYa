@@ -5,5 +5,13 @@ node_modules
 *.md
 .env
 .env.test
+.env.local
+.env*.local
 docker-compose.yml
 Dockerfile
+coverage
+*.log
+.eslintcache
+.vscode
+.idea
+.DS_Store

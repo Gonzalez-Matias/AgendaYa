@@ -3,14 +3,16 @@ FROM node:20-alpine
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 COPY . .
 
-ENV DATABASE_URL=postgresql://postgres:postgres@postgres:5432/agendaya
-
 RUN npx prisma generate
 
+RUN mkdir -p /app/.next && chown -R node:node /app
+
 EXPOSE 3000
+
+USER node
 
 CMD ["npx", "next", "dev", "--turbopack", "-p", "3000"]

@@ -27,7 +27,7 @@ export async function findReservasActivasEnRango(
       estadoReserva: {
         nombre: { in: ["Confirmada", "PendienteDeConfirmacion", "PendienteDeReagendar"] },
       },
-      fechaHoraInicio: { gte: desde, lte: hasta },
+      fechaHoraInicio: { gte: desde, lt: hasta },
     },
     select: { fechaHoraInicio: true, duracion: true },
   });

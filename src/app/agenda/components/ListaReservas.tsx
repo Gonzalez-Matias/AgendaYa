@@ -12,23 +12,22 @@ interface ListaReservasProps {
 const DIAS_CORTOS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
 const MESES_CORTOS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 
-const TIPO_COLORS: Record<string, { bg: string; text: string }> = {};
+const PALETTE = [
+  { bg: "#003EC7", text: "#FFFFFF" },
+  { bg: "#9C27B0", text: "#FFFFFF" },
+  { bg: "#4CAF50", text: "#FFFFFF" },
+  { bg: "#E4E4E7", text: "#191C1E" },
+  { bg: "#F59E0B", text: "#FFFFFF" },
+  { bg: "#EF4444", text: "#FFFFFF" },
+  { bg: "#3B82F6", text: "#FFFFFF" },
+  { bg: "#10B981", text: "#FFFFFF" },
+];
 
-function getTipoColors(nombre: string) {
-  if (TIPO_COLORS[nombre]) return TIPO_COLORS[nombre];
-  const palettes = [
-    { bg: "#003EC7", text: "#FFFFFF" },
-    { bg: "#9C27B0", text: "#FFFFFF" },
-    { bg: "#4CAF50", text: "#FFFFFF" },
-    { bg: "#E4E4E7", text: "#191C1E" },
-    { bg: "#F59E0B", text: "#FFFFFF" },
-    { bg: "#EF4444", text: "#FFFFFF" },
-    { bg: "#3B82F6", text: "#FFFFFF" },
-    { bg: "#10B981", text: "#FFFFFF" },
-  ];
-  const idx = Object.keys(TIPO_COLORS).length;
-  TIPO_COLORS[nombre] = palettes[idx % palettes.length];
-  return TIPO_COLORS[nombre];
+function buildTipoColorMap(reservas: ReservaVista[]): Map<string, { bg: string; text: string }> {
+  const map = new Map<string, { bg: string; text: string }>();
+  const tipos = [...new Set(reservas.map((r) => r.tipoEvento))];
+  tipos.forEach((t, i) => map.set(t, PALETTE[i % PALETTE.length]));
+  return map;
 }
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
@@ -68,10 +67,10 @@ function formatDayHeader(fecha: Date): { label: string; dateStr: string; isToday
 }
 
 function esPasada(reserva: ReservaVista): boolean {
-  const [dd, mm] = reserva.fecha.split("/");
+  const [dd, mm, yyyy] = reserva.fecha.split("/");
   const [startStr] = reserva.horario.split(" - ");
   const [h, m] = startStr.split(":").map(Number);
-  const fechaReserva = new Date(2026, parseInt(mm) - 1, parseInt(dd), h, m);
+  const fechaReserva = new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(dd), h, m);
   return fechaReserva < new Date();
 }
 
@@ -89,6 +88,8 @@ function getWeekDays(fechaActual: Date): Date[] {
 }
 
 export function ListaReservas({ reservas, fechaActual, subVista }: ListaReservasProps) {
+  const tipoColorMap = buildTipoColorMap(reservas);
+
   if (reservas.length === 0) {
     return (
       <div className={styles.listaContainer}>
@@ -151,7 +152,7 @@ export function ListaReservas({ reservas, fechaActual, subVista }: ListaReservas
                   })
                   .map((r) => {
                     const [startStr, endStr] = r.horario.split(" - ");
-                    const tc = getTipoColors(r.tipoEvento);
+                    const tc = tipoColorMap.get(r.tipoEvento) || PALETTE[4];
                     const sc = STATUS_STYLES[r.estado] || STATUS_STYLES.Completada;
                     const past = esPasada(r);
 

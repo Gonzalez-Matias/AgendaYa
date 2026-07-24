@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import type { ModoVista } from "@/services/visualizacion";
 import styles from "./CalendarToolbar.module.css";
 
 interface CalendarToolbarProps {
   fechaActual: Date;
-  modoVista: "lista" | "calendario";
+  modoVista: ModoVista;
   subVista: "semanal" | "mensual";
   onChangeFecha: (delta: number) => void;
   onGoToMonth: (year: number, month: number) => void;
-  onChangeModo: (modo: "lista" | "calendario") => void;
+  onChangeModo: (modo: ModoVista) => void;
   onChangeSubVista: (sub: "semanal" | "mensual") => void;
 }
 

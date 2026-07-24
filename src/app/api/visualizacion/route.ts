@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { obtenerReservasPorRango } from "@/services/visualizacion";
+import { findReservasByAdminYPagina } from "@/repositories/visualizacion";
 import prisma from "@/repositories/db";
 
 export async function POST(request: NextRequest) {
@@ -14,24 +15,36 @@ export async function POST(request: NextRequest) {
     const inicio = new Date(fechaDesde);
     const fin = new Date(fechaHasta);
 
-    const todasLasReservas = await obtenerReservasPorRango(administradorId, inicio, fin);
-
-    let reservasPaginadas = todasLasReservas;
-    let totalPaginas = 1;
-
     if (modoVista === "lista") {
-      const porPaginaNum = porPagina || 10;
-      const paginaNum = pagina || 1;
-      const inicioIdx = (paginaNum - 1) * porPaginaNum;
-      reservasPaginadas = todasLasReservas.slice(inicioIdx, inicioIdx + porPaginaNum);
-      totalPaginas = Math.ceil(todasLasReservas.length / porPaginaNum);
+      const porPaginaNum = Math.max(1, Number(porPagina) || 10);
+      const paginaNum = Math.max(1, Number(pagina) || 1);
+      const skip = (paginaNum - 1) * porPaginaNum;
+
+      const [reservas, total] = await Promise.all([
+        findReservasByAdminYPagina(administradorId, inicio, fin, paginaNum, porPaginaNum),
+        prisma.reserva.count({
+          where: { administradorId, fechaHoraInicio: { gte: inicio, lte: fin } },
+        }),
+      ]);
+
+      return NextResponse.json({
+        reservas: reservas.map((r) => ({
+          id: r.id,
+          fecha: `${String(r.fechaHoraInicio.getUTCDate()).padStart(2, "0")}/${String(r.fechaHoraInicio.getUTCMonth() + 1).padStart(2, "0")}/${r.fechaHoraInicio.getUTCFullYear()}`,
+          horario: `${String(r.fechaHoraInicio.getUTCHours()).padStart(2, "0")}:${String(r.fechaHoraInicio.getUTCMinutes()).padStart(2, "0")} - ${String(new Date(r.fechaHoraInicio.getTime() + r.duracion * 60000).getUTCHours()).padStart(2, "0")}:${String(new Date(r.fechaHoraInicio.getTime() + r.duracion * 60000).getUTCMinutes()).padStart(2, "0")}`,
+          nombreInvitado: r.nombreInvitado,
+          emailInvitado: r.emailInvitado,
+          tipoEvento: r.tipoEvento.nombre,
+          estado: r.estadoReserva.nombre === "PendienteDeConfirmacion" || r.estadoReserva.nombre === "PendienteDeReagendar" ? "Pendiente" : r.estadoReserva.nombre,
+          colorFondo: "",
+        })),
+        total,
+        totalPaginas: Math.ceil(total / porPaginaNum),
+      });
     }
 
-    return NextResponse.json({
-      reservas: reservasPaginadas,
-      total: todasLasReservas.length,
-      totalPaginas,
-    });
+    const reservas = await obtenerReservasPorRango(administradorId, inicio, fin);
+    return NextResponse.json({ reservas, total: reservas.length, totalPaginas: 1 });
   } catch (error) {
     console.error("Error al obtener reservas:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });

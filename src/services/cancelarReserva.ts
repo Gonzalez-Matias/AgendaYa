@@ -14,7 +14,7 @@ const CancelarReservaInputSchema = z.object({
 type CancelarReservaInput = z.infer<typeof CancelarReservaInputSchema>;
 
 export async function cancelarReserva(input: CancelarReservaInput) {
-  const { reservaId, adminId } = CancelarReservaInputSchema.parse(input);
+  const { reservaId, motivo, adminId } = CancelarReservaInputSchema.parse(input);
 
   const reserva = await obtenerReservaPorId(reservaId);
   if (!reserva) {
@@ -30,9 +30,9 @@ export async function cancelarReserva(input: CancelarReservaInput) {
     throw new Error("Estado Cancelada no encontrado en la base de datos");
   }
 
-  const count = await cancelarReservaAtomica(reservaId, estadoCancelada.id);
+  const exito = await cancelarReservaAtomica(reservaId, estadoCancelada.id, motivo);
 
-  if (count === 0) {
+  if (!exito) {
     throw new Error("La reserva ya está cancelada");
   }
 }

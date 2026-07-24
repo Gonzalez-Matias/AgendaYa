@@ -33,7 +33,7 @@ export default function AgendaPage() {
   useEffect(() => {
     if (!adminId) return;
     cargarReservas();
-  }, [adminId, fechaActual, subVista]);
+  }, [adminId, fechaActual, subVista, modoVista]);
 
   async function cargarReservas() {
     setCargando(true);
