@@ -6,6 +6,14 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
+  // Limpiar datos previos en orden de FK (hijos primero)
+  await prisma.reservaEstadoHistorial.deleteMany();
+  await prisma.reserva.deleteMany();
+  await prisma.bloqueoAgenda.deleteMany();
+  await prisma.disponibilidadSemanal.deleteMany();
+  await prisma.tipoEvento.deleteMany();
+  await prisma.usuarioAdministrador.deleteMany();
+
   // ── EstadoReserva (5 registros) ──────────────────────────────────────────
   const estadoPendienteConfirmacion = await prisma.estadoReserva.upsert({
     where: { nombre: "PendienteDeConfirmacion" },
@@ -36,23 +44,20 @@ async function main() {
   console.log("✓ Estados de reserva creados");
 
   // ── UsuarioAdministrador (3 registros) ───────────────────────────────────
-  const admin1 = await prisma.usuarioAdministrador.create({
-    data: {
-      email: "maria.garcia@agendaya.com",
-      nombre: "María García",
-    },
+  const admin1 = await prisma.usuarioAdministrador.upsert({
+    where: { email: "maria.garcia@agendaya.com" },
+    update: {},
+    create: { email: "maria.garcia@agendaya.com", nombre: "María García" },
   });
-  const admin2 = await prisma.usuarioAdministrador.create({
-    data: {
-      email: "carlos.lopez@agendaya.com",
-      nombre: "Carlos López",
-    },
+  const admin2 = await prisma.usuarioAdministrador.upsert({
+    where: { email: "carlos.lopez@agendaya.com" },
+    update: {},
+    create: { email: "carlos.lopez@agendaya.com", nombre: "Carlos López" },
   });
-  const admin3 = await prisma.usuarioAdministrador.create({
-    data: {
-      email: "ana.martinez@agendaya.com",
-      nombre: "Ana Martínez",
-    },
+  const admin3 = await prisma.usuarioAdministrador.upsert({
+    where: { email: "ana.martinez@agendaya.com" },
+    update: {},
+    create: { email: "ana.martinez@agendaya.com", nombre: "Ana Martínez" },
   });
 
   console.log("✓ Administradores creados");

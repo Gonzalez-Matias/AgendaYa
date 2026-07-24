@@ -1,6 +1,6 @@
 import { prisma, cleanDB } from "../helpers";
 import prismaRepo from "../../src/repositories/db";
-import { reagendarReserva, ReagendarError } from "../../src/services/reserva.service";
+import { reagendarReserva, ReagendarError } from "../../src/services/reagendarReserva";
 
 describe("reagendarReserva", () => {
   beforeEach(async () => {
@@ -213,5 +213,60 @@ describe("reagendarReserva", () => {
       where: { reservaId: reserva.id },
     });
     expect(historial[0].motivo).toBe("El cliente solicitó cambio");
+  });
+
+  it("debería rechazar si adminId no coincide con el dueño", async () => {
+    const admin = await prisma.usuarioAdministrador.create({
+      data: { email: "admin@test.com", nombre: "Admin Test" },
+    });
+    const otroAdmin = await prisma.usuarioAdministrador.create({
+      data: { email: "otro@test.com", nombre: "Otro Admin" },
+    });
+    const tipoEvento = await prisma.tipoEvento.create({
+      data: { nombre: "Reunión", duracion: 30, antelacionMinima: 1, administradorId: admin.id },
+    });
+    const estado = await prisma.estadoReserva.create({ data: { nombre: "Confirmada" } });
+
+    const reserva = await prisma.reserva.create({
+      data: {
+        fechaHoraInicio: new Date("2026-08-01T10:00:00Z"), duracion: 30,
+        nombreInvitado: "Juan", emailInvitado: "juan@test.com",
+        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
+      },
+    });
+
+    await expect(
+      reagendarReserva({
+        reservaId: reserva.id,
+        nuevaFechaHoraInicio: new Date("2026-08-01T16:00:00Z"),
+        adminId: otroAdmin.id,
+      })
+    ).rejects.toThrow(ReagendarError);
+  });
+
+  it("debería permitir reagendar cuando adminId coincide con el dueño", async () => {
+    const estado = await prisma.estadoReserva.create({ data: { nombre: "Confirmada" } });
+    const admin = await prisma.usuarioAdministrador.create({
+      data: { email: "admin@test.com", nombre: "Admin Test" },
+    });
+    const tipoEvento = await prisma.tipoEvento.create({
+      data: { nombre: "Reunión", duracion: 30, antelacionMinima: 1, administradorId: admin.id },
+    });
+
+    const reserva = await prisma.reserva.create({
+      data: {
+        fechaHoraInicio: new Date("2026-08-01T10:00:00Z"), duracion: 30,
+        nombreInvitado: "Juan", emailInvitado: "juan@test.com",
+        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
+      },
+    });
+
+    const resultado = await reagendarReserva({
+      reservaId: reserva.id,
+      nuevaFechaHoraInicio: new Date("2026-08-01T16:00:00Z"),
+      adminId: admin.id,
+    });
+
+    expect(resultado.reserva.estadoReserva.nombre).toBe("Confirmada");
   });
 });

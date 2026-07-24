@@ -10,6 +10,7 @@ const ReagendarReservaSchema = z.object({
   reservaId: z.number().int().positive(),
   nuevaFechaHoraInicio: z.date(),
   motivo: z.string().optional(),
+  adminId: z.number().int().positive().optional(),
 });
 
 export class ReagendarError extends Error {
@@ -23,12 +24,17 @@ export async function reagendarReserva(input: {
   reservaId: number;
   nuevaFechaHoraInicio: Date;
   motivo?: string;
+  adminId?: number;
 }) {
   const datos = ReagendarReservaSchema.parse(input);
 
   const reserva = await findReservaById(datos.reservaId);
   if (!reserva) {
     throw new ReagendarError("La reserva no existe");
+  }
+
+  if (datos.adminId && reserva.administradorId !== datos.adminId) {
+    throw new ReagendarError("No autorizado: la reserva no pertenece a este administrador");
   }
 
   const nuevaFechaFin = new Date(

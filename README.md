@@ -2,122 +2,14 @@
 
 Sistema de gestión de agenda y reserva de turnos para profesionales. Permite a usuarios invitados reservar turnos online y a administradores gestionar su agenda de forma eficiente.
 
-## Módulos
-
-- **MOD 04 - Proceso de Reserva**: Flujo de booking para usuarios invitados (mobile-first, max 4 pasos, booking < 10s en 4G)
-- **MOD 05 - Gestión de Agenda y Reserva**: Panel del administrador (desktop) para gestionar reservas, calendaristas y configuración
-
-## Requisitos Destacados
-
-### Módulo 04 (Reserva de Turnos)
-
-| ID | Requisito | Tipo |
-|----|-----------|------|
-| M04-RF01 | Reserva de turnos para usuarios invitados (sin registro) | Funcional |
-| M04-RF02 | Consultar disponibilidad con slots diferidos 30min | Funcional |
-| M04-RNF01 | Booking completo en < 10s (4G) | No Funcional |
-| M04-RNF02 | Máximo 4 pasos para crear una reserva | No Funcional |
-| M04-RNF03 | Operabilidad con una sola mano (thumb zone) | No Funcional |
-
-### Módulo 05 (Gestión de Agenda)
-
-| ID | Requisito | Tipo |
-|----|-----------|------|
-| M05-RF01 | Re-agendar una reserva | Funcional |
-| M05-RF02 | Marcar reserva como completada | Funcional |
-| M05-RF03 | Vista calendario semanal/mensual | Funcional |
-| M05-RF04 | Cancelar una reserva | Funcional |
-| M05-RF05 | Mostrar detalle de reserva | Funcional |
-| M05-RF06 | Alternar vista lista/calendario | Funcional |
-| M05-RF07 | Auto-cancelación de reservas sin confirmar (4hs) | Funcional |
-| M05-RF08 | Confirmar manualmente una reserva | Funcional |
-| M05-RNF01 | Compatibilidad Chrome 136+, Firefox 137+, Safari 17+ | No Funcional |
-| M05-RNF02 | Atajos de teclado para acciones frecuentes | No Funcional |
-| M05-RNF03 | Simbología según UI_Kit_AgendaYA | No Funcional |
-| M05-RNF04 | Colores adaptables por locale | No Funcional |
-
 ## Stack
 
-- **Framework**: Next.js 15 (App Router) — por ahora solo scaffolding, el foco actual es la capa backend
+- **Framework**: Next.js 15 (App Router)
 - **Base de datos**: PostgreSQL 16 (Docker)
 - **ORM**: Prisma 7 con adapter `@prisma/adapter-pg`
-- **Testing**: Jest + @swc/jest
+- **Testing**: Jest + @swc/jest (92 tests, 14 suites)
 - **CI**: GitHub Actions
 - **Code Review**: CodeRabbit (AI)
-## Metodología - TDD
-
-El proyecto sigue un enfoque **Test-Driven Development (TDD)** donde los tests validan la capa de base de datos antes de implementar la lógica de negocio.
-
-### Ciclo TDD
-
-```
-1. RED    → Escribir test que falle (describe el comportamiento esperado)
-2. GREEN  → Implementar la mínima cantidad de código para que pase
-3. REFACTOR → Refactorizar manteniendo los tests verdes
-```
-
-### Flujo por feature
-
-```
-┌─────────────────────────────────────────────────┐
-│  1. Definir requisito (User Story del TP)       │
-│  2. Escribir test en tests/ que falle           │
-│  3. Ejecutar npm test → veo el fallo (RED)      │
-│  4. Implementar repository/service              │
-│  5. Ejecutar npm test → veo el pase (GREEN)     │
-│  6. Refactorizar si es necesario                │
-│  7. Commit con mensaje descriptivo              │
-└─────────────────────────────────────────────────┘
-```
-
-### Flujo de Git
-
-Cada alumno trabaja en su propia branch. No hay subdivisiones por feature.
-
-1. Crear tu branch personal (una sola vez)
-   ```bash
-   git checkout -b tu-nombre
-   ```
-
-2. Hacer cambios y commitear
-   ```bash
-   git add .
-   git commit -m "Descripción del cambio"
-   ```
-
-3. Push a tu branch
-   ```bash
-   git push -u origin tu-nombre
-   ```
-
-4. Abrir PR en GitHub cuando quieras merge a main
-
-5. Esperar a que pasen:
-   - **Tests** (GitHub Actions)
-   - **CodeRabbit** (review automático)
-
-6. Si ambos pasan → merge habilitado
-
-**Convenciones:**
-- **Commits**: mensajes descriptivos en español ("Agregar validación de email", "Fix en schema de Prisma")
-- **PRs**: título claro + descripción breve de qué se hizo
-
-### Estrategia de Testing
-
-| Nivel | Directorio | Qué testea | Estado |
-|-------|-----------|-----------|--------|
-| **DB** | `tests/db.test.ts` | Que el seed inserta la cantidad correcta de registros | ✅ |
-| **Repository** | `tests/repositories/*.test.ts` | Queries Prisma (findById, create, count) | Pendiente |
-| **Service** | `tests/services/*.test.ts` | Lógica de negocio y validaciones | Pendiente |
-| **Actions** | `tests/actions/*.test.ts` | Entry points, permisos, respuesta | Pendiente |
-
-Todos los tests usan `cleanDB()` + `seed()` en `beforeAll` y son **read-only** (solo `count()` o `findMany()`).
-
-## Requisitos
-
-- Node.js 20+
-- Docker y Docker Compose
-- npm
 
 ## Setup
 
@@ -134,98 +26,221 @@ docker compose up -d
 
 # 4. Configurar .env
 cp .env.example .env
-# Editar DATABASE_URL si es necesario
+# DATABASE_URL por defecto: postgresql://postgres:postgres@localhost:5432/agendaya
 
 # 5. Generar cliente Prisma
 npx prisma generate
 
-# 6. Ejecutar migraciones
-npx prisma migrate dev
+# 6. Crear la base de datos y migrar
+npx prisma db push
 
-# 7. Cargar datos de prueba
+# 7. Crear base de datos de test
+docker exec agendaya_postgres psql -U postgres -c "CREATE DATABASE agendaya_test;"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/agendaya_test" npx prisma db push
+
+# 8. Cargar datos de prueba
 npx prisma db seed
 
-# 8. Ejecutar tests
+# 9. Ejecutar tests
 npm test
+
+# 10. Levantar servidor de desarrollo
+npm run dev
 ```
+
 ## Comandos
 
 | Comando | Descripción |
 |---------|-------------|
-| `npm test` | Ejecuta todos los tests con Jest |
-| `npm run dev` | Inicia el servidor de desarrollo |
-| `npx prisma migrate dev` | Crea/aplica migraciones |
-| `npx prisma db seed` | Ejecuta el seed de la DB |
+| `npm test` | Ejecuta todos los tests con Jest (usa DB de test separada) |
+| `npm run dev` | Inicia el servidor de desarrollo en http://localhost:3000 |
+| `npx prisma db seed` | Ejecuta el seed de la DB (idempotente) |
+| `npx prisma db push` | Sincroniza el schema de Prisma con la DB |
 | `npx prisma studio` | Abre el explorador de Prisma |
 | `docker compose up -d` | Levanta PostgreSQL |
 | `docker compose down` | Detiene PostgreSQL |
 
-## Estructura del Proyecto
+## API Endpoints
 
-```
-agendaya/
-├── prisma/
-│   ├── schema.prisma          # Schema de la DB (7 modelos)
-│   ├── seed.ts                # Datos de prueba (47 registros)
-│   └── migrations/            # Migraciones SQL
-├── src/
-│   ├── app/                   # Next.js App Router (pages y layouts)
-│   ├── actions/               # Server Actions (entry points)
-│   ├── services/              # Lógica de negocio
-│   ├── repositories/          # Acceso a datos (Prisma)
-│   ├── types/                 # Tipos compartidos
-│   ├── utils/                 # Utilidades
-│   └── generated/             # Cliente Prisma generado (no commitear)
-├── tests/
-│   ├── helpers.ts             # PrismaClient, cleanDB(), seed()
-│   ├── db.test.ts             # Tests de verificación de seed
-│   ├── repositories/          # Tests de acceso a datos (futuro)
-│   ├── services/              # Tests de lógica de negocio (futuro)
-│   └── actions/               # Tests de entry points (futuro)
-├── documents/
-│   └── TP Nº1_ *.pdf          # Documento de requisitos del TP
-├── docker-compose.yml         # PostgreSQL 16
-├── jest.config.ts             # Config de Jest con @swc/jest
-├── prisma.config.ts           # Config de Prisma (seed, datasource)
-└── .github/workflows/ci.yml   # Pipeline de CI
+Base URL: `http://localhost:3000`
+
+### Administradores
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `GET` | `/api/administradores` | Listar todos los administradores |
+| `GET` | `/api/administradores/:id/tipos-evento` | Listar tipos de evento de un administrador |
+
+### Reservas
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `GET` | `/api/reservas/:id` | Obtener detalle de una reserva |
+| `POST` | `/api/visualizacion` | Listar reservas con paginación (body: `{ administradorId, fechaDesde, fechaHasta, modoVista }`) |
+| `POST` | `/api/disponibilidad` | Consultar slots disponibles (body: `{ tipoEventoId, fechaDesde, fechaHasta }`) |
+| `POST` | `/api/reservas/cancelar` | Cancelar una reserva (body: `{ reservaId, motivo? }`) |
+| `POST` | `/api/reservas/completar` | Completar una reserva confirmada (body: `{ reservaId }`) |
+| `POST` | `/api/reservas/confirmar` | Confirmar una reserva pendiente (body: `{ reservaId }`) |
+| `POST` | `/api/reservas/reagendar` | Reagendar una reserva (body: `{ reservaId, nuevaFechaHoraInicio, motivo? }`) |
+
+Todos los endpoints de mutación de reservas aceptan un `adminId` opcional en el body/query. Si se envía, validan que la reserva pertenezca a ese administrador. Sin `adminId`, el comportamiento es sin restricciones (compatibilidad hacia atrás mientras no hay auth).
+
+### Ejemplos de uso con curl
+
+```bash
+# Obtener administradores
+curl http://localhost:3000/api/administradores
+
+# Listar reservas de un administrador
+curl -X POST http://localhost:3000/api/visualizacion \
+  -H "Content-Type: application/json" \
+  -d '{"administradorId": 1, "fechaDesde": "2026-07-20T00:00:00.000Z", "fechaHasta": "2026-08-30T23:59:59.999Z", "modoVista": "lista"}'
+
+# Consultar disponibilidad
+curl -X POST http://localhost:3000/api/disponibilidad \
+  -H "Content-Type: application/json" \
+  -d '{"tipoEventoId": 1, "fechaDesde": "2026-07-24T00:00:00.000Z", "fechaHasta": "2026-07-25T23:59:59.999Z"}'
+
+# Cancelar una reserva
+curl -X POST http://localhost:3000/api/reservas/cancelar \
+  -H "Content-Type: application/json" \
+  -d '{"reservaId": 1, "motivo": "Cliente no puede asistir"}'
 ```
 
 ## Arquitectura
 
-El proyecto sigue una arquitectura por capas. CodeRabbit verifica estas reglas en cada PR:
+```
+src/
+├── app/
+│   ├── api/                    ← HTTP endpoints (8 rutas)
+│   │   ├── administradores/
+│   │   │   └── [id]/tipos-evento/
+│   │   ├── disponibilidad/
+│   │   ├── reservas/
+│   │   │   ├── [id]/
+│   │   │   ├── cancelar/
+│   │   │   ├── completar/
+│   │   │   ├── confirmar/
+│   │   │   └── reagendar/
+│   │   └── visualizacion/
+│   ├── layout.tsx
+│   └── page.tsx                ← Landing page con documentación de API
+├── services/                   ← Lógica de negocio (7 archivos)
+│   ├── cancelarReserva.ts
+│   ├── completarReserva.ts
+│   ├── confirmacion.ts
+│   ├── detalleReserva.ts
+│   ├── disponibilidad.ts
+│   ├── reagendarReserva.ts
+│   └── visualizacion.ts
+├── repositories/               ← Acceso a datos (8 archivos)
+│   ├── db.ts                   ← PrismaClient singleton
+│   ├── cancelarReserva.ts
+│   ├── completarReserva.ts
+│   ├── confirmarReserva.ts
+│   ├── detalleReserva.ts
+│   ├── disponibilidad.ts
+│   ├── reserva.ts
+│   ├── tipoEvento.ts
+│   └── visualizacion.ts
+└── types/                      ← Tipos compartidos
+    ├── disponibilidad.ts
+    └── reserva.ts
+```
+
+### Flujo de capas
 
 ```
-Actions → Services → Repositories → Prisma → PostgreSQL
+API Route  →  Service  →  Repository  →  Prisma  →  PostgreSQL
+   │              │            │
+   │              │            └── Solo queries, sin lógica de negocio
+   │              └── Zod validation + reglas de negocio
+   └── HTTP request/response, extrae params, maneja errores
 ```
 
-| Capa | Responsabilidad | Regla |
-|------|----------------|-------|
-| `src/actions/**` | Entry points (Server Actions) | Solo recibir datos, validar y llamar al service. Sin lógica de negocio. |
-| `src/services/**` | Lógica de negocio | Validar con Zod. No importar Prisma directamente. |
-| `src/repositories/**` | Acceso a datos | Solo queries Prisma. Sin lógica de negocio. |
-| `src/types/**` | Tipos compartidos | Solo interfaces y types. Sin lógica ni dependencias. |
-| `src/utils/**` | Helpers reutilizables | Funciones puras. Sin dependencias de Prisma ni Next.js. |
-| `tests/**` | Tests | Usar `cleanDB()` + `seed()` en `beforeAll`. Read-only. |
+## Base de datos
 
-## CI
+### Esquema (7 modelos)
 
-Cuando se abre un PR, se ejecutan dos flujos en paralelo:
+| Modelo | Tabla | Descripción |
+|--------|-------|-------------|
+| `UsuarioAdministrador` | `usuario_administrador` | Administradores del sistema |
+| `TipoEvento` | `tipo_evento` | Tipos de evento (Reunión, Consulta, etc.) |
+| `EstadoReserva` | `estado_reserva` | Estados posibles de una reserva |
+| `Reserva` | `reserva` | Reservas de turnos |
+| `ReservaEstadoHistorial` | `reserva_estado_historial` | Historial de cambios de estado |
+| `DisponibilidadSemanal` | `disponibilidad_semanal` | Franjas horarias semanales por admin |
+| `BloqueoAgenda` | `bloqueo_agenda` | Períodos de bloqueo de agenda |
 
-### GitHub Actions (ci.yml)
-1. Checkout del código
-2. Instalación de dependencias
-3. `prisma generate`
-4. `prisma migrate deploy`
-5. `npm test`
+### Estados de reserva
 
-Si algún test falla, el PR no se puede mergear.
+```
+PendienteDeConfirmacion → Confirmada → Completada
+                        → Cancelada
+PendienteDeReagendar    → Confirmada (al reagendar)
+```
 
-### CodeRabbit (review automático)
-- Review de código con AI basado en `.coderabbit.yaml`
-- Reglas específicas por capa: actions, services, repositories, types, utils y tests
-- Comenta suggestions directamente en el PR
+### Datos de prueba (seed)
 
-Si pide cambios, el PR no se puede mergear (branch protection habilitado)
+El seed es idempotente: limpia los datos previos antes de insertar. Crea:
+
+| Tabla | Cantidad |
+|-------|----------|
+| `estado_reserva` | 5 |
+| `usuario_administrador` | 3 |
+| `tipo_evento` | 9 |
+| `disponibilidad_semanal` | 15 |
+| `reserva` | 6 |
+| `reserva_estado_historial` | 6 |
+| `bloqueo_agenda` | 3 |
+
+## Testing
+
+### Estrategia
+
+```
+1. RED    → Escribir test que falle
+2. GREEN  → Implementar mínimo código para que pase
+3. REFACTOR → Refactorizar manteniendo tests verdes
+```
+
+### Bases de datos separadas
+
+- **Desarrollo**: `agendaya` (DATABASE_URL en `.env`)
+- **Tests**: `agendaya_test` (DATABASE_URL en `.env.test`)
+
+Jest carga `.env.test` automáticamente vía `tests/setup.ts`. Los tests nunca tocan la base de datos de desarrollo.
+
+### Tests por capa
+
+| Capa | Suite | Tests |
+|------|-------|-------|
+| DB | `tests/db.test.ts` | Verifica counts del seed |
+| Repositories | `tests/repositories/*.test.ts` | Queries Prisma (4 suites) |
+| Services | `tests/services/*.test.ts` | Lógica de negocio + validación + auth (9 suites) |
+
+### Ejecución
+
+```bash
+npm test                          # Todos los tests
+npx jest tests/services/          # Solo services
+npx jest --no-coverage            # Sin reporte HTML
+```
+
+## CI/CD
+
+### GitHub Actions
+
+Al abrir un PR:
+1. Checkout + instalar dependencias
+2. `prisma generate`
+3. `npx prisma db push` (DB de test)
+4. `npm test`
+5. Publicar reporte HTML en GitHub Pages
+
+### CodeRabbit
+
+Revisión automática de código en cada PR siguiendo las reglas de `.coderabbit.yaml`.
 
 ## Integrantes
 

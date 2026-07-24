@@ -1,22 +1,60 @@
-export interface ReservaConfirmacion {
-    id: string;
-    invitado: string;
-    fecha: string;
-    hora: string;
-    estado: "Pendiente de Confirmación" | "Confirmada" | "Cancelada";
+import { z } from "zod";
+import {
+  findReservaById,
+  confirmarReservaEnTransaccion,
+} from "../repositories/confirmarReserva";
+
+const ConfirmarReservaInputSchema = z.object({
+  reservaId: z.number().int().positive(),
+  adminId: z.number().int().positive().optional(),
+});
+
+type ConfirmarReservaInput = z.infer<typeof ConfirmarReservaInputSchema>;
+
+export async function confirmarReserva(input: ConfirmarReservaInput) {
+  const { reservaId, adminId } = ConfirmarReservaInputSchema.parse(input);
+
+  const reserva = await findReservaById(reservaId);
+  if (!reserva) {
+    throw new Error("Reserva no encontrada");
+  }
+
+  if (adminId && reserva.administradorId !== adminId) {
+    throw new Error("No autorizado: la reserva no pertenece a este administrador");
+  }
+
+  const estadoActual = reserva.estadoReserva.nombre;
+
+  if (estadoActual === "Confirmada") {
+    throw new Error("La reserva ya está confirmada");
+  }
+
+  if (estadoActual === "Cancelada") {
+    throw new Error("No se puede confirmar una reserva cancelada");
+  }
+
+  if (estadoActual === "Completada") {
+    throw new Error("No se puede confirmar una reserva completada");
+  }
+
+  if (estadoActual !== "PendienteDeConfirmacion") {
+    throw new Error(`No se puede confirmar una reserva en estado "${estadoActual}"`);
+  }
+
+  const estadoConfirmada = await import("../repositories/completarReserva").then(
+    (mod) => mod.findEstadoByNombre("Confirmada")
+  );
+
+  if (!estadoConfirmada) {
+    throw new Error("Estado Confirmada no encontrado en la base de datos");
+  }
+
+  return confirmarReservaEnTransaccion(reservaId, estadoConfirmada.id);
 }
 
-// Lógica para Escenario 1 y 2: Cambiar estado y mantener datos
-export function confirmarReserva(id: string, reservas: ReservaConfirmacion[]): ReservaConfirmacion | undefined {
-    const reserva = reservas.find(r => r.id === id);
-    if (reserva) {
-        reserva.estado = "Confirmada";
-        return reserva;
-    }
-    return undefined;
-}
-
-// Lógica para Escenario 1: Mensaje de éxito
+/**
+ * Retorna el mensaje de éxito estándar para confirmación de reserva.
+ */
 export function obtenerMensajeExito(): string {
-    return "Reserva confirmada correctamente";
+  return "Reserva confirmada correctamente";
 }
