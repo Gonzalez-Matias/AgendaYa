@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReservaVista } from "@/services/visualizacion";
+import { StatusIcon } from "./StatusIcon";
 import styles from "./Sidebar.module.css";
 
 interface SidebarProps {
@@ -9,42 +10,12 @@ interface SidebarProps {
 
 const DOT_COLORS = ["#003EC7", "#9C27B0", "#4CAF50", "#E0E3E5", "#F59E0B", "#EF4444", "#3B82F6", "#10B981"];
 
-const STATE_CONFIG: Record<string, { label: string; bg: string; text: string; icon: string }> = {
-  Confirmada: { label: "Confirmada", bg: "#DCFCE7", text: "#166534", icon: "confirmada" },
-  Pendiente: { label: "Pendiente de confirmación", bg: "#FEF9C3", text: "#854D0E", icon: "pendiente" },
-  Cancelada: { label: "Cancelada", bg: "#FEE2E2", text: "#991B1B", icon: "cancelada" },
-  Completada: { label: "Completada", bg: "#F3F4F6", text: "#4B5563", icon: "completada" },
+const STATE_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
+  Confirmada: { label: "Confirmada", bg: "#DCFCE7", text: "#166534" },
+  Pendiente: { label: "Pendiente de confirmación", bg: "#FEF9C3", text: "#854D0E" },
+  Cancelada: { label: "Cancelada", bg: "#FEE2E2", text: "#991B1B" },
+  Completada: { label: "Completada", bg: "#F3F4F6", text: "#4B5563" },
 };
-
-function StatusIcon({ type }: { type: string }) {
-  if (type === "confirmada") {
-    return (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M3 8l4 4 6-6" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-  if (type === "pendiente") {
-    return (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="8" r="6" stroke="#EAB308" strokeWidth="2" />
-        <path d="M8 4v4l3 2" stroke="#EAB308" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    );
-  }
-  if (type === "cancelada") {
-    return (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M4 4l8 8M12 4l-8 8" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    );
-  }
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <circle cx="8" cy="8" r="6" stroke="#6B7280" strokeWidth="2" />
-    </svg>
-  );
-}
 
 export function Sidebar({ reservas }: SidebarProps) {
   const tipoCounts = new Map<string, number>();
@@ -84,7 +55,7 @@ export function Sidebar({ reservas }: SidebarProps) {
           if (!cfg) return null;
           return (
             <div key={estado} className={styles.stateItem}>
-              <StatusIcon type={cfg.icon} />
+              <StatusIcon estado={estado} />
               <span className={styles.stateBadge} style={{ background: cfg.bg, color: cfg.text }}>
                 {cfg.label} [{count}]
               </span>

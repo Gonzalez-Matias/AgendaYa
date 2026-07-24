@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReservaVista } from "@/services/visualizacion";
+import { StatusIcon } from "./StatusIcon";
 import styles from "./CalendarioSemanal.module.css";
 
 interface CalendarioSemanalProps {
@@ -143,6 +144,7 @@ export function CalendarioSemanal({ reservas, fechaActual }: CalendarioSemanalPr
                       {r.horario}
                     </span>
                     <span className={styles.eventName} style={{ color: colors.name }}>
+                      <StatusIcon estado={r.estado} size={12} />
                       {r.tipoEvento} - {r.nombreInvitado}
                     </span>
                   </div>

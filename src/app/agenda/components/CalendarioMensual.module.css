@@ -121,6 +121,9 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   color: #191C1E;
+  display: flex;
+  align-items: center;
+  gap: 3px;
 }
 
 .moreEvents {

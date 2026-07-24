@@ -13,10 +13,35 @@ interface CalendarToolbarProps {
   onChangeSubVista: (sub: "semanal" | "mensual") => void;
 }
 
-const MESES = [
-  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
-];
+const MESES_CORTOS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+function getWeekRange(date: Date): { start: Date; end: Date } {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const start = new Date(d);
+  start.setDate(diff);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6);
+  return { start, end };
+}
+
+function getMonthTitle(fechaActual: Date): string {
+  return `${MESES_CORTOS[fechaActual.getMonth()]} ${fechaActual.getFullYear()}`;
+}
+
+function getWeekTitle(fechaActual: Date): string {
+  const { start, end } = getWeekRange(fechaActual);
+  const fmt = (d: Date) => `${MESES_CORTOS[d.getMonth()]} ${d.getDate()}`;
+
+  if (start.getMonth() === end.getMonth()) {
+    return `${fmt(start)} - ${end.getDate()}, ${start.getFullYear()}`;
+  }
+  if (start.getFullYear() === end.getFullYear()) {
+    return `${fmt(start)} - ${fmt(end)}, ${start.getFullYear()}`;
+  }
+  return `${fmt(start)}, ${start.getFullYear()} - ${fmt(end)}, ${end.getFullYear()}`;
+}
 
 export function CalendarToolbar({
   fechaActual,
@@ -36,6 +61,10 @@ export function CalendarToolbar({
     setShowPicker(false);
   }
 
+  const monthTitle = subVista === "semanal"
+    ? getWeekTitle(fechaActual)
+    : getMonthTitle(fechaActual);
+
   return (
     <div className={styles.toolbar}>
       <div style={{ position: "relative" }}>
@@ -44,7 +73,7 @@ export function CalendarToolbar({
           onClick={() => setShowPicker(!showPicker)}
           style={{ cursor: "pointer" }}
         >
-          {fechaActual.toLocaleDateString("es-AR", { month: "long", year: "numeric" })}
+          {monthTitle}
         </span>
 
         {showPicker && (
@@ -67,13 +96,13 @@ export function CalendarToolbar({
                 </button>
               </div>
               <div className={styles.pickerGrid}>
-                {MESES.map((mes, idx) => (
+                {MESES_CORTOS.map((mes, idx) => (
                   <button
                     key={mes}
                     className={`${styles.pickerMonth} ${idx === currentMonth ? styles.pickerMonthActive : ""}`}
                     onClick={() => handleSelectMonth(idx)}
                   >
-                    {mes.substring(0, 3)}
+                    {mes}
                   </button>
                 ))}
               </div>

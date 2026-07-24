@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReservaVista } from "@/services/visualizacion";
+import { StatusIcon } from "./StatusIcon";
 import styles from "./CalendarioMensual.module.css";
 
 interface CalendarioMensualProps {
@@ -127,6 +128,7 @@ export function CalendarioMensual({ reservas, fechaActual }: CalendarioMensualPr
                           title={`${reserva.horario} - ${reserva.nombreInvitado} (${reserva.estado})`}
                         >
                           <span className={styles.eventTime}>{reserva.horario.split(" - ")[0]}</span>
+                          <StatusIcon estado={reserva.estado} size={12} />
                           <span className={styles.eventName}>
                             {reserva.nombreInvitado}
                           </span>

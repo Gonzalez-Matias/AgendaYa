@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { CalendarToolbar } from "./components/CalendarToolbar";
 import { CalendarioMensual } from "./components/CalendarioMensual";
 import { CalendarioSemanal } from "./components/CalendarioSemanal";
+import { ListaReservas } from "./components/ListaReservas";
 import { Sidebar } from "./components/Sidebar";
 import type { ModoVista, ReservaVista } from "@/services/visualizacion";
 import styles from "./page.module.css";
@@ -32,15 +33,29 @@ export default function AgendaPage() {
   useEffect(() => {
     if (!adminId) return;
     cargarReservas();
-  }, [adminId, fechaActual]);
+  }, [adminId, fechaActual, subVista]);
 
   async function cargarReservas() {
     setCargando(true);
     try {
-      const desde = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 1);
-      desde.setHours(0, 0, 0, 0);
-      const hasta = new Date(fechaActual.getFullYear(), fechaActual.getMonth() + 1, 0);
-      hasta.setHours(23, 59, 59, 999);
+      let desde: Date;
+      let hasta: Date;
+
+      if (subVista === "semanal") {
+        const day = fechaActual.getDay();
+        const diff = fechaActual.getDate() - day + (day === 0 ? -6 : 1);
+        desde = new Date(fechaActual);
+        desde.setDate(diff);
+        desde.setHours(0, 0, 0, 0);
+        hasta = new Date(desde);
+        hasta.setDate(hasta.getDate() + 6);
+        hasta.setHours(23, 59, 59, 999);
+      } else {
+        desde = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 1);
+        desde.setHours(0, 0, 0, 0);
+        hasta = new Date(fechaActual.getFullYear(), fechaActual.getMonth() + 1, 0);
+        hasta.setHours(23, 59, 59, 999);
+      }
 
       const res = await fetch("/api/visualizacion", {
         method: "POST",
@@ -49,7 +64,7 @@ export default function AgendaPage() {
           administradorId: adminId,
           fechaDesde: desde.toISOString(),
           fechaHasta: hasta.toISOString(),
-          modoVista: "calendario",
+          modoVista,
         }),
       });
 
@@ -137,9 +152,7 @@ export default function AgendaPage() {
               <CalendarioMensual reservas={reservas} fechaActual={fechaActual} />
             )
           ) : (
-            <div style={{ padding: 40, textAlign: "center", color: "#737688" }}>
-              Vista lista próximamente
-            </div>
+            <ListaReservas reservas={reservas} fechaActual={fechaActual} subVista={subVista} />
           )}
         </div>
 
