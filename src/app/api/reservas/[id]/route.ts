@@ -9,8 +9,8 @@ export async function GET(
     const { id } = await params;
     const reservaId = Number(id);
 
-    if (!id || isNaN(reservaId)) {
-      return NextResponse.json({ error: "ID de reserva inválido" }, { status: 400 });
+    if (!id || isNaN(reservaId) || reservaId <= 0) {
+      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
     const adminId = request.nextUrl.searchParams.get("adminId");
@@ -20,7 +20,13 @@ export async function GET(
     return NextResponse.json({ data: resultado });
   } catch (error) {
     if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 404 });
+      if (error.message.includes("no encontrada")) {
+        return NextResponse.json({ error: error.message }, { status: 404 });
+      }
+      if (error.message.includes("No autorizado")) {
+        return NextResponse.json({ error: error.message }, { status: 403 });
+      }
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }

@@ -38,9 +38,16 @@ export function StatusIcon({ estado, size = 16 }: StatusIconProps) {
       </svg>
     );
   }
+  if (estado === "Completada") {
+    return (
+      <svg width={s} height={s} viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6" stroke="#6B7280" strokeWidth="2" />
+      </svg>
+    );
+  }
   return (
     <svg width={s} height={s} viewBox="0 0 16 16" fill="none">
-      <circle cx="8" cy="8" r="6" stroke="#6B7280" strokeWidth="2" />
+      <circle cx="8" cy="8" r="6" stroke="#9CA3AF" strokeWidth="2" />
     </svg>
   );
 }

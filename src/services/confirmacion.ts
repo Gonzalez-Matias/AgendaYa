@@ -3,6 +3,7 @@ import {
   findReservaById,
   confirmarReservaEnTransaccion,
 } from "../repositories/confirmarReserva";
+import { findEstadoByNombre } from "../repositories/reserva";
 
 const ConfirmarReservaInputSchema = z.object({
   reservaId: z.number().int().positive(),
@@ -41,9 +42,7 @@ export async function confirmarReserva(input: ConfirmarReservaInput) {
     throw new Error(`No se puede confirmar una reserva en estado "${estadoActual}"`);
   }
 
-  const estadoConfirmada = await import("../repositories/completarReserva").then(
-    (mod) => mod.findEstadoByNombre("Confirmada")
-  );
+  const estadoConfirmada = await findEstadoByNombre("Confirmada");
 
   if (!estadoConfirmada) {
     throw new Error("Estado Confirmada no encontrado en la base de datos");

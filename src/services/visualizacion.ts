@@ -109,7 +109,7 @@ function mapearEstado(nombreEstado: string): ReservaVista["estado"] {
 
 /**
  * Obtiene el color de fondo según el estado de la reserva.
- * M05-RF06: Confirmada=verde, Pendiente=amarillo, Cancelada=rojo
+ * Confirmada=verde, PendienteDeConfirmacion=amarillo, PendienteDeReagendar=naranja, Cancelada=rojo, Completada=azul
  */
 function obtenerColorEstado(estado: string): string {
   switch (estado) {

@@ -198,6 +198,11 @@
   background: #BBF7D0;
 }
 
+.confirmBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .notaText {
   font-size: 14px;
   font-weight: 400;

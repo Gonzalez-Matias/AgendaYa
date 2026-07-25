@@ -24,7 +24,7 @@ export async function findReservasEnRango(adminId: number, inicio: Date, fin: Da
   return prisma.reserva.findMany({
     where: {
       administradorId: adminId,
-      NOT: { estadoReservaId: estadoCancelada?.id },
+      ...(estadoCancelada ? { NOT: { estadoReservaId: estadoCancelada.id } } : {}),
       fechaHoraInicio: { gte: inicioExpandido, lt: fin },
     },
     select: { fechaHoraInicio: true, duracion: true },

@@ -20,6 +20,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data: resultado });
   } catch (error) {
     if (error instanceof ReagendarError) {
+      if (error.message.includes("no existe")) return NextResponse.json({ error: error.message }, { status: 404 });
+      if (error.message.includes("No autorizado")) return NextResponse.json({ error: error.message }, { status: 403 });
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
     if (error instanceof Error) {

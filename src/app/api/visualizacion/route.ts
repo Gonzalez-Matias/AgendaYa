@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { obtenerReservasPorRango } from "@/services/visualizacion";
+import type { ReservaVista } from "@/services/visualizacion";
 import { findReservasByAdminYPagina } from "@/repositories/visualizacion";
 import prisma from "@/repositories/db";
 
@@ -12,13 +13,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "administradorId es requerido" }, { status: 400 });
     }
 
+    if (!fechaDesde || !fechaHasta) {
+      return NextResponse.json({ error: "fechaDesde y fechaHasta son requeridos" }, { status: 400 });
+    }
+
     const inicio = new Date(fechaDesde);
     const fin = new Date(fechaHasta);
+
+    if (isNaN(inicio.getTime()) || isNaN(fin.getTime())) {
+      return NextResponse.json({ error: "fechaDesde y fechaHasta deben ser fechas válidas" }, { status: 400 });
+    }
 
     if (modoVista === "lista") {
       const porPaginaNum = Math.max(1, Number(porPagina) || 10);
       const paginaNum = Math.max(1, Number(pagina) || 1);
-      const skip = (paginaNum - 1) * porPaginaNum;
 
       const [reservas, total] = await Promise.all([
         findReservasByAdminYPagina(administradorId, inicio, fin, paginaNum, porPaginaNum),
@@ -38,7 +46,7 @@ export async function POST(request: NextRequest) {
             nombreInvitado: r.nombreInvitado,
             emailInvitado: r.emailInvitado,
             tipoEvento: r.tipoEvento.nombre,
-            estado: r.estadoReserva.nombre as "Confirmada" | "PendienteDeConfirmacion" | "PendienteDeReagendar" | "Cancelada" | "Completada",
+            estado: r.estadoReserva.nombre as ReservaVista["estado"],
             colorFondo: "",
           };
         }),
