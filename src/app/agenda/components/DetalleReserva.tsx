@@ -194,6 +194,12 @@ export function DetalleReserva({ reservaId, adminId, adminNombre, onClose, onAct
 
         <div className={styles.title}>{detalle.tipoEvento.nombre} - {detalle.nombreInvitado}</div>
 
+        {error && (
+          <div style={{ margin: "0 24px", padding: "12px 16px", background: "#FEE2E2", borderRadius: "6px", color: "#991B1B", fontSize: "13px", fontWeight: 500 }}>
+            {error}
+          </div>
+        )}
+
         <div className={styles.body}>
           <div className={styles.section}>
             <div className={styles.sectionIcon}>

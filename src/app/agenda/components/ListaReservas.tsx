@@ -40,8 +40,7 @@ const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }>
 };
 
 function parseDateKey(fecha: string): string {
-  const [dd, mm] = fecha.split("/");
-  return `${mm}/${dd}`;
+  return fecha;
 }
 
 function esMismaFecha(a: Date, b: Date): boolean {
@@ -111,7 +110,7 @@ export function ListaReservas({ reservas, fechaActual, subVista, onReservaClick 
 
   const dateKeyToFechas = new Map<string, Date>();
   datesToFechas.forEach((f) => {
-    const key = parseDateKey(`${String(f.getDate()).padStart(2, "0")}/${String(f.getMonth() + 1).padStart(2, "0")}`);
+    const key = parseDateKey(`${String(f.getDate()).padStart(2, "0")}/${String(f.getMonth() + 1).padStart(2, "0")}/${f.getFullYear()}`);
     dateKeyToFechas.set(key, f);
   });
 
@@ -125,9 +124,11 @@ export function ListaReservas({ reservas, fechaActual, subVista, onReservaClick 
   const diasConReservas = [...agrupadas.entries()]
     .filter(([key]) => dateKeyToFechas.has(key))
     .sort((a, b) => {
-      const [mA, dA] = a[0].split("/").map(Number);
-      const [mB, dB] = b[0].split("/").map(Number);
-      return mA !== mB ? mA - mB : dA - dB;
+      const aKey = a[0].split("/").map(Number);
+      const bKey = b[0].split("/").map(Number);
+      if (aKey[2] !== bKey[2]) return aKey[2] - bKey[2];
+      if (aKey[1] !== bKey[1]) return aKey[1] - bKey[1];
+      return aKey[0] - bKey[0];
     });
 
   return (

@@ -60,9 +60,11 @@ function agruparSlots(slotsBrutos: { inicio: string; fin: string }[], duracionMi
   const cantidad = duracionMin / 15;
   for (let i = 0; i <= slotsBrutos.length - cantidad; i++) {
     const inicio = slotsBrutos[i].inicio;
-    const finEsperado = new Date(new Date(inicio).getTime() + duracionMin * 60000).toISOString();
+    const inicioTime = new Date(inicio).getTime();
+    const finEsperadoTime = inicioTime + duracionMin * 60000;
     const ultimo = slotsBrutos[i + cantidad - 1];
-    if (ultimo && ultimo.fin === finEsperado) {
+    if (ultimo && new Date(ultimo.fin).getTime() === finEsperadoTime) {
+      const finEsperado = new Date(finEsperadoTime).toISOString();
       resultado.push({
         inicio,
         fin: finEsperado,

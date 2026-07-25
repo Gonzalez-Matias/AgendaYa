@@ -39,7 +39,7 @@ function buildTipoColorMap(reservas: ReservaVista[]): Map<string, TipoEventoColo
 }
 
 function formatearDiaMes(fecha: Date): string {
-  return `${String(fecha.getDate()).padStart(2, "0")}/${String(fecha.getMonth() + 1).padStart(2, "0")}`;
+  return `${String(fecha.getDate()).padStart(2, "0")}/${String(fecha.getMonth() + 1).padStart(2, "0")}/${fecha.getFullYear()}`;
 }
 
 export function CalendarioMensual({ reservas, fechaActual, onReservaClick }: CalendarioMensualProps) {
@@ -71,10 +71,7 @@ export function CalendarioMensual({ reservas, fechaActual, onReservaClick }: Cal
 
   function reservasDelDia(fecha: Date): ReservaVista[] {
     const key = formatearDiaMes(fecha);
-    return reservas.filter((r) => {
-      const [dd, mm] = r.fecha.split("/");
-      return `${dd}/${mm}` === key;
-    });
+    return reservas.filter((r) => r.fecha === key);
   }
 
   function esHoy(fecha: Date): boolean {

@@ -14,7 +14,8 @@ export async function GET(
     }
 
     const adminId = request.nextUrl.searchParams.get("adminId");
-    const resultado = await obtenerDetalleReserva(reservaId, adminId ? Number(adminId) : undefined);
+    const adminIdNum = Number(adminId);
+    const resultado = await obtenerDetalleReserva(reservaId, adminIdNum > 0 ? adminIdNum : undefined);
 
     return NextResponse.json({ data: resultado });
   } catch (error) {

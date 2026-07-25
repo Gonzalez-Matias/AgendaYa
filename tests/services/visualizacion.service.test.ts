@@ -55,8 +55,8 @@ describe("visualizacion service", () => {
       const miércoles = new Date(2026, 6, 22); // 22 de julio 2026 (miércoles)
       const rango = obtenerRangoSemanal(miércoles);
 
-      expect(rango.desde.getUTCDay()).toBe(1); // Lunes
-      expect(rango.hasta.getUTCDay()).toBe(0); // Domingo
+      expect(rango.desde.getDay()).toBe(1); // Lunes
+      expect(rango.hasta.getDay()).toBe(0); // Domingo
     });
 
     it("debería incluir la fecha dada dentro del rango", () => {
@@ -73,8 +73,8 @@ describe("visualizacion service", () => {
       const fecha = new Date(2026, 6, 15); // 15 de julio 2026
       const rango = obtenerRangoMensual(fecha);
 
-      expect(rango.desde.getUTCDate()).toBe(1);
-      expect(rango.hasta.getUTCDate()).toBe(31); // Julio tiene 31 días
+      expect(rango.desde.getDate()).toBe(1);
+      expect(rango.hasta.getDate()).toBe(31); // Julio tiene 31 días
     });
   });
 
@@ -222,7 +222,7 @@ describe("visualizacion service", () => {
 
       expect(resultado).toHaveLength(3);
       expect(resultado.find(r => r.nombreInvitado === "R1")?.estado).toBe("Confirmada");
-      expect(resultado.find(r => r.nombreInvitado === "R2")?.estado).toBe("Pendiente");
+      expect(resultado.find(r => r.nombreInvitado === "R2")?.estado).toBe("PendienteDeConfirmacion");
       expect(resultado.find(r => r.nombreInvitado === "R3")?.estado).toBe("Cancelada");
     });
   });

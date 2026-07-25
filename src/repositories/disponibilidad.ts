@@ -19,11 +19,13 @@ export async function findReservasEnRango(adminId: number, inicio: Date, fin: Da
     where: { nombre: "Cancelada" },
   });
 
+  const inicioExpandido = new Date(inicio.getTime() - 24 * 60 * 60 * 1000);
+
   return prisma.reserva.findMany({
     where: {
       administradorId: adminId,
       NOT: { estadoReservaId: estadoCancelada?.id },
-      fechaHoraInicio: { gte: inicio, lt: fin },
+      fechaHoraInicio: { gte: inicioExpandido, lt: fin },
     },
     select: { fechaHoraInicio: true, duracion: true },
   });

@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       reservaId: Number(reservaId),
       nuevaFechaHoraInicio: new Date(nuevaFechaHoraInicio),
       motivo,
-      adminId: adminId ? Number(adminId) : undefined,
+      adminId: Number(adminId) > 0 ? Number(adminId) : undefined,
     });
 
     return NextResponse.json({ success: true, data: resultado });

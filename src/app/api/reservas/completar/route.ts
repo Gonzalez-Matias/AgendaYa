@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "reservaId es requerido" }, { status: 400 });
     }
 
-    const resultado = await completarReserva({ reservaId: Number(reservaId), adminId: adminId ? Number(adminId) : undefined });
+    const resultado = await completarReserva({ reservaId: Number(reservaId), adminId: Number(adminId) > 0 ? Number(adminId) : undefined });
 
     return NextResponse.json({ success: true, data: resultado });
   } catch (error) {

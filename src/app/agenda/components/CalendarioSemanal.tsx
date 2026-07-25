@@ -68,10 +68,9 @@ export function CalendarioSemanal({ reservas, fechaActual, onReservaClick }: Cal
   const hours = Array.from({ length: HOUR_END - HOUR_START }, (_, i) => HOUR_START + i);
 
   function reservasDelDia(fecha: Date): ReservaVista[] {
-    const key = `${String(fecha.getDate()).padStart(2, "0")}/${String(fecha.getMonth() + 1).padStart(2, "0")}`;
+    const key = `${String(fecha.getDate()).padStart(2, "0")}/${String(fecha.getMonth() + 1).padStart(2, "0")}/${fecha.getFullYear()}`;
     return reservas.filter((r) => {
-      const [dd, mm] = r.fecha.split("/");
-      return `${dd}/${mm}` === key;
+      return r.fecha === key;
     });
   }
 

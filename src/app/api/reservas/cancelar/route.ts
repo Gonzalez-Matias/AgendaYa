@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "reservaId es requerido" }, { status: 400 });
     }
 
-    await cancelarReserva({ reservaId: Number(reservaId), motivo, adminId: adminId ? Number(adminId) : undefined });
+    await cancelarReserva({ reservaId: Number(reservaId), motivo, adminId: Number(adminId) > 0 ? Number(adminId) : undefined });
 
     return NextResponse.json({ success: true });
   } catch (error) {

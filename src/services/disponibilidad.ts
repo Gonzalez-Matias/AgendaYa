@@ -31,7 +31,7 @@ function haySuperposicion(
 
 function minutosAFecha(dia: Date, minutos: number): Date {
   const resultado = new Date(dia);
-  resultado.setUTCHours(Math.floor(minutos / 60), minutos % 60, 0, 0);
+  resultado.setHours(Math.floor(minutos / 60), minutos % 60, 0, 0);
   return resultado;
 }
 
@@ -58,10 +58,10 @@ export async function consultarDisponibilidad(
   const disponibilidades = await findDisponibilidadAdmin(administradorId);
 
   const primerDia = new Date(datos.fechaDesde);
-  primerDia.setUTCHours(0, 0, 0, 0);
+  primerDia.setHours(0, 0, 0, 0);
   const ultimoDia = new Date(datos.fechaHasta);
-  ultimoDia.setUTCHours(0, 0, 0, 0);
-  ultimoDia.setUTCDate(ultimoDia.getUTCDate() + 1);
+  ultimoDia.setHours(0, 0, 0, 0);
+  ultimoDia.setDate(ultimoDia.getDate() + 1);
 
   const reservas = await findReservasEnRango(
     administradorId,
@@ -86,29 +86,30 @@ export async function consultarDisponibilidad(
 
   const ahora = new Date();
   const fechaMinima = new Date(ahora);
-  fechaMinima.setUTCHours(fechaMinima.getUTCHours() + antelacionMinima);
+  fechaMinima.setHours(fechaMinima.getHours() + antelacionMinima);
 
   const resultado: DiaDisponible[] = [];
   const diaActual = new Date(datos.fechaDesde);
 
   while (diaActual <= datos.fechaHasta) {
-    const diaSemana = diaActual.getUTCDay();
+    const diaSemana = diaActual.getDay();
     const disps = dispMap.get(diaSemana);
 
     if (!disps || disps.length === 0) {
       resultado.push({ fecha: new Date(diaActual), slots: [] });
-      diaActual.setUTCDate(diaActual.getUTCDate() + 1);
+      diaActual.setDate(diaActual.getDate() + 1);
       continue;
     }
 
     const diaInicio = new Date(diaActual);
-    diaInicio.setUTCHours(0, 0, 0, 0);
+    diaInicio.setHours(0, 0, 0, 0);
     const diaFin = new Date(diaActual);
-    diaFin.setUTCHours(24, 0, 0, 0);
+    diaFin.setHours(24, 0, 0, 0);
 
-    const reservasDelDia = reservas.filter(
-      (r) => r.fechaHoraInicio >= diaInicio && r.fechaHoraInicio < diaFin
-    );
+    const reservasDelDia = reservas.filter((r) => {
+      const rFin = new Date(r.fechaHoraInicio.getTime() + r.duracion * 60000);
+      return r.fechaHoraInicio < diaFin && rFin > diaInicio;
+    });
     const bloqueosDelDia = bloqueos.filter(
       (b) => b.fechaInicio < diaFin && b.fechaFin > diaInicio
     );
@@ -132,7 +133,7 @@ export async function consultarDisponibilidad(
 
         const superponeConReserva = reservasDelDia.some((r) => {
           const rFin = new Date(r.fechaHoraInicio);
-          rFin.setUTCMinutes(rFin.getUTCMinutes() + r.duracion);
+          rFin.setMinutes(rFin.getMinutes() + r.duracion);
           return haySuperposicion(slotInicio, slotFin, r.fechaHoraInicio, rFin);
         });
         if (superponeConReserva) continue;
@@ -147,7 +148,7 @@ export async function consultarDisponibilidad(
     }
 
     resultado.push({ fecha: new Date(diaActual), slots });
-    diaActual.setUTCDate(diaActual.getUTCDate() + 1);
+    diaActual.setDate(diaActual.getDate() + 1);
   }
 
   return resultado;
