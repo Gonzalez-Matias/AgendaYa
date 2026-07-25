@@ -1,0 +1,406 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.modal {
+  width: 768px;
+  max-width: 768px;
+  background: white;
+  border-radius: 8px;
+  outline: 1px solid #C3C5D9;
+  outline-offset: -1px;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.header {
+  padding: 24px 32px;
+  background: white;
+  border-bottom: 1px solid #C3C5D9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  color: #191C1E;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+}
+
+.subtitle {
+  color: #434656;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.closeBtn {
+  padding: 8px;
+  border-radius: 12px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #434656;
+}
+
+.closeBtn:hover {
+  background: #F2F4F6;
+}
+
+.body {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.eventInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.eventName {
+  color: #191C1E;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.eventDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detailRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.detailIcon {
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #737688;
+}
+
+.detailText {
+  color: #434656;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.divider {
+  border-top: 1px solid #C3C5D9;
+}
+
+.calendarSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.slotsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.slotsHeader {
+  color: #434656;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  line-height: 16px;
+  letter-spacing: 0.6px;
+}
+
+.slotsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.slotBtn {
+  padding: 8px 16px;
+  background: white;
+  border-radius: 4px;
+  outline: 1px solid #C3C5D9;
+  outline-offset: -1px;
+  border: none;
+  cursor: pointer;
+  color: #191C1E;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.slotBtn:hover {
+  background: #F7F9FB;
+}
+
+.slotBtnSelected {
+  background: #DDE1FF;
+  outline: 2px solid #003EC7;
+  outline-offset: -2px;
+  color: #003EC7;
+  font-weight: 500;
+}
+
+.noSlots {
+  color: #9CA3AF;
+  font-size: 14px;
+  font-style: italic;
+  padding: 8px 0;
+}
+
+.footer {
+  padding: 20px 32px;
+  background: white;
+  border-top: 1px solid #C3C5D9;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+}
+
+.cancelBtn {
+  padding: 8px 24px;
+  border-radius: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #191C1E;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background: #F2F4F6;
+}
+
+.confirmBtn {
+  padding: 8px 24px;
+  background: #0052FF;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.confirmBtn:hover:not(:disabled) {
+  background: #003EC7;
+}
+
+.confirmBtn:disabled,
+.cancelBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.confirmOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 250;
+}
+
+.confirmDialog {
+  width: 420px;
+  max-width: 420px;
+  padding: 24px;
+  background: white;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  outline: 1px solid #C3C5D9;
+  outline-offset: -1px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.confirmHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.confirmIcon {
+  width: 48px;
+  height: 48px;
+  background: #D0E1FB;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #54647A;
+}
+
+.confirmTitle {
+  color: #191C1E;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  text-align: center;
+}
+
+.confirmInfo {
+  padding: 16px;
+  background: #F2F4F6;
+  border-radius: 4px;
+  outline: 1px solid rgba(195, 197, 217, 0.5);
+  outline-offset: -1px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.confirmText {
+  text-align: center;
+  color: #434656;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.confirmTextBold {
+  font-weight: 600;
+}
+
+.confirmDetails {
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  outline: 1px solid rgba(195, 197, 217, 0.3);
+  outline-offset: -1px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.confirmDetailRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #191C1E;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.confirmDetailIcon {
+  color: #003EC7;
+  display: flex;
+  align-items: center;
+}
+
+.confirmFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.confirmCancelBtn {
+  padding: 10px 16px;
+  border-radius: 12px;
+  outline: 1px solid #C3C5D9;
+  outline-offset: -1px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #434656;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.6px;
+}
+
+.confirmCancelBtn:hover:not(:disabled) {
+  background: #F2F4F6;
+}
+
+.confirmAcceptBtn {
+  padding: 10px 16px;
+  background: #0052FF;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  color: #DFE3FF;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.6px;
+}
+
+.confirmAcceptBtn:hover:not(:disabled) {
+  background: #003EC7;
+}
+
+.confirmCancelBtn:disabled,
+.confirmAcceptBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.noteSection {
+  padding-top: 24px;
+  border-top: 1px solid #C3C5D9;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.noteLabel {
+  color: #434656;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  line-height: 16px;
+  letter-spacing: 0.6px;
+}
+
+.noteText {
+  color: #434656;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}

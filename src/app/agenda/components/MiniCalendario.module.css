@@ -1,0 +1,112 @@
+.container {
+  padding: 20px;
+  background: white;
+  border-radius: 4px;
+  outline: 1px solid #C3C5D9;
+  outline-offset: -1px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.monthTitle {
+  color: #191C1E;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.arrows {
+  display: flex;
+  gap: 8px;
+}
+
+.arrowBtn {
+  padding: 4px;
+  border-radius: 2px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #434656;
+}
+
+.arrowBtn:hover {
+  background: #F2F4F6;
+}
+
+.dayHeaders {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding-top: 8px;
+}
+
+.dayHeader {
+  text-align: center;
+  color: #434656;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 14px;
+  padding: 4px 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.dayCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+  border-radius: 12px;
+  cursor: default;
+}
+
+.dayAvailable {
+  background: #A9F0FF;
+  cursor: pointer;
+}
+
+.dayAvailable:hover {
+  background: #7EE4FC;
+}
+
+.daySelected {
+  background: #0052FF;
+  color: white;
+  cursor: pointer;
+}
+
+.daySelected:hover {
+  background: #0044DD;
+}
+
+.dayDisabled {
+  background: #E6E6E6;
+}
+
+.dayNumber {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: #54647A;
+  text-align: center;
+}
+
+.dayAvailable .dayNumber {
+  color: #54647A;
+}
+
+.daySelected .dayNumber {
+  color: white;
+}

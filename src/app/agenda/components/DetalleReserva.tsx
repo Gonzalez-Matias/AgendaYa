@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import styles from "./DetalleReserva.module.css";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { ReagendarModal } from "./ReagendarModal";
 
 interface DetalleReservaData {
   id: number;
@@ -66,6 +67,7 @@ export function DetalleReserva({ reservaId, adminId, adminNombre, onClose, onAct
   const [error, setError] = useState("");
   const [procesando, setProcesando] = useState(false);
   const [accionPendiente, setAccionPendiente] = useState<"confirmar" | "cancelar" | "completar" | null>(null);
+  const [mostrarReagendar, setMostrarReagendar] = useState(false);
 
   useEffect(() => {
     fetch(`/api/reservas/${reservaId}?adminId=${adminId}`)
@@ -272,7 +274,7 @@ export function DetalleReserva({ reservaId, adminId, adminNombre, onClose, onAct
             </svg>
             Cancelar
           </button>
-          <button className={styles.reagendarBtn} disabled={procesando || isFinalizada}>Reagendar</button>
+          <button className={styles.reagendarBtn} onClick={() => setMostrarReagendar(true)} disabled={procesando || isFinalizada}>Reagendar</button>
           <button className={styles.completarBtn} onClick={() => setAccionPendiente("completar")} disabled={procesando || !isConfirmada}>
 <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
                 <circle cx="8.5" cy="8.5" r="7" stroke="white" strokeWidth="1.5" />
@@ -290,6 +292,22 @@ export function DetalleReserva({ reservaId, adminId, adminNombre, onClose, onAct
           onConfirm={accionPendiente === "confirmar" ? () => handleConfirmar() : accionPendiente === "cancelar" ? handleCancelar : handleCompletar}
           onCancel={() => setAccionPendiente(null)}
           loading={procesando}
+        />
+      )}
+
+      {mostrarReagendar && (
+        <ReagendarModal
+          reservaId={reservaId}
+          tipoEventoId={detalle.tipoEvento.id}
+          adminId={adminId}
+          duracion={detalle.duracion}
+          fechaActual={detalle.fechaHoraInicio}
+          horarioActual={`${formatTime(detalle.fechaHoraInicio)} - ${formatTime(detalle.fechaHoraFin)}`}
+          nombreInvitado={detalle.nombreInvitado}
+          tipoEvento={detalle.tipoEvento.nombre}
+          notaInvitado={detalle.notaInvitado}
+          onClose={() => setMostrarReagendar(false)}
+          onAction={onAction}
         />
       )}
     </div>
