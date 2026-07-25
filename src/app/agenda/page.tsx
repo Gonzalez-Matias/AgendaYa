@@ -5,6 +5,7 @@ import { CalendarToolbar } from "./components/CalendarToolbar";
 import { CalendarioMensual } from "./components/CalendarioMensual";
 import { CalendarioSemanal } from "./components/CalendarioSemanal";
 import { ListaReservas } from "./components/ListaReservas";
+import { DetalleReserva } from "./components/DetalleReserva";
 import { Sidebar } from "./components/Sidebar";
 import type { ModoVista, ReservaVista } from "@/services/visualizacion";
 import styles from "./page.module.css";
@@ -17,6 +18,7 @@ export default function AgendaPage() {
   const [adminId, setAdminId] = useState<number | null>(null);
   const [adminNombre, setAdminNombre] = useState("");
   const [cargando, setCargando] = useState(true);
+  const [reservaSeleccionada, setReservaSeleccionada] = useState<number | null>(null);
 
   useEffect(() => {
     fetch("/api/administradores")
@@ -147,17 +149,27 @@ export default function AgendaPage() {
             </div>
           ) : modoVista === "calendario" ? (
             subVista === "semanal" ? (
-              <CalendarioSemanal reservas={reservas} fechaActual={fechaActual} />
+              <CalendarioSemanal reservas={reservas} fechaActual={fechaActual} onReservaClick={setReservaSeleccionada} />
             ) : (
-              <CalendarioMensual reservas={reservas} fechaActual={fechaActual} />
+              <CalendarioMensual reservas={reservas} fechaActual={fechaActual} onReservaClick={setReservaSeleccionada} />
             )
           ) : (
-            <ListaReservas reservas={reservas} fechaActual={fechaActual} subVista={subVista} />
+            <ListaReservas reservas={reservas} fechaActual={fechaActual} subVista={subVista} onReservaClick={setReservaSeleccionada} />
           )}
         </div>
 
         <Sidebar reservas={reservas} />
       </div>
+
+      {reservaSeleccionada && adminId && (
+        <DetalleReserva
+          reservaId={reservaSeleccionada}
+          adminId={adminId}
+          adminNombre={adminNombre}
+          onClose={() => setReservaSeleccionada(null)}
+          onAction={cargarReservas}
+        />
+      )}
     </div>
   );
 }

@@ -1,5 +1,8 @@
 FROM node:20-alpine
 
+RUN apk add --no-cache tzdata
+ENV TZ=America/Argentina/Buenos_Aires
+
 WORKDIR /app
 
 COPY package*.json ./

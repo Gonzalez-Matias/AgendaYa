@@ -28,16 +28,20 @@ export async function POST(request: NextRequest) {
       ]);
 
       return NextResponse.json({
-        reservas: reservas.map((r) => ({
-          id: r.id,
-          fecha: `${String(r.fechaHoraInicio.getUTCDate()).padStart(2, "0")}/${String(r.fechaHoraInicio.getUTCMonth() + 1).padStart(2, "0")}/${r.fechaHoraInicio.getUTCFullYear()}`,
-          horario: `${String(r.fechaHoraInicio.getUTCHours()).padStart(2, "0")}:${String(r.fechaHoraInicio.getUTCMinutes()).padStart(2, "0")} - ${String(new Date(r.fechaHoraInicio.getTime() + r.duracion * 60000).getUTCHours()).padStart(2, "0")}:${String(new Date(r.fechaHoraInicio.getTime() + r.duracion * 60000).getUTCMinutes()).padStart(2, "0")}`,
-          nombreInvitado: r.nombreInvitado,
-          emailInvitado: r.emailInvitado,
-          tipoEvento: r.tipoEvento.nombre,
-          estado: r.estadoReserva.nombre === "PendienteDeConfirmacion" || r.estadoReserva.nombre === "PendienteDeReagendar" ? "Pendiente" : r.estadoReserva.nombre,
-          colorFondo: "",
-        })),
+        reservas: reservas.map((r) => {
+          const fechaInicio = new Date(r.fechaHoraInicio);
+          const fechaFin = new Date(fechaInicio.getTime() + r.duracion * 60000);
+          return {
+            id: r.id,
+            fecha: `${String(fechaInicio.getDate()).padStart(2, "0")}/${String(fechaInicio.getMonth() + 1).padStart(2, "0")}/${fechaInicio.getFullYear()}`,
+            horario: `${String(fechaInicio.getHours()).padStart(2, "0")}:${String(fechaInicio.getMinutes()).padStart(2, "0")} - ${String(fechaFin.getHours()).padStart(2, "0")}:${String(fechaFin.getMinutes()).padStart(2, "0")}`,
+            nombreInvitado: r.nombreInvitado,
+            emailInvitado: r.emailInvitado,
+            tipoEvento: r.tipoEvento.nombre,
+            estado: r.estadoReserva.nombre as "Confirmada" | "PendienteDeConfirmacion" | "PendienteDeReagendar" | "Cancelada" | "Completada",
+            colorFondo: "",
+          };
+        }),
         total,
         totalPaginas: Math.ceil(total / porPaginaNum),
       });

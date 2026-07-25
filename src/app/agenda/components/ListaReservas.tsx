@@ -7,6 +7,7 @@ interface ListaReservasProps {
   reservas: ReservaVista[];
   fechaActual: Date;
   subVista: "semanal" | "mensual";
+  onReservaClick?: (id: number) => void;
 }
 
 const DIAS_CORTOS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
@@ -32,7 +33,8 @@ function buildTipoColorMap(reservas: ReservaVista[]): Map<string, { bg: string; 
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   Confirmada: { bg: "#DCFCE7", text: "#166534", label: "Confirmada" },
-  Pendiente: { bg: "#FEF9C3", text: "#854D0E", label: "Pendiente de confirmación" },
+  PendienteDeConfirmacion: { bg: "#FEF9C3", text: "#854D0E", label: "Pendiente de confirmación" },
+  PendienteDeReagendar: { bg: "#FED7AA", text: "#9A3412", label: "Pendiente de reagendar" },
   Cancelada: { bg: "#FEE2E2", text: "#991B1B", label: "Cancelada" },
   Completada: { bg: "#F3F4F6", text: "#4B5563", label: "Completada" },
 };
@@ -87,7 +89,7 @@ function getWeekDays(fechaActual: Date): Date[] {
   });
 }
 
-export function ListaReservas({ reservas, fechaActual, subVista }: ListaReservasProps) {
+export function ListaReservas({ reservas, fechaActual, subVista, onReservaClick }: ListaReservasProps) {
   const tipoColorMap = buildTipoColorMap(reservas);
 
   if (reservas.length === 0) {
@@ -157,7 +159,7 @@ export function ListaReservas({ reservas, fechaActual, subVista }: ListaReservas
                     const past = esPasada(r);
 
                     return (
-                      <div key={r.id} className={`${styles.eventCard} ${past ? styles.eventCardPast : ""}`}>
+                      <div key={r.id} className={`${styles.eventCard} ${past ? styles.eventCardPast : ""}`} onClick={() => onReservaClick?.(r.id)} role="button" tabIndex={0}>
                         <div className={styles.timeColumn}>
                           <span className={styles.startTime}>{startStr}</span>
                           <span className={styles.endTime}>{endStr}</span>

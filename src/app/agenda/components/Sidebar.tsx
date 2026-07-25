@@ -12,7 +12,8 @@ const DOT_COLORS = ["#003EC7", "#9C27B0", "#4CAF50", "#E0E3E5", "#F59E0B", "#EF4
 
 const STATE_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
   Confirmada: { label: "Confirmada", bg: "#DCFCE7", text: "#166534" },
-  Pendiente: { label: "Pendiente de confirmación", bg: "#FEF9C3", text: "#854D0E" },
+  PendienteDeConfirmacion: { label: "Pendiente de confirmación", bg: "#FEF9C3", text: "#854D0E" },
+  PendienteDeReagendar: { label: "Pendiente de reagendar", bg: "#FED7AA", text: "#9A3412" },
   Cancelada: { label: "Cancelada", bg: "#FEE2E2", text: "#991B1B" },
   Completada: { label: "Completada", bg: "#F3F4F6", text: "#4B5563" },
 };
@@ -49,7 +50,7 @@ export function Sidebar({ reservas }: SidebarProps) {
 
       <span className={styles.sectionTitle}>Estados</span>
       <div className={styles.stateList}>
-        {["Confirmada", "Pendiente", "Cancelada", "Completada"].map((estado) => {
+        {["Confirmada", "PendienteDeConfirmacion", "PendienteDeReagendar", "Cancelada", "Completada"].map((estado) => {
           const count = estadoCounts.get(estado) || 0;
           const cfg = STATE_CONFIG[estado];
           if (!cfg) return null;

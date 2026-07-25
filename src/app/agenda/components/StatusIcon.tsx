@@ -14,11 +14,20 @@ export function StatusIcon({ estado, size = 16 }: StatusIconProps) {
       </svg>
     );
   }
-  if (estado === "Pendiente") {
+  if (estado === "PendienteDeConfirmacion") {
     return (
       <svg width={s} height={s} viewBox="0 0 16 16" fill="none">
         <circle cx="8" cy="8" r="6" stroke="#EAB308" strokeWidth="2" />
         <path d="M8 4v4l3 2" stroke="#EAB308" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (estado === "PendienteDeReagendar") {
+    return (
+      <svg width={s} height={s} viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6" stroke="#F97316" strokeWidth="2" />
+        <path d="M8 4.5v4" stroke="#F97316" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="8" cy="11.5" r="1" fill="#F97316" />
       </svg>
     );
   }

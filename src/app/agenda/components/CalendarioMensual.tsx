@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { ReservaVista } from "@/services/visualizacion";
 import { StatusIcon } from "./StatusIcon";
 import styles from "./CalendarioMensual.module.css";
@@ -7,6 +8,7 @@ import styles from "./CalendarioMensual.module.css";
 interface CalendarioMensualProps {
   reservas: ReservaVista[];
   fechaActual: Date;
+  onReservaClick?: (id: number) => void;
 }
 
 const DIAS = ["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"];
@@ -40,7 +42,8 @@ function formatearDiaMes(fecha: Date): string {
   return `${String(fecha.getDate()).padStart(2, "0")}/${String(fecha.getMonth() + 1).padStart(2, "0")}`;
 }
 
-export function CalendarioMensual({ reservas, fechaActual }: CalendarioMensualProps) {
+export function CalendarioMensual({ reservas, fechaActual, onReservaClick }: CalendarioMensualProps) {
+  const [diaExpandido, setDiaExpandido] = useState<string | null>(null);
   const anio = fechaActual.getFullYear();
   const mes = fechaActual.getMonth();
   const hoy = new Date();
@@ -91,7 +94,7 @@ export function CalendarioMensual({ reservas, fechaActual }: CalendarioMensualPr
           <div key={dia} className={styles.headerCell}>{dia}</div>
         ))}
       </div>
-      <div className={styles.grid}>
+      <div className={styles.grid} onClick={() => setDiaExpandido(null)}>
         {celdas.map((fecha, idx) => {
           const col = idx % 7;
           const isWeekend = esFinde(col);
@@ -126,6 +129,9 @@ export function CalendarioMensual({ reservas, fechaActual }: CalendarioMensualPr
                             borderLeft: `3px solid ${border}`,
                           }}
                           title={`${reserva.horario} - ${reserva.nombreInvitado} (${reserva.estado})`}
+                          onClick={() => onReservaClick?.(reserva.id)}
+                          role="button"
+                          tabIndex={0}
                         >
                           <span className={styles.eventTime}>{reserva.horario.split(" - ")[0]}</span>
                           <StatusIcon estado={reserva.estado} size={12} />
@@ -136,11 +142,51 @@ export function CalendarioMensual({ reservas, fechaActual }: CalendarioMensualPr
                       );
                     })}
                     {reservasDelDia(fecha).length > 3 && (
-                      <span className={styles.moreEvents}>
-                        +{reservasDelDia(fecha).length - 3} más
+                      <span
+                        className={styles.moreEvents}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const key = formatearDiaMes(fecha);
+                          setDiaExpandido(diaExpandido === key ? null : key);
+                        }}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        +{reservasDelDia(fecha).length - 3} reservas
                       </span>
                     )}
                   </div>
+                  {diaExpandido === formatearDiaMes(fecha) && reservasDelDia(fecha).length > 3 && (
+                    <div className={styles.popup} onClick={(e) => e.stopPropagation()}>
+                      {reservasDelDia(fecha).map((reserva) => {
+                        const colorInfo = tipoColorMap.get(reserva.tipoEvento);
+                        const bg = colorInfo?.bg || "#E0E3E5";
+                        const border = colorInfo?.border || "#6B7280";
+                        return (
+                          <div
+                            key={reserva.id}
+                            className={styles.popupEvent}
+                            onClick={() => {
+                              onReservaClick?.(reserva.id);
+                              setDiaExpandido(null);
+                            }}
+                            role="button"
+                            tabIndex={0}
+                          >
+                            <div
+                              className={styles.popupEventColor}
+                              style={{ background: border }}
+                            />
+                            <div className={styles.popupEventInfo}>
+                              <span className={styles.popupEventTime}>{reserva.horario}</span>
+                              <span className={styles.popupEventName}>{reserva.nombreInvitado}</span>
+                            </div>
+                            <StatusIcon estado={reserva.estado} size={12} />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </>
               )}
             </div>

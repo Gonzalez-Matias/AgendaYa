@@ -125,8 +125,18 @@ async function main() {
     { fechaHoraInicio: enUnaSemana, duracion: 90, nombreInvitado: "Pedro Gómez", emailInvitado: "pedro.gomez@email.com", telefonoInvitado: "+5491155559012", notaInvitado: "Traer documentación", tipoEventoId: tiposEvento[3].id, administradorId: admin2.id, estadoReservaId: estadoConfirmada.id },
     { fechaHoraInicio: enDosSemanas, duracion: 120, nombreInvitado: "Sofía Ruiz", emailInvitado: "sofia.ruiz@email.com", telefonoInvitado: null, notaInvitado: "Auditoría anual", tipoEventoId: tiposEvento[4].id, administradorId: admin2.id, estadoReservaId: estadoCancelada.id },
     // Admin 3
-    { fechaHoraInicio: enTresSemanas, duracion: 180, nombreInvitado: "Martín Díaz", emailInvitado: "martin.diaz@email.com", telefonoInvitado: "+5491155553456", notaInvitado: "Workshop de React", tipoEventoId: tiposEvento[6].id, administradorId: admin3.id, estadoReservaId: estadoPendienteReagendar.id },
+    { fechaHoraInicio: new Date("2026-08-14T15:00:00"), duracion: 180, nombreInvitado: "Martín Díaz", emailInvitado: "martin.diaz@email.com", telefonoInvitado: "+5491155553456", notaInvitado: "Workshop de React", tipoEventoId: tiposEvento[6].id, administradorId: admin3.id, estadoReservaId: estadoPendienteReagendar.id },
     { fechaHoraInicio: new Date(enTresSemanas.getTime() + 86400000), duracion: 45, nombreInvitado: "Lucía Fernández", emailInvitado: "lucia.fernandez@email.com", telefonoInvitado: "+5491155557890", notaInvitado: null, tipoEventoId: tiposEvento[7].id, administradorId: admin3.id, estadoReservaId: estadoConfirmada.id },
+    // ── Admin 3 (Ana Martínez) - Reservas de agosto (1 por estado) ────────
+    { fechaHoraInicio: new Date("2026-08-03T10:00:00"), duracion: 180, nombreInvitado: "Augusto Reyes", emailInvitado: "augusto.reyes@email.com", telefonoInvitado: "+5491166661111", notaInvitado: "Workshop de agosto", tipoEventoId: tiposEvento[6].id, administradorId: admin3.id, estadoReservaId: estadoPendienteConfirmacion.id },
+    { fechaHoraInicio: new Date("2026-08-06T14:00:00"), duracion: 45, nombreInvitado: "Brenda López", emailInvitado: "brenda.lopez@email.com", telefonoInvitado: "+5491166662222", notaInvitado: "Mentoría pendiente de reagendar", tipoEventoId: tiposEvento[7].id, administradorId: admin3.id, estadoReservaId: estadoPendienteReagendar.id },
+    { fechaHoraInicio: new Date("2026-08-11T10:00:00"), duracion: 180, nombreInvitado: "Carlos Méndez", emailInvitado: "carlos.mendez@email.com", telefonoInvitado: "+5491166663333", notaInvitado: null, tipoEventoId: tiposEvento[6].id, administradorId: admin3.id, estadoReservaId: estadoConfirmada.id },
+    { fechaHoraInicio: new Date("2026-08-14T11:00:00"), duracion: 60, nombreInvitado: "Diana Torres", emailInvitado: "diana.torres@email.com", telefonoInvitado: "+5491166664444", notaInvitado: "Evaluación cancelada", tipoEventoId: tiposEvento[8].id, administradorId: admin3.id, estadoReservaId: estadoCancelada.id },
+    { fechaHoraInicio: new Date("2026-08-14T09:00:00"), duracion: 180, nombreInvitado: "Fernando García", emailInvitado: "fernando.garcia@email.com", telefonoInvitado: "+5491166666000", notaInvitado: "Workshop matutino", tipoEventoId: tiposEvento[6].id, administradorId: admin3.id, estadoReservaId: estadoConfirmada.id },
+    { fechaHoraInicio: new Date("2026-08-14T13:00:00"), duracion: 45, nombreInvitado: "Gabriela Rojas", emailInvitado: "gabriela.rojas@email.com", telefonoInvitado: "+5491166667000", notaInvitado: null, tipoEventoId: tiposEvento[7].id, administradorId: admin3.id, estadoReservaId: estadoPendienteConfirmacion.id },
+    { fechaHoraInicio: new Date("2026-08-14T14:00:00"), duracion: 60, nombreInvitado: "Hugo Castillo", emailInvitado: "hugo.castillo@email.com", telefonoInvitado: "+5491166668000", notaInvitado: "Evaluación de desempeño", tipoEventoId: tiposEvento[8].id, administradorId: admin3.id, estadoReservaId: estadoCompletada.id },
+    { fechaHoraInicio: new Date("2026-08-14T18:00:00"), duracion: 180, nombreInvitado: "Irene Morales", emailInvitado: "irene.morales@email.com", telefonoInvitado: "+5491166669000", notaInvitado: "Workshop vespertino", tipoEventoId: tiposEvento[6].id, administradorId: admin3.id, estadoReservaId: estadoPendienteReagendar.id },
+    { fechaHoraInicio: new Date("2026-08-19T15:00:00"), duracion: 45, nombreInvitado: "Eduardo Paz", emailInvitado: "eduardo.paz@email.com", telefonoInvitado: "+5491166665555", notaInvitado: "Mentoría completada", tipoEventoId: tiposEvento[7].id, administradorId: admin3.id, estadoReservaId: estadoCompletada.id },
   ];
 
   const reservas = [];
@@ -145,6 +155,16 @@ async function main() {
     { reservaId: reservas[3].id, estadoReservaId: estadoCancelada.id, motivo: "Cancelada por el invitado" },
     { reservaId: reservas[4].id, estadoReservaId: estadoPendienteReagendar.id, motivo: "Horario no disponible" },
     { reservaId: reservas[5].id, estadoReservaId: estadoConfirmada.id, motivo: "Confirmación automática" },
+    // ── Historial agosto ─────────────────────────────────────────────────
+    { reservaId: reservas[6].id, estadoReservaId: estadoPendienteConfirmacion.id, motivo: "Reserva creada" },
+    { reservaId: reservas[7].id, estadoReservaId: estadoPendienteReagendar.id, motivo: "Horario no disponible" },
+    { reservaId: reservas[8].id, estadoReservaId: estadoConfirmada.id, motivo: "Confirmación automática" },
+    { reservaId: reservas[9].id, estadoReservaId: estadoCancelada.id, motivo: "Cancelada por el invitado" },
+    { reservaId: reservas[10].id, estadoReservaId: estadoCompletada.id, motivo: "Reunión finalizada" },
+    { reservaId: reservas[11].id, estadoReservaId: estadoConfirmada.id, motivo: "Confirmación automática" },
+    { reservaId: reservas[12].id, estadoReservaId: estadoPendienteConfirmacion.id, motivo: "Reserva creada" },
+    { reservaId: reservas[13].id, estadoReservaId: estadoCompletada.id, motivo: "Evaluación finalizada" },
+    { reservaId: reservas[14].id, estadoReservaId: estadoPendienteReagendar.id, motivo: "Horario no disponible" },
   ];
 
   await prisma.reservaEstadoHistorial.createMany({ data: historialData });

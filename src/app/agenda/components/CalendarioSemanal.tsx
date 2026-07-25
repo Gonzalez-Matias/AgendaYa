@@ -7,15 +7,16 @@ import styles from "./CalendarioSemanal.module.css";
 interface CalendarioSemanalProps {
   reservas: ReservaVista[];
   fechaActual: Date;
+  onReservaClick?: (id: number) => void;
 }
 
 const DIAS_CORTOS = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"];
 
 const EVENT_COLORS = [
-  { bg: "#DBEAFE", border: "#2563EB", time: "#1E40AF", name: "#1E3A8A" },
-  { bg: "#FAF5FF", border: "#9333EA", time: "#6B21A8", name: "#581C87" },
-  { bg: "#F0FDF4", border: "#16A34A", time: "#166534", name: "#14532D" },
-  { bg: "#F2F4F6", border: "#6B7280", time: "#374151", name: "#1F2937" },
+  { bg: "#DBEAFE", border: "#2563EB", time: "#1E40AF", name: "#1E3A8A", outline: "#80A7F5" },
+  { bg: "#FAF5FF", border: "#9333EA", time: "#6B21A8", name: "#581C87", outline: "#C794F5" },
+  { bg: "#F0FDF4", border: "#16A34A", time: "#166534", name: "#14532D", outline: "#83D09F" },
+  { bg: "#F2F4F6", border: "#6B7280", time: "#374151", name: "#1F2937", outline: "#AFB3BB" },
 ];
 
 const HOUR_START = 8;
@@ -51,7 +52,7 @@ function esHoy(fecha: Date): boolean {
   );
 }
 
-export function CalendarioSemanal({ reservas, fechaActual }: CalendarioSemanalProps) {
+export function CalendarioSemanal({ reservas, fechaActual, onReservaClick }: CalendarioSemanalProps) {
   const weekStart = getWeekStart(fechaActual);
 
   const tipoColorMap = new Map<string, number>();
@@ -120,7 +121,32 @@ export function CalendarioSemanal({ reservas, fechaActual }: CalendarioSemanalPr
                 />
               ))}
 
-              {dayReservas.map((r) => {
+              {dayReservas.filter((r) => r.estado === "Cancelada").map((r) => {
+                const [startStr, endStr] = r.horario.split(" - ");
+                const startH = parseTime(startStr);
+                const endH = parseTime(endStr);
+                const top = (startH - HOUR_START) * HOUR_HEIGHT;
+                const height = Math.max((endH - startH) * HOUR_HEIGHT, 32);
+
+                return (
+                  <div
+                    key={r.id}
+                    className={styles.eventCardCancelled}
+                    style={{ top: `${top}px`, height: `${height}px`, outline: `1px solid #DC2626`, outlineOffset: -1 }}
+                    onClick={() => onReservaClick?.(r.id)}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <span className={styles.eventTime}>{r.horario}</span>
+                    <span className={styles.eventName}>
+                      <StatusIcon estado={r.estado} size={12} />
+                      {r.tipoEvento} - {r.nombreInvitado}
+                    </span>
+                  </div>
+                );
+              })}
+
+              {dayReservas.filter((r) => r.estado !== "Cancelada").map((r) => {
                 const tipoIdx = tipoColorMap.get(r.tipoEvento) ?? 3;
                 const colors = EVENT_COLORS[tipoIdx];
                 const [startStr, endStr] = r.horario.split(" - ");
@@ -133,12 +159,17 @@ export function CalendarioSemanal({ reservas, fechaActual }: CalendarioSemanalPr
                   <div
                     key={r.id}
                     className={styles.eventCard}
-                    style={{
-                      top: `${top}px`,
-                      height: `${height}px`,
-                      background: colors.bg,
-                      borderLeft: `4px solid ${colors.border}`,
-                    }}
+                  style={{
+                    top: `${top}px`,
+                    height: `${height}px`,
+                    background: colors.bg,
+                    borderLeft: `4px solid ${colors.border}`,
+                    outline: `1px solid ${colors.outline}`,
+                    outlineOffset: -1,
+                  }}
+                    onClick={() => onReservaClick?.(r.id)}
+                    role="button"
+                    tabIndex={0}
                   >
                     <span className={styles.eventTime} style={{ color: colors.time }}>
                       {r.horario}
