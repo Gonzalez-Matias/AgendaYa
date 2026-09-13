@@ -27,6 +27,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/agendaya?schema=public
+      CYPRESS_INSTALL_BINARY: 0
 
     steps:
       - name: Checkout código
@@ -46,6 +47,13 @@ jobs:
 
       - name: Correr migraciones
         run: npx prisma migrate deploy
+
+      - name: Crear base de datos de test
+        run: |
+          node -e "const { Client } = require('pg'); const c = new Client({ connectionString: 'postgresql://postgres:postgres@localhost:5432/postgres' }); (async () => { await c.connect(); try { await c.query('CREATE DATABASE agendaya_test'); console.log('DB agendaya_test creada'); } catch (e) { if (!/already exists/i.test(e.message)) throw e; console.log('DB agendaya_test ya existía'); } finally { await c.end(); } })()"
+
+      - name: Correr migraciones en la base de test
+        run: DATABASE_URL="postgresql://postgres:postgres@localhost:5432/agendaya_test?schema=public" npx prisma migrate deploy
 
       - name: Correr tests
         id: tests
