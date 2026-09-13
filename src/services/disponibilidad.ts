@@ -35,6 +35,11 @@ function minutosAFecha(dia: Date, minutos: number): Date {
   return resultado;
 }
 
+function inicioDiaCalendario(fecha: Date): Date {
+  // Las fechas de la API representan días del calendario; los horarios se calculan en la zona local.
+  return new Date(fecha.getUTCFullYear(), fecha.getUTCMonth(), fecha.getUTCDate());
+}
+
 export async function consultarDisponibilidad(
   input: ConsultarDisponibilidadInput
 ): Promise<DiaDisponible[]> {
@@ -57,10 +62,9 @@ export async function consultarDisponibilidad(
 
   const disponibilidades = await findDisponibilidadAdmin(administradorId);
 
-  const primerDia = new Date(datos.fechaDesde);
-  primerDia.setHours(0, 0, 0, 0);
-  const ultimoDia = new Date(datos.fechaHasta);
-  ultimoDia.setHours(0, 0, 0, 0);
+  const primerDia = inicioDiaCalendario(datos.fechaDesde);
+  const ultimoDiaConsultado = inicioDiaCalendario(datos.fechaHasta);
+  const ultimoDia = new Date(ultimoDiaConsultado);
   ultimoDia.setDate(ultimoDia.getDate() + 1);
 
   const reservas = await findReservasEnRango(
@@ -89,9 +93,9 @@ export async function consultarDisponibilidad(
   fechaMinima.setHours(fechaMinima.getHours() + antelacionMinima);
 
   const resultado: DiaDisponible[] = [];
-  const diaActual = new Date(datos.fechaDesde);
+  const diaActual = new Date(primerDia);
 
-  while (diaActual <= datos.fechaHasta) {
+  while (diaActual <= ultimoDiaConsultado) {
     const diaSemana = diaActual.getDay();
     const disps = dispMap.get(diaSemana);
 

@@ -24,7 +24,7 @@ export function ConfirmDialog({ variant, eventTitle, onConfirm, onCancel, loadin
 
   if (variant === "cancelar") {
     return (
-      <div className={styles.overlay} onClick={onCancel}>
+      <div className={styles.overlay} onClick={onCancel} data-cy="confirm-dialog">
         <div className={`${styles.dialog} ${styles.dialogCancelar}`} onClick={(e) => e.stopPropagation()}>
           <div className={styles.headerCancelar}>
             <div className={styles.iconBoxCancelar}>
@@ -43,6 +43,7 @@ export function ConfirmDialog({ variant, eventTitle, onConfirm, onCancel, loadin
 
           <div className={styles.textareaWrapper}>
             <textarea
+              data-cy="confirm-motivo"
               className={styles.textarea}
               placeholder="Motivo de cancelación (opcional)"
               value={motivo}
@@ -51,10 +52,10 @@ export function ConfirmDialog({ variant, eventTitle, onConfirm, onCancel, loadin
           </div>
 
           <div className={styles.footer}>
-            <button className={`${styles.btnVolver} ${styles.btnVolverCancelar}`} onClick={onCancel} disabled={loading}>
+            <button data-cy="confirm-volver" className={`${styles.btnVolver} ${styles.btnVolverCancelar}`} onClick={onCancel} disabled={loading}>
               Volver
             </button>
-            <button className={styles.btnConfirmCancelar} onClick={handleConfirm} disabled={loading}>
+            <button data-cy="confirm-aceptar" className={styles.btnConfirmCancelar} onClick={handleConfirm} disabled={loading}>
               Cancelar Reserva
             </button>
           </div>
@@ -65,7 +66,7 @@ export function ConfirmDialog({ variant, eventTitle, onConfirm, onCancel, loadin
 
   if (variant === "confirmar") {
     return (
-      <div className={styles.overlay} onClick={onCancel}>
+      <div className={styles.overlay} onClick={onCancel} data-cy="confirm-dialog">
         <div className={`${styles.dialog} ${styles.dialogConfirmar}`} onClick={(e) => e.stopPropagation()}>
           <div className={styles.headerConfirmar}>
             <div className={styles.title}>Confirmar Reserva</div>
@@ -84,10 +85,10 @@ export function ConfirmDialog({ variant, eventTitle, onConfirm, onCancel, loadin
           </div>
 
           <div className={styles.footer}>
-            <button className={styles.btnVolver} onClick={onCancel} disabled={loading}>
+            <button data-cy="confirm-volver" className={styles.btnVolver} onClick={onCancel} disabled={loading}>
               Volver
             </button>
-            <button className={styles.btnConfirmar} onClick={handleConfirm} disabled={loading}>
+            <button data-cy="confirm-aceptar" className={styles.btnConfirmar} onClick={handleConfirm} disabled={loading}>
               Confirmar Reserva
             </button>
           </div>
@@ -98,7 +99,7 @@ export function ConfirmDialog({ variant, eventTitle, onConfirm, onCancel, loadin
 
   // completar
   return (
-    <div className={styles.overlay} onClick={onCancel}>
+    <div className={styles.overlay} onClick={onCancel} data-cy="confirm-dialog">
       <div className={`${styles.dialog} ${styles.dialogCompletar}`} onClick={(e) => e.stopPropagation()}>
         <div className={styles.headerCompletar}>
           <div className={styles.iconBoxCompletar} />
@@ -114,10 +115,10 @@ export function ConfirmDialog({ variant, eventTitle, onConfirm, onCancel, loadin
         </div>
 
         <div className={`${styles.footer} ${styles.footerWhite}`}>
-          <button className={styles.btnVolver} onClick={onCancel} disabled={loading}>
+          <button data-cy="confirm-volver" className={styles.btnVolver} onClick={onCancel} disabled={loading}>
             Volver
           </button>
-          <button className={styles.btnCompletar} onClick={handleConfirm} disabled={loading}>
+          <button data-cy="confirm-aceptar" className={styles.btnCompletar} onClick={handleConfirm} disabled={loading}>
             Marcar Completada
           </button>
         </div>

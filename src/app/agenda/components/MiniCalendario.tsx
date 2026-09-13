@@ -101,6 +101,8 @@ export function MiniCalendario({ month, year, diasDisponibles, selectedDate, onS
           return (
             <div
               key={celda.key}
+              data-cy="reagendar-dia"
+              data-dia={celda.key}
               className={className}
               onClick={() => {
                 if (isAvailable && !isPast) {

@@ -710,4 +710,49 @@ describe("consultarDisponibilidad", () => {
       })
     ).rejects.toThrow("El período no puede superar 30 días");
   });
+
+  it("debería devolver los slots en la misma fecha calendario consultada", async () => {
+    const admin = await prisma.usuarioAdministrador.create({
+      data: { email: "fechas@test.com", nombre: "Test fechas" },
+    });
+
+    const tipoEvento = await prisma.tipoEvento.create({
+      data: {
+        nombre: "Consulta de fechas",
+        duracion: 30,
+        antelacionMinima: 1,
+        administradorId: admin.id,
+      },
+    });
+
+    await prisma.disponibilidadSemanal.create({
+      data: {
+        diaSemana: 2,
+        horaInicio: 480,
+        horaFin: 540,
+        administradorId: admin.id,
+      },
+    });
+
+    // Próximo martes (día 2) al menos 48h en el futuro para respetar la antelación mínima.
+    let diasHastaMartes = (2 - new Date().getDay() + 7) % 7;
+    if (diasHastaMartes === 0) diasHastaMartes = 7;
+    if (diasHastaMartes === 1) diasHastaMartes += 7;
+    const proximoMartes = new Date();
+    proximoMartes.setDate(proximoMartes.getDate() + diasHastaMartes);
+    proximoMartes.setHours(0, 0, 0, 0);
+
+    const fechaConsultada = new Date(proximoMartes.toISOString().slice(0, 10) + "T00:00:00.000Z");
+    const fechaEsperada = fechaConsultada.toISOString().slice(0, 10);
+
+    const resultado = await consultarDisponibilidad({
+      tipoEventoId: tipoEvento.id,
+      fechaDesde: fechaConsultada,
+      fechaHasta: fechaConsultada,
+    });
+
+    expect(resultado).toHaveLength(1);
+    expect(resultado[0].fecha.toISOString()).toBe(`${fechaEsperada}T03:00:00.000Z`);
+    expect(resultado[0].slots[0].inicio.toISOString()).toBe(`${fechaEsperada}T11:00:00.000Z`);
+  });
 });

@@ -179,23 +179,23 @@ export function DetalleReserva({ reservaId, adminId, adminNombre, onClose, onAct
   }
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.header}>
-          <div className={styles.headerLeft}>
-            <div className={styles.dot} style={{ background: tipoColor }} />
-            <span className={styles.tipoLabel}>{detalle.tipoEvento.nombre}</span>
-            <span className={styles.statusBadge} style={{ background: st.bg, color: st.color, outline: `1px solid ${st.outline}` }}>
-              {st.label}
-            </span>
+<div className={styles.overlay} onClick={onClose} data-cy="detalle-modal">
+        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+          <div className={styles.header}>
+            <div className={styles.headerLeft}>
+              <div className={styles.dot} style={{ background: tipoColor }} />
+              <span className={styles.tipoLabel}>{detalle.tipoEvento.nombre}</span>
+              <span className={styles.statusBadge} style={{ background: st.bg, color: st.color, outline: `1px solid ${st.outline}` }} data-cy="detalle-estado">
+                {st.label}
+              </span>
+            </div>
+            <button className={styles.closeBtn} onClick={onClose} data-cy="detalle-close">✕</button>
           </div>
-          <button className={styles.closeBtn} onClick={onClose}>✕</button>
-        </div>
 
         <div className={styles.title}>{detalle.tipoEvento.nombre} - {detalle.nombreInvitado}</div>
 
         {error && (
-          <div style={{ margin: "0 24px", padding: "12px 16px", background: "#FEE2E2", borderRadius: "6px", color: "#991B1B", fontSize: "13px", fontWeight: 500 }}>
+          <div data-cy="detalle-error" style={{ margin: "0 24px", padding: "12px 16px", background: "#FEE2E2", borderRadius: "6px", color: "#991B1B", fontSize: "13px", fontWeight: 500 }}>
             {error}
           </div>
         )}
@@ -247,7 +247,7 @@ export function DetalleReserva({ reservaId, adminId, adminNombre, onClose, onAct
                 <span className={styles.estadoLabel}>Estado:</span>
                 <span className={styles.estadoText} style={{ color: st.color }}>{st.label}</span>
                 {isPendiente && (
-                  <button className={styles.confirmBtn} onClick={() => setAccionPendiente("confirmar")} disabled={procesando}>
+                  <button data-cy="btn-confirmar" className={styles.confirmBtn} onClick={() => setAccionPendiente("confirmar")} disabled={procesando}>
                     <svg width="13" height="12" viewBox="0 0 13 12" fill="none">
                       <path d="M1 6l4 4 7-7" stroke="#166534" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -274,14 +274,14 @@ export function DetalleReserva({ reservaId, adminId, adminNombre, onClose, onAct
         </div>
 
         <div className={styles.footer}>
-          <button className={styles.cancelBtn} onClick={() => setAccionPendiente("cancelar")} disabled={procesando || isFinalizada}>
+          <button data-cy="btn-cancelar" className={styles.cancelBtn} onClick={() => setAccionPendiente("cancelar")} disabled={procesando || isFinalizada}>
             <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
               <path d="M4 4l9 9M13 4l-9 9" stroke="#BA1A1A" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             Cancelar
           </button>
-          <button className={styles.reagendarBtn} onClick={() => setMostrarReagendar(true)} disabled={procesando || isFinalizada}>Reagendar</button>
-          <button className={styles.completarBtn} onClick={() => setAccionPendiente("completar")} disabled={procesando || !isConfirmada}>
+          <button data-cy="btn-reagendar" className={styles.reagendarBtn} onClick={() => setMostrarReagendar(true)} disabled={procesando || isFinalizada}>Reagendar</button>
+          <button data-cy="btn-completar" className={styles.completarBtn} onClick={() => setAccionPendiente("completar")} disabled={procesando || !isConfirmada}>
 <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
                 <circle cx="8.5" cy="8.5" r="7" stroke="white" strokeWidth="1.5" />
                 <path d="M5 8.5l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

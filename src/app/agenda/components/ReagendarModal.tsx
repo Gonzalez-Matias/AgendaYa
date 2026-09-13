@@ -218,14 +218,14 @@ export function ReagendarModal({
     : "";
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} onClick={onClose} data-cy="reagendar-modal">
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <div className={styles.headerText}>
             <span className={styles.title}>Reagendar Reserva</span>
             <span className={styles.subtitle}>Elija nueva fecha y horario</span>
           </div>
-          <button className={styles.closeBtn} onClick={onClose} type="button">
+          <button data-cy="reagendar-close" className={styles.closeBtn} onClick={onClose} type="button">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M1 1l12 12M13 1L1 13" stroke="#434656" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
@@ -267,9 +267,9 @@ export function ReagendarModal({
 
           <div className={styles.calendarSection}>
             {cargando ? (
-              <span className={styles.noSlots}>Cargando disponibilidad...</span>
+              <span className={styles.noSlots} data-cy="reagendar-loading">Cargando disponibilidad...</span>
             ) : error ? (
-              <span className={styles.noSlots} style={{ color: "#EF4444" }}>{error}</span>
+              <span data-cy="reagendar-error" className={styles.noSlots} style={{ color: "#EF4444" }}>{error}</span>
             ) : (
               <MiniCalendario
                 month={calendarMonth}
@@ -289,6 +289,7 @@ export function ReagendarModal({
                 {slotsDelDia.map((slot) => (
                   <button
                     key={slot.inicio}
+                    data-cy="reagendar-slot"
                     className={`${styles.slotBtn} ${selectedSlot?.inicio === slot.inicio ? styles.slotBtnSelected : ""}`}
                     onClick={() => handleSelectSlot(slot)}
                     type="button"
@@ -302,16 +303,17 @@ export function ReagendarModal({
 
           {selectedDate && slotsDelDia.length === 0 && !cargando && (
             <div className={styles.slotsSection}>
-              <span className={styles.noSlots}>No hay turnos disponibles para esta fecha</span>
+              <span data-cy="reagendar-sin-turnos" className={styles.noSlots}>No hay turnos disponibles para esta fecha</span>
             </div>
           )}
         </div>
 
         <div className={styles.footer}>
-          <button className={styles.cancelBtn} onClick={onClose} disabled={procesando} type="button">
+          <button data-cy="reagendar-cancelar" className={styles.cancelBtn} onClick={onClose} disabled={procesando} type="button">
             Cancelar
           </button>
           <button
+            data-cy="reagendar-confirmar"
             className={styles.confirmBtn}
             onClick={handleConfirm}
             disabled={!selectedSlot || procesando}
@@ -323,7 +325,7 @@ export function ReagendarModal({
       </div>
 
       {confirmando && selectedSlot && (
-        <div className={styles.confirmOverlay} onClick={() => setConfirmando(false)}>
+        <div className={styles.confirmOverlay} onClick={() => setConfirmando(false)} data-cy="reagendar-confirmacion">
           <div className={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
             <div className={styles.confirmHeader}>
               <div className={styles.confirmIcon}>
@@ -366,6 +368,7 @@ export function ReagendarModal({
 
             <div className={styles.confirmFooter}>
               <button
+                data-cy="reagendar-confirmar-cancelar"
                 className={styles.confirmCancelBtn}
                 onClick={() => setConfirmando(false)}
                 disabled={procesando}
@@ -374,6 +377,7 @@ export function ReagendarModal({
                 Cancelar
               </button>
               <button
+                data-cy="reagendar-confirmar-final"
                 className={styles.confirmAcceptBtn}
                 onClick={handleConfirmarDefinitivo}
                 disabled={procesando}

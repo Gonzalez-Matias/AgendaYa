@@ -98,7 +98,7 @@ export default function AgendaPage() {
   }
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} data-cy="agenda-container">
       <header className={styles.header}>
         <div className={styles.logo}>
           <div className={styles.logoIcon}>
@@ -144,7 +144,7 @@ export default function AgendaPage() {
           />
 
           {cargando ? (
-            <div style={{ padding: 40, textAlign: "center", color: "#737688" }}>
+            <div data-cy="loading" style={{ padding: 40, textAlign: "center", color: "#737688" }}>
               Cargando reservas...
             </div>
           ) : modoVista === "calendario" ? (

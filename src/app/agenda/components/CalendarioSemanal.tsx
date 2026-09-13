@@ -130,6 +130,9 @@ export function CalendarioSemanal({ reservas, fechaActual, onReservaClick }: Cal
                 return (
                   <div
                     key={r.id}
+                    data-cy="reserva-item"
+                    data-reserva-id={r.id}
+                    data-cy-estado={r.estado}
                     className={styles.eventCardCancelled}
                     style={{ top: `${top}px`, height: `${height}px`, outline: `1px solid #DC2626`, outlineOffset: -1 }}
                     onClick={() => onReservaClick?.(r.id)}
@@ -157,6 +160,9 @@ export function CalendarioSemanal({ reservas, fechaActual, onReservaClick }: Cal
                 return (
                   <div
                     key={r.id}
+                    data-cy="reserva-item"
+                    data-reserva-id={r.id}
+                    data-cy-estado={r.estado}
                     className={styles.eventCard}
                   style={{
                     top: `${top}px`,

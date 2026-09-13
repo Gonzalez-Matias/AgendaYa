@@ -94,7 +94,7 @@ export function ListaReservas({ reservas, fechaActual, subVista, onReservaClick 
   if (reservas.length === 0) {
     return (
       <div className={styles.listaContainer}>
-        <div className={styles.noEvents}>No hay reservas para este período</div>
+        <div className={`${styles.noEvents}`} data-cy="no-reservas">No hay reservas para este período</div>
       </div>
     );
   }
@@ -160,7 +160,7 @@ export function ListaReservas({ reservas, fechaActual, subVista, onReservaClick 
                     const past = esPasada(r);
 
                     return (
-                      <div key={r.id} className={`${styles.eventCard} ${past ? styles.eventCardPast : ""}`} onClick={() => onReservaClick?.(r.id)} role="button" tabIndex={0}>
+                      <div key={r.id} data-cy="reserva-item" data-reserva-id={r.id} data-cy-estado={r.estado} className={`${styles.eventCard} ${past ? styles.eventCardPast : ""}`} onClick={() => onReservaClick?.(r.id)} role="button" tabIndex={0}>
                         <div className={styles.timeColumn}>
                           <span className={styles.startTime}>{startStr}</span>
                           <span className={styles.endTime}>{endStr}</span>

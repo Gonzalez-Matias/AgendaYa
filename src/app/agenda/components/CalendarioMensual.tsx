@@ -120,6 +120,9 @@ export function CalendarioMensual({ reservas, fechaActual, onReservaClick }: Cal
                       return (
                         <div
                           key={reserva.id}
+                          data-cy="reserva-item"
+                          data-reserva-id={reserva.id}
+                          data-cy-estado={reserva.estado}
                           className={styles.event}
                           style={{
                             background: bg,
@@ -162,6 +165,9 @@ export function CalendarioMensual({ reservas, fechaActual, onReservaClick }: Cal
                         return (
                           <div
                             key={reserva.id}
+                            data-cy="reserva-item"
+                            data-reserva-id={reserva.id}
+                            data-cy-estado={reserva.estado}
                             className={styles.popupEvent}
                             onClick={() => {
                               onReservaClick?.(reserva.id);

@@ -70,6 +70,7 @@ export function CalendarToolbar({
     <div className={styles.toolbar}>
       <div style={{ position: "relative" }}>
         <span
+          data-cy="toolbar-title"
           className={styles.monthTitle}
           onClick={() => setShowPicker(!showPicker)}
           style={{ cursor: "pointer" }}
@@ -113,19 +114,21 @@ export function CalendarToolbar({
       </div>
 
       <div className={styles.navArrows}>
-        <button className={styles.arrowBtn} onClick={() => onChangeFecha(-1)}>◀</button>
-        <button className={styles.arrowBtn} onClick={() => onChangeFecha(1)}>▶</button>
+        <button className={styles.arrowBtn} onClick={() => onChangeFecha(-1)} data-cy="toolbar-prev">◀</button>
+        <button className={styles.arrowBtn} onClick={() => onChangeFecha(1)} data-cy="toolbar-next">▶</button>
       </div>
 
       <div className={styles.toggles}>
         <div className={styles.toggleGroup}>
           <button
+            data-cy="toggle-lista"
             className={`${styles.toggleBtn} ${modoVista === "lista" ? styles.toggleBtnActive : ""}`}
             onClick={() => onChangeModo("lista")}
           >
             Lista
           </button>
           <button
+            data-cy="toggle-calendario"
             className={`${styles.toggleBtn} ${modoVista === "calendario" ? styles.toggleBtnActive : ""}`}
             onClick={() => onChangeModo("calendario")}
           >
@@ -135,12 +138,14 @@ export function CalendarToolbar({
 
         <div className={styles.toggleGroup}>
           <button
+            data-cy="toggle-semana"
             className={`${styles.toggleBtn} ${subVista === "semanal" ? styles.toggleBtnActive : ""}`}
             onClick={() => onChangeSubVista("semanal")}
           >
             Semana
           </button>
           <button
+            data-cy="toggle-mes"
             className={`${styles.toggleBtn} ${subVista === "mensual" ? styles.toggleBtnActive : ""}`}
             onClick={() => onChangeSubVista("mensual")}
           >
