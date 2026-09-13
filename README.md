@@ -7,7 +7,8 @@ Sistema de gestión de agenda y reserva de turnos para profesionales. Permite a 
 - **Framework**: Next.js 15 (App Router)
 - **Base de datos**: PostgreSQL 16 (Docker)
 - **ORM**: Prisma 7 con adapter `@prisma/adapter-pg`
-- **Testing**: Jest + @swc/jest (92 tests, 14 suites)
+- **Testing**: Jest + @swc/jest (93 tests, 14 suites) + Cypress (E2E)
+- **Frontend**: UI de gestión de reservas en `/agenda` preparada para tests E2E (`data-cy`)
 - **CI**: GitHub Actions
 - **Code Review**: CodeRabbit (AI)
 
@@ -57,6 +58,8 @@ npm run dev
 | `npx prisma db seed` | Ejecuta el seed de la DB (idempotente) |
 | `npx prisma db push` | Sincroniza el schema de Prisma con la DB |
 | `npx prisma studio` | Abre el explorador de Prisma |
+| `npm run cypress:open` | Abre Cypress en modo interactivo (requiere `npm run dev`) |
+| `npm run cypress:run` | Ejecuta los tests E2E de Cypress en modo headless |
 | `docker compose up -d` | Levanta PostgreSQL |
 | `docker compose down` | Detiene PostgreSQL |
 
@@ -182,7 +185,7 @@ PendienteDeReagendar    → Confirmada (al reagendar)
 
 ### Datos de prueba (seed)
 
-El seed es idempotente: limpia los datos previos antes de insertar. Crea:
+El seed es idempotente: limpia los datos previos antes de insertar. Las fechas son **relativas a hoy** (reservas cerca de la fecha actual y bloqueos futuros), así la UI siempre muestra datos vigentes. Crea:
 
 | Tabla | Cantidad |
 |-------|----------|
@@ -190,8 +193,8 @@ El seed es idempotente: limpia los datos previos antes de insertar. Crea:
 | `usuario_administrador` | 3 |
 | `tipo_evento` | 9 |
 | `disponibilidad_semanal` | 15 |
-| `reserva` | 6 |
-| `reserva_estado_historial` | 6 |
+| `reserva` | 15 |
+| `reserva_estado_historial` | 15 |
 | `bloqueo_agenda` | 3 |
 
 ## Testing
@@ -227,16 +230,29 @@ npx jest tests/services/          # Solo services
 npx jest --no-coverage            # Sin reporte HTML
 ```
 
+### Testing E2E (Cypress)
+
+`/agenda` es la UI de gestión de reservas (toolbar, cards, detalle, confirmación y reagendado). Los componentes exponen atributos `data-cy` como anclas estables para los tests. Requiere el servidor de dev levantado:
+
+```bash
+npm run dev            # Terminal 1
+npm run cypress:open   # Terminal 2
+npm run cypress:run    # o en modo headless
+```
+
+El binario de Cypress se instala con `npm install`. En CI se fuerza `CYPRESS_INSTALL_BINARY=0` para no descargarlo (no hay tests E2E ejecutándose en CI aún).
+
 ## CI/CD
 
 ### GitHub Actions
 
-Al abrir un PR:
-1. Checkout + instalar dependencias
+Al abrir un PR (workflow `.github/workflows/ci.yml`):
+1. Checkout + `npm ci` (sin descargar binario de Cypress)
 2. `prisma generate`
-3. `npx prisma db push` (DB de test)
-4. `npm test`
-5. Publicar reporte HTML en GitHub Pages
+3. `prisma migrate deploy` contra `agendaya`
+4. Crear `agendaya_test` + `prisma migrate deploy` contra esa DB
+5. `npm test` (con `continue-on-error`)
+6. Publicar reporte HTML en GitHub Pages
 
 ### CodeRabbit
 
