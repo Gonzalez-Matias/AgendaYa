@@ -743,7 +743,6 @@ describe("consultarDisponibilidad", () => {
     proximoMartes.setHours(0, 0, 0, 0);
 
     const fechaConsultada = new Date(proximoMartes.toISOString().slice(0, 10) + "T00:00:00.000Z");
-    const fechaEsperada = fechaConsultada.toISOString().slice(0, 10);
 
     const resultado = await consultarDisponibilidad({
       tipoEventoId: tipoEvento.id,
@@ -751,8 +750,15 @@ describe("consultarDisponibilidad", () => {
       fechaHasta: fechaConsultada,
     });
 
+    // Las aserciones usan componentes locales para funcionar en cualquier zona horaria (CI corre en UTC).
+    const dia = new Date(resultado[0].fecha);
     expect(resultado).toHaveLength(1);
-    expect(resultado[0].fecha.toISOString()).toBe(`${fechaEsperada}T03:00:00.000Z`);
-    expect(resultado[0].slots[0].inicio.toISOString()).toBe(`${fechaEsperada}T11:00:00.000Z`);
+    expect(dia.getFullYear()).toBe(proximoMartes.getFullYear());
+    expect(dia.getMonth()).toBe(proximoMartes.getMonth());
+    expect(dia.getDate()).toBe(proximoMartes.getDate());
+
+    const slotInicio = new Date(resultado[0].slots[0].inicio);
+    expect(slotInicio.getHours()).toBe(8);
+    expect(slotInicio.getMinutes()).toBe(0);
   });
 });
