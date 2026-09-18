@@ -47,3 +47,6 @@ src/generated/
 
 # docuemntation
 /documents
+
+test-report.html
+coverage/

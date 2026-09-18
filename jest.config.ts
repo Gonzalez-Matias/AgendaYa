@@ -1,6 +1,7 @@
 import type { Config } from "jest";
 
 const config: Config = {
+  setupFiles: ["<rootDir>/tests/setup.ts"],
   testMatch: ["<rootDir>/tests/**/*.test.ts"],
   transform: {
     "^.+\\.(ts|js|mjs)$": "@swc/jest",
@@ -13,6 +14,20 @@ const config: Config = {
   },
   verbose: true,
   testTimeout: 30000,
+  reporters: [
+    'default',
+    ['jest-html-reporter', {
+      pageTitle: 'AgendaYa - Test Report',
+      outputPath: './test-report.html',
+      includeFailureMsg: true,
+      includeSuiteFailure: true,
+      dateFormat: 'dd-mm-yyyy HH:MM:ss',
+      sort: 'status',
+      hidePassed: false,
+      hidePending: false,
+      hideSkipped: false,
+    }]
+  ],
 };
 
 export default config;

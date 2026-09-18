@@ -6,6 +6,14 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
+  // Limpiar datos previos en orden de FK (hijos primero)
+  await prisma.reservaEstadoHistorial.deleteMany();
+  await prisma.reserva.deleteMany();
+  await prisma.bloqueoAgenda.deleteMany();
+  await prisma.disponibilidadSemanal.deleteMany();
+  await prisma.tipoEvento.deleteMany();
+  await prisma.usuarioAdministrador.deleteMany();
+
   // ── EstadoReserva (5 registros) ──────────────────────────────────────────
   const estadoPendienteConfirmacion = await prisma.estadoReserva.upsert({
     where: { nombre: "PendienteDeConfirmacion" },
@@ -36,23 +44,20 @@ async function main() {
   console.log("✓ Estados de reserva creados");
 
   // ── UsuarioAdministrador (3 registros) ───────────────────────────────────
-  const admin1 = await prisma.usuarioAdministrador.create({
-    data: {
-      email: "maria.garcia@agendaya.com",
-      nombre: "María García",
-    },
+  const admin1 = await prisma.usuarioAdministrador.upsert({
+    where: { email: "maria.garcia@agendaya.com" },
+    update: {},
+    create: { email: "maria.garcia@agendaya.com", nombre: "María García" },
   });
-  const admin2 = await prisma.usuarioAdministrador.create({
-    data: {
-      email: "carlos.lopez@agendaya.com",
-      nombre: "Carlos López",
-    },
+  const admin2 = await prisma.usuarioAdministrador.upsert({
+    where: { email: "carlos.lopez@agendaya.com" },
+    update: {},
+    create: { email: "carlos.lopez@agendaya.com", nombre: "Carlos López" },
   });
-  const admin3 = await prisma.usuarioAdministrador.create({
-    data: {
-      email: "ana.martinez@agendaya.com",
-      nombre: "Ana Martínez",
-    },
+  const admin3 = await prisma.usuarioAdministrador.upsert({
+    where: { email: "ana.martinez@agendaya.com" },
+    update: {},
+    create: { email: "ana.martinez@agendaya.com", nombre: "Ana Martínez" },
   });
 
   console.log("✓ Administradores creados");
@@ -94,23 +99,19 @@ async function main() {
 
   console.log("✓ Disponibilidades semanales creadas");
 
-  // ── Reserva (6 registros, 2 por admin) ───────────────────────────────────
+  // ── Reserva (15 registros, relativos a hoy) ─────────────────────────────
   const ahora = new Date();
-  const manana = new Date(ahora);
-  manana.setDate(ahora.getDate() + 1);
-  manana.setHours(10, 0, 0, 0);
-  const pasadoManana = new Date(ahora);
-  pasadoManana.setDate(ahora.getDate() + 2);
-  pasadoManana.setHours(14, 0, 0, 0);
-  const enUnaSemana = new Date(ahora);
-  enUnaSemana.setDate(ahora.getDate() + 7);
-  enUnaSemana.setHours(9, 0, 0, 0);
-  const enDosSemanas = new Date(ahora);
-  enDosSemanas.setDate(ahora.getDate() + 14);
-  enDosSemanas.setHours(11, 0, 0, 0);
-  const enTresSemanas = new Date(ahora);
-  enTresSemanas.setDate(ahora.getDate() + 21);
-  enTresSemanas.setHours(15, 0, 0, 0);
+  const fechaRelativa = (dias: number, horas: number, minutos = 0): Date => {
+    const d = new Date(ahora);
+    d.setDate(ahora.getDate() + dias);
+    d.setHours(horas, minutos, 0, 0);
+    return d;
+  };
+  const manana = fechaRelativa(1, 10);
+  const pasadoManana = fechaRelativa(2, 14);
+  const enUnaSemana = fechaRelativa(7, 9);
+  const enDosSemanas = fechaRelativa(14, 11);
+  const enTresSemanas = fechaRelativa(21, 15);
 
   const reservaData = [
     // Admin 1
@@ -120,8 +121,18 @@ async function main() {
     { fechaHoraInicio: enUnaSemana, duracion: 90, nombreInvitado: "Pedro Gómez", emailInvitado: "pedro.gomez@email.com", telefonoInvitado: "+5491155559012", notaInvitado: "Traer documentación", tipoEventoId: tiposEvento[3].id, administradorId: admin2.id, estadoReservaId: estadoConfirmada.id },
     { fechaHoraInicio: enDosSemanas, duracion: 120, nombreInvitado: "Sofía Ruiz", emailInvitado: "sofia.ruiz@email.com", telefonoInvitado: null, notaInvitado: "Auditoría anual", tipoEventoId: tiposEvento[4].id, administradorId: admin2.id, estadoReservaId: estadoCancelada.id },
     // Admin 3
-    { fechaHoraInicio: enTresSemanas, duracion: 180, nombreInvitado: "Martín Díaz", emailInvitado: "martin.diaz@email.com", telefonoInvitado: "+5491155553456", notaInvitado: "Workshop de React", tipoEventoId: tiposEvento[6].id, administradorId: admin3.id, estadoReservaId: estadoPendienteReagendar.id },
+    { fechaHoraInicio: fechaRelativa(6, 15), duracion: 180, nombreInvitado: "Martín Díaz", emailInvitado: "martin.diaz@email.com", telefonoInvitado: "+5491155553456", notaInvitado: "Workshop de React", tipoEventoId: tiposEvento[6].id, administradorId: admin3.id, estadoReservaId: estadoPendienteReagendar.id },
     { fechaHoraInicio: new Date(enTresSemanas.getTime() + 86400000), duracion: 45, nombreInvitado: "Lucía Fernández", emailInvitado: "lucia.fernandez@email.com", telefonoInvitado: "+5491155557890", notaInvitado: null, tipoEventoId: tiposEvento[7].id, administradorId: admin3.id, estadoReservaId: estadoConfirmada.id },
+    // Admin 3 (Ana Martínez) - Reservas cercanas a hoy (1 por estado) ──────
+    { fechaHoraInicio: fechaRelativa(1, 10), duracion: 180, nombreInvitado: "Augusto Reyes", emailInvitado: "augusto.reyes@email.com", telefonoInvitado: "+5491166661111", notaInvitado: "Workshop de la semana", tipoEventoId: tiposEvento[6].id, administradorId: admin3.id, estadoReservaId: estadoPendienteConfirmacion.id },
+    { fechaHoraInicio: fechaRelativa(2, 14), duracion: 45, nombreInvitado: "Brenda López", emailInvitado: "brenda.lopez@email.com", telefonoInvitado: "+5491166662222", notaInvitado: "Mentoría pendiente de reagendar", tipoEventoId: tiposEvento[7].id, administradorId: admin3.id, estadoReservaId: estadoPendienteReagendar.id },
+    { fechaHoraInicio: fechaRelativa(3, 10), duracion: 180, nombreInvitado: "Carlos Méndez", emailInvitado: "carlos.mendez@email.com", telefonoInvitado: "+5491166663333", notaInvitado: null, tipoEventoId: tiposEvento[6].id, administradorId: admin3.id, estadoReservaId: estadoConfirmada.id },
+    { fechaHoraInicio: fechaRelativa(4, 11), duracion: 60, nombreInvitado: "Diana Torres", emailInvitado: "diana.torres@email.com", telefonoInvitado: "+5491166664444", notaInvitado: "Evaluación cancelada", tipoEventoId: tiposEvento[8].id, administradorId: admin3.id, estadoReservaId: estadoCancelada.id },
+    { fechaHoraInicio: fechaRelativa(4, 9), duracion: 180, nombreInvitado: "Fernando García", emailInvitado: "fernando.garcia@email.com", telefonoInvitado: "+5491166666000", notaInvitado: "Workshop matutino", tipoEventoId: tiposEvento[6].id, administradorId: admin3.id, estadoReservaId: estadoConfirmada.id },
+    { fechaHoraInicio: fechaRelativa(5, 13), duracion: 45, nombreInvitado: "Gabriela Rojas", emailInvitado: "gabriela.rojas@email.com", telefonoInvitado: "+5491166667000", notaInvitado: null, tipoEventoId: tiposEvento[7].id, administradorId: admin3.id, estadoReservaId: estadoPendienteConfirmacion.id },
+    { fechaHoraInicio: fechaRelativa(5, 14), duracion: 60, nombreInvitado: "Hugo Castillo", emailInvitado: "hugo.castillo@email.com", telefonoInvitado: "+5491166668000", notaInvitado: "Evaluación de desempeño", tipoEventoId: tiposEvento[8].id, administradorId: admin3.id, estadoReservaId: estadoCompletada.id },
+    { fechaHoraInicio: fechaRelativa(5, 18), duracion: 180, nombreInvitado: "Irene Morales", emailInvitado: "irene.morales@email.com", telefonoInvitado: "+5491166669000", notaInvitado: "Workshop vespertino", tipoEventoId: tiposEvento[6].id, administradorId: admin3.id, estadoReservaId: estadoPendienteReagendar.id },
+    { fechaHoraInicio: fechaRelativa(7, 15), duracion: 45, nombreInvitado: "Eduardo Paz", emailInvitado: "eduardo.paz@email.com", telefonoInvitado: "+5491166665555", notaInvitado: "Mentoría completada", tipoEventoId: tiposEvento[7].id, administradorId: admin3.id, estadoReservaId: estadoCompletada.id },
   ];
 
   const reservas = [];
@@ -140,6 +151,16 @@ async function main() {
     { reservaId: reservas[3].id, estadoReservaId: estadoCancelada.id, motivo: "Cancelada por el invitado" },
     { reservaId: reservas[4].id, estadoReservaId: estadoPendienteReagendar.id, motivo: "Horario no disponible" },
     { reservaId: reservas[5].id, estadoReservaId: estadoConfirmada.id, motivo: "Confirmación automática" },
+    // ── Historial agosto ─────────────────────────────────────────────────
+    { reservaId: reservas[6].id, estadoReservaId: estadoPendienteConfirmacion.id, motivo: "Reserva creada" },
+    { reservaId: reservas[7].id, estadoReservaId: estadoPendienteReagendar.id, motivo: "Horario no disponible" },
+    { reservaId: reservas[8].id, estadoReservaId: estadoConfirmada.id, motivo: "Confirmación automática" },
+    { reservaId: reservas[9].id, estadoReservaId: estadoCancelada.id, motivo: "Cancelada por el invitado" },
+    { reservaId: reservas[10].id, estadoReservaId: estadoCompletada.id, motivo: "Reunión finalizada" },
+    { reservaId: reservas[11].id, estadoReservaId: estadoConfirmada.id, motivo: "Confirmación automática" },
+    { reservaId: reservas[12].id, estadoReservaId: estadoPendienteConfirmacion.id, motivo: "Reserva creada" },
+    { reservaId: reservas[13].id, estadoReservaId: estadoCompletada.id, motivo: "Evaluación finalizada" },
+    { reservaId: reservas[14].id, estadoReservaId: estadoPendienteReagendar.id, motivo: "Horario no disponible" },
   ];
 
   await prisma.reservaEstadoHistorial.createMany({ data: historialData });
@@ -167,6 +188,9 @@ async function main() {
 
   const bloqueosData = [
     { fechaInicio: inicioSemana, fechaFin: finSemana, motivo: "Almuerzo", administradorId: admin1.id },
+    // Datos controlados para probar cantidades concretas de slots de María.
+    { fechaInicio: fechaRelativa(12, 8, 0), fechaFin: fechaRelativa(12, 16, 15), motivo: "Bloqueo de prueba - quedan 3 slots", administradorId: admin1.id },
+    { fechaInicio: fechaRelativa(13, 8, 0), fechaFin: fechaRelativa(13, 15, 15), motivo: "Bloqueo de prueba - quedan 7 slots", administradorId: admin1.id },
     { fechaInicio: proximoViernes, fechaFin: finViernes, motivo: "Reunión interna de equipo", administradorId: admin2.id },
     { fechaInicio: proximoLunes, fechaFin: finLunes, motivo: "Mantenimiento de sistemas", administradorId: admin3.id },
   ];
