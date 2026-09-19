@@ -95,6 +95,7 @@ export function ReagendarModal({
   const [confirmando, setConfirmando] = useState(false);
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState("");
+  const [exito, setExito] = useState("");
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const d = new Date(fechaActual);
     return d.getMonth();
@@ -190,13 +191,20 @@ export function ReagendarModal({
         }),
       });
       if (res.ok) {
+        // CP-US010-001: se muestra el mensaje de éxito antes de cerrar el modal.
+        const data = await res.json().catch(() => null);
+        setConfirmando(false);
+        setExito(data?.data?.mensaje ?? "¡La reserva se re-agendó con éxito!");
         onAction?.();
-        onClose();
+        setTimeout(onClose, 1500);
       } else {
+        // CP-US010-002: se cierra la confirmación para que el error sea visible.
         const data = await res.json();
+        setConfirmando(false);
         setError(data.error || "Error al reagendar");
       }
     } catch {
+      setConfirmando(false);
       setError("Error al reagendar");
     } finally {
       setProcesando(false);
@@ -385,6 +393,26 @@ export function ReagendarModal({
               >
                 Confirmar Cambios
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {exito && (
+        <div className={styles.confirmOverlay} data-cy="reagendar-exito-overlay">
+          <div className={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.confirmHeader}>
+              <div className={styles.confirmIcon}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="#54647A" strokeWidth="2" />
+                  <path d="M8 12l3 3 5-5" stroke="#54647A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <span className={styles.confirmTitle}>Cambio confirmado</span>
+            </div>
+
+            <div className={styles.confirmInfo}>
+              <div className={styles.confirmText} data-cy="reagendar-exito">{exito}</div>
             </div>
           </div>
         </div>
