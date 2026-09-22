@@ -7,7 +7,9 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
@@ -27,11 +29,16 @@
     "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cypress": "^16.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.19",
     "jest": "^30.4.2",
     "jest-html-reporter": "^4.4.0",
+    "mochawesome": "^8.1.1",
+    "mochawesome-merge": "^4.4.1",
+    "mochawesome-report-generator": "^6.3.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^9.1.0"
   }
 }

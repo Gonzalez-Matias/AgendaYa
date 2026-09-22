@@ -27,6 +27,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/agendaya?schema=public
+      CYPRESS_INSTALL_BINARY: 0
 
     steps:
       - name: Checkout código
@@ -47,31 +48,152 @@ jobs:
       - name: Correr migraciones
         run: npx prisma migrate deploy
 
+      - name: Crear base de datos de test
+        run: |
+          node -e "const { Client } = require('pg'); const c = new Client({ connectionString: 'postgresql://postgres:postgres@localhost:5432/postgres' }); (async () => { await c.connect(); try { await c.query('CREATE DATABASE agendaya_test'); console.log('DB agendaya_test creada'); } catch (e) { if (!/already exists/i.test(e.message)) throw e; console.log('DB agendaya_test ya existía'); } finally { await c.end(); } })()"
+
+      - name: Correr migraciones en la base de test
+        run: DATABASE_URL="postgresql://postgres:postgres@localhost:5432/agendaya_test?schema=public" npx prisma migrate deploy
+
       - name: Correr tests
         id: tests
         run: npm test
         continue-on-error: true
 
-      - name: Generar reporte HTML
-        run: |
-          if [ -f test-report.html ]; then
-            echo "✅ Reporte generado correctamente"
-          else
-            echo "⚠️ No se generó el reporte"
-          fi
-
       - name: Subir reporte como artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-report
+          name: unit-test-report
           path: test-report.html
           if-no-files-found: ignore
+
+      - name: Fallar el workflow si los tests fallaron
+        if: steps.tests.outcome != 'success'
+        run: exit 1
+
+  e2e:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: agendaya
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/agendaya?schema=public
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Generar Prisma Client
+        run: npx prisma generate
+
+      - name: Correr migraciones
+        run: npx prisma migrate deploy
+
+      - name: Semillar base de datos
+        run: npx prisma db seed
+
+      - name: Iniciar aplicación en background
+        run: npm run dev &
+
+      - name: Esperar que la app esté lista
+        run: npx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Ejecutar tests E2E con Cypress
+        uses: cypress-io/github-action@v6
+        with:
+          install: false
+          wait-on: false
+
+      - name: Generar reporte HTML de E2E
+        if: always()
+        run: |
+          npx mochawesome-merge "cypress/reports/*.json" > cypress/reports/e2e-report.json
+          npx marge cypress/reports/e2e-report.json --reportDir ./cypress/reports --inline
+
+      - name: Subir screenshots si falla
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+
+      - name: Subir reporte E2E como artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-report
+          path: cypress/reports/e2e-report.html
+          if-no-files-found: ignore
+
+  publish:
+    needs: [test, e2e]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Download unit test report
+        uses: actions/download-artifact@v4
+        with:
+          name: unit-test-report
+          path: reports
+        continue-on-error: true
+
+      - name: Download E2E test report
+        uses: actions/download-artifact@v4
+        with:
+          name: e2e-test-report
+          path: reports
+        continue-on-error: true
+
+      - name: Download E2E screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: reports/screenshots
+        continue-on-error: true
+
+      - name: Preparar carpeta para publicar
+        run: |
+          mkdir -p pages-deploy
+          if [ -f reports/test-report.html ]; then
+            cp reports/test-report.html pages-deploy/
+          fi
+          if [ -f reports/e2e-report.html ]; then
+            cp reports/e2e-report.html pages-deploy/
+          fi
+          if [ -d reports/screenshots ]; then
+            cp -r reports/screenshots pages-deploy/
+          fi
 
       - name: Publicar reporte en GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
+          publish_dir: ./pages-deploy
           destination_dir: test-reports
           keep_files: true
           publish_branch: gh-pages
@@ -80,27 +202,28 @@ jobs:
       - name: Agregar resumen al workflow
         if: always()
         run: |
-          echo "## 📊 Resultados de Tests" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 Resultados de Testing" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
-          if [ -f test-report.html ]; then
-            echo "✅ **Reporte generado exitosamente**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### 📥 Descargar reporte" >> $GITHUB_STEP_SUMMARY
-            echo "El reporte HTML está disponible en la sección **Artifacts** de esta ejecución." >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### 📈 Ver reporte en línea" >> $GITHUB_STEP_SUMMARY
-            echo "Si se configuró GitHub Pages, el reporte estará disponible en:" >> $GITHUB_STEP_SUMMARY
-            echo "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/test-reports/test-report.html" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f pages-deploy/test-report.html ]; then
+            echo "### ✅ Tests Unitarios" >> $GITHUB_STEP_SUMMARY
+            echo "- 📈 [Ver reporte en línea](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/test-reports/test-report.html)" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ **No se generó el reporte**" >> $GITHUB_STEP_SUMMARY
+            echo "### ❌ Tests Unitarios" >> $GITHUB_STEP_SUMMARY
+            echo "- No se generó el reporte" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f pages-deploy/e2e-report.html ]; then
+            echo "### ✅ Tests E2E (Cypress)" >> $GITHUB_STEP_SUMMARY
+            echo "- 📈 [Ver reporte en línea](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/test-reports/e2e-report.html)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Tests E2E (Cypress)" >> $GITHUB_STEP_SUMMARY
+            echo "- No se generó el reporte" >> $GITHUB_STEP_SUMMARY
+          fi
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🔗 Enlaces útiles" >> $GITHUB_STEP_SUMMARY
           echo "- [Ver ejecución](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
           echo "- [Ver código](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
-
-      - name: Fallar el workflow si los tests fallaron
-        if: steps.tests.outcome != 'success'
-        run: exit 1
