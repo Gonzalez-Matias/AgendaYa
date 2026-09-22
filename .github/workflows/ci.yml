@@ -129,8 +129,9 @@ jobs:
       - name: Generar reporte HTML de E2E
         if: always()
         run: |
-          npx mochawesome-merge "cypress/reports/*.json" > cypress/reports/e2e-report.json
-          npx marge cypress/reports/e2e-report.json --reportDir ./cypress/reports --inline
+          npx mochawesome-merge "cypress/reports/mochawesome*.json" > cypress/reports/merged.json
+          npx marge cypress/reports/merged.json --reportDir ./cypress/reports --inline
+          mv cypress/reports/merged.html cypress/reports/e2e-report.html
 
       - name: Subir screenshots si falla
         if: failure()
