@@ -9,5 +9,12 @@ export default defineConfig({
     screenshotOnRunFailure: true,
     viewportWidth: 1440,
     viewportHeight: 900,
+    reporter: "mochawesome",
+    reporterOptions: {
+      reportDir: "cypress/reports",
+      overwrite: false,
+      html: true,
+      json: true,
+    },
   },
 });
