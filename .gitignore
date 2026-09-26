@@ -50,3 +50,8 @@ src/generated/
 
 test-report.html
 coverage/
+
+# cypress
+cypress/reports/
+cypress/screenshots/
+cypress/videos/
