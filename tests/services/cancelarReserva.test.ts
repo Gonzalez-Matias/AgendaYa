@@ -92,9 +92,93 @@ describe("cancelarReserva", () => {
     ).rejects.toThrow("La reserva ya está cancelada");
   });
 
+  it("debería lanzar un error si el estado Cancelada no está configurado", async () => {
+    const admin = await prisma.usuarioAdministrador.create({
+      data: { email: "test2@test.com", nombre: "Test Admin 2" },
+    });
+
+    const tipoEvento = await prisma.tipoEvento.create({
+      data: {
+        nombre: "Consulta",
+        duracion: 60,
+        antelacionMinima: 1,
+        administradorId: admin.id,
+      },
+    });
+
+    const estadoConfirmada = await prisma.estadoReserva.create({
+      data: { nombre: "Confirmada" },
+    });
+
+    const reserva = await prisma.reserva.create({
+      data: {
+        fechaHoraInicio: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        duracion: 60,
+        nombreInvitado: "Laura Silva",
+        emailInvitado: "laura@email.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+        estadoReservaId: estadoConfirmada.id,
+      },
+    });
+
+    await expect(
+      cancelarReserva({ reservaId: reserva.id, motivo: "Intento sin Cancelada" })
+    ).rejects.toThrow("Estado Cancelada no encontrado en la base de datos");
+  });
+
   it("debería lanzar un error si la reserva no existe", async () => {
     await expect(
       cancelarReserva({ reservaId: 99999, motivo: "No existe" })
     ).rejects.toThrow("Reserva no encontrada");
+  });
+
+  it("debería rechazar si adminId no coincide con el dueño", async () => {
+    const admin = await prisma.usuarioAdministrador.create({
+      data: { email: "test@test.com", nombre: "Test Admin" },
+    });
+    const otroAdmin = await prisma.usuarioAdministrador.create({
+      data: { email: "otro@test.com", nombre: "Otro Admin" },
+    });
+    const tipoEvento = await prisma.tipoEvento.create({
+      data: { nombre: "Reunión", duracion: 30, antelacionMinima: 1, administradorId: admin.id },
+    });
+    const estado = await prisma.estadoReserva.create({ data: { nombre: "Confirmada" } });
+    await prisma.estadoReserva.create({ data: { nombre: "Cancelada" } });
+
+    const reserva = await prisma.reserva.create({
+      data: {
+        fechaHoraInicio: new Date(Date.now() + 86400000), duracion: 30,
+        nombreInvitado: "Juan", emailInvitado: "juan@email.com",
+        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
+      },
+    });
+
+    await expect(
+      cancelarReserva({ reservaId: reserva.id, adminId: otroAdmin.id })
+    ).rejects.toThrow("No autorizado");
+  });
+
+  it("debería permitir cancelar cuando adminId coincide con el dueño", async () => {
+    const admin = await prisma.usuarioAdministrador.create({
+      data: { email: "test@test.com", nombre: "Test Admin" },
+    });
+    const tipoEvento = await prisma.tipoEvento.create({
+      data: { nombre: "Reunión", duracion: 30, antelacionMinima: 1, administradorId: admin.id },
+    });
+    const estado = await prisma.estadoReserva.create({ data: { nombre: "Confirmada" } });
+    await prisma.estadoReserva.create({ data: { nombre: "Cancelada" } });
+
+    const reserva = await prisma.reserva.create({
+      data: {
+        fechaHoraInicio: new Date(Date.now() + 86400000), duracion: 30,
+        nombreInvitado: "Juan", emailInvitado: "juan@email.com",
+        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
+      },
+    });
+
+    await cancelarReserva({ reservaId: reserva.id, adminId: admin.id });
+    const actualizada = await prisma.reserva.findUnique({ where: { id: reserva.id }, include: { estadoReserva: true } });
+    expect(actualizada?.estadoReserva.nombre).toBe("Cancelada");
   });
 });

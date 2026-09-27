@@ -44,3 +44,14 @@ next-env.d.ts
 
 # prisma generated client
 src/generated/
+
+# docuemntation
+/documents
+
+test-report.html
+coverage/
+
+# cypress
+cypress/reports/
+cypress/screenshots/
+cypress/videos/

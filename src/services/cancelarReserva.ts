@@ -8,6 +8,7 @@ import {
 const CancelarReservaInputSchema = z.object({
   reservaId: z.number().int().positive(),
   motivo: z.string().trim().min(1).optional(),
+  adminId: z.number().int().positive().optional(),
 });
 
 type CancelarReservaInput = z.infer<typeof CancelarReservaInputSchema>;
@@ -17,11 +18,15 @@ type CancelarReservaInput = z.infer<typeof CancelarReservaInputSchema>;
  * Lanza un error si la reserva no existe o ya está cancelada.
  */
 export async function cancelarReserva(input: CancelarReservaInput) {
-  const { reservaId } = CancelarReservaInputSchema.parse(input);
+  const { reservaId, motivo, adminId } = CancelarReservaInputSchema.parse(input);
 
   const reserva = await obtenerReservaPorId(reservaId);
   if (!reserva) {
     throw new Error("Reserva no encontrada");
+  }
+
+  if (adminId && reserva.administradorId !== adminId) {
+    throw new Error("No autorizado: la reserva no pertenece a este administrador");
   }
 
   const estadoCancelada = await obtenerEstadoPorNombre("Cancelada");
@@ -29,9 +34,9 @@ export async function cancelarReserva(input: CancelarReservaInput) {
     throw new Error("Estado Cancelada no encontrado en la base de datos");
   }
 
-  const count = await cancelarReservaAtomica(reservaId, estadoCancelada.id);
+  const exito = await cancelarReservaAtomica(reservaId, estadoCancelada.id, motivo);
 
-  if (count === 0) {
+  if (!exito) {
     throw new Error("La reserva ya está cancelada");
   }
 }

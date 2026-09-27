@@ -20,11 +20,6 @@ const Schema = z.object({
   fechaHasta: z.date(),
 });
 
-/**
- * Determines if two time intervals overlap.
- *
- * @returns `true` if the intervals overlap, `false` otherwise.
- */
 function haySuperposicion(
   slotInicio: Date,
   slotFin: Date,
@@ -34,28 +29,17 @@ function haySuperposicion(
   return slotInicio < objFin && slotFin > objInicio;
 }
 
-/**
- * Creates a Date with the specified day and time of day in minutes from midnight.
- *
- * @param dia - The day to use for the resulting Date.
- * @param minutos - The time of day in minutes from midnight (UTC).
- * @returns A new Date with the specified day and UTC time set to the given minute offset.
- */
 function minutosAFecha(dia: Date, minutos: number): Date {
   const resultado = new Date(dia);
-  resultado.setUTCHours(Math.floor(minutos / 60), minutos % 60, 0, 0);
+  resultado.setHours(Math.floor(minutos / 60), minutos % 60, 0, 0);
   return resultado;
 }
 
-/**
- * Queries available booking slots for an event type within a date range.
- *
- * Validates the input, retrieves the event type configuration and administrator's availability schedule, then generates available time slots by excluding times before the minimum lead requirement, overlapping reservations, and blocked periods.
- *
- * @throws Throws an error if the date range exceeds 30 days.
- * @throws Throws an error if the event type is not found.
- * @returns An array of days with available time slots for the specified period.
- */
+function inicioDiaCalendario(fecha: Date): Date {
+  // Las fechas de la API representan días del calendario; los horarios se calculan en la zona local.
+  return new Date(fecha.getUTCFullYear(), fecha.getUTCMonth(), fecha.getUTCDate());
+}
+
 export async function consultarDisponibilidad(
   input: ConsultarDisponibilidadInput
 ): Promise<DiaDisponible[]> {
@@ -78,11 +62,10 @@ export async function consultarDisponibilidad(
 
   const disponibilidades = await findDisponibilidadAdmin(administradorId);
 
-  const primerDia = new Date(datos.fechaDesde);
-  primerDia.setUTCHours(0, 0, 0, 0);
-  const ultimoDia = new Date(datos.fechaHasta);
-  ultimoDia.setUTCHours(0, 0, 0, 0);
-  ultimoDia.setUTCDate(ultimoDia.getUTCDate() + 1);
+  const primerDia = inicioDiaCalendario(datos.fechaDesde);
+  const ultimoDiaConsultado = inicioDiaCalendario(datos.fechaHasta);
+  const ultimoDia = new Date(ultimoDiaConsultado);
+  ultimoDia.setDate(ultimoDia.getDate() + 1);
 
   const reservas = await findReservasEnRango(
     administradorId,
@@ -107,29 +90,30 @@ export async function consultarDisponibilidad(
 
   const ahora = new Date();
   const fechaMinima = new Date(ahora);
-  fechaMinima.setUTCHours(fechaMinima.getUTCHours() + antelacionMinima);
+  fechaMinima.setHours(fechaMinima.getHours() + antelacionMinima);
 
   const resultado: DiaDisponible[] = [];
-  const diaActual = new Date(datos.fechaDesde);
+  const diaActual = new Date(primerDia);
 
-  while (diaActual <= datos.fechaHasta) {
-    const diaSemana = diaActual.getUTCDay();
+  while (diaActual <= ultimoDiaConsultado) {
+    const diaSemana = diaActual.getDay();
     const disps = dispMap.get(diaSemana);
 
     if (!disps || disps.length === 0) {
       resultado.push({ fecha: new Date(diaActual), slots: [] });
-      diaActual.setUTCDate(diaActual.getUTCDate() + 1);
+      diaActual.setDate(diaActual.getDate() + 1);
       continue;
     }
 
     const diaInicio = new Date(diaActual);
-    diaInicio.setUTCHours(0, 0, 0, 0);
+    diaInicio.setHours(0, 0, 0, 0);
     const diaFin = new Date(diaActual);
-    diaFin.setUTCHours(24, 0, 0, 0);
+    diaFin.setHours(24, 0, 0, 0);
 
-    const reservasDelDia = reservas.filter(
-      (r) => r.fechaHoraInicio >= diaInicio && r.fechaHoraInicio < diaFin
-    );
+    const reservasDelDia = reservas.filter((r) => {
+      const rFin = new Date(r.fechaHoraInicio.getTime() + r.duracion * 60000);
+      return r.fechaHoraInicio < diaFin && rFin > diaInicio;
+    });
     const bloqueosDelDia = bloqueos.filter(
       (b) => b.fechaInicio < diaFin && b.fechaFin > diaInicio
     );
@@ -153,7 +137,7 @@ export async function consultarDisponibilidad(
 
         const superponeConReserva = reservasDelDia.some((r) => {
           const rFin = new Date(r.fechaHoraInicio);
-          rFin.setUTCMinutes(rFin.getUTCMinutes() + r.duracion);
+          rFin.setMinutes(rFin.getMinutes() + r.duracion);
           return haySuperposicion(slotInicio, slotFin, r.fechaHoraInicio, rFin);
         });
         if (superponeConReserva) continue;
@@ -168,7 +152,7 @@ export async function consultarDisponibilidad(
     }
 
     resultado.push({ fecha: new Date(diaActual), slots });
-    diaActual.setUTCDate(diaActual.getUTCDate() + 1);
+    diaActual.setDate(diaActual.getDate() + 1);
   }
 
   return resultado;
