@@ -1,3 +1,5 @@
+/// <reference types="node" />
+import { exec } from "node:child_process";
 import { defineConfig } from "cypress";
 
 export default defineConfig({
@@ -15,6 +17,23 @@ export default defineConfig({
       overwrite: false,
       html: true,
       json: true,
+    },
+    setupNodeEvents(on) {
+      // Cypress 16 eliminó cy.exec(): las tareas de Node se exponen vía cy.task().
+      // Permite que un spec siembre la base para garantizar sus precondiciones.
+      on("task", {
+        seedDatabase() {
+          return new Promise((resolve, reject) => {
+            exec("npx prisma db seed", { timeout: 120000 }, (error, stdout) => {
+              if (error) {
+                reject(error);
+                return;
+              }
+              resolve(stdout);
+            });
+          });
+        },
+      });
     },
   },
 });
