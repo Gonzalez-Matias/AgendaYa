@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { exec } from "node:child_process";
 import { defineConfig } from "cypress";
-import { seedReservasPendientes } from "./cypress/support/db";
+import { seedReservasPendientes, seedDisponibilidadEscenario } from "./cypress/support/db";
 
 export default defineConfig({
   e2e: {
@@ -17,6 +17,7 @@ export default defineConfig({
       // Permite que un spec siembre la base para garantizar sus precondiciones.
       on("task", {
         seedReservasPendientes,
+        seedDisponibilidadEscenario,
         seedDatabase() {
           return new Promise((resolve, reject) => {
             exec("npx prisma db seed", { timeout: 120000 }, (error, stdout) => {

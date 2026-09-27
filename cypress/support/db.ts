@@ -3,6 +3,18 @@ import { Client } from "pg";
 
 const FIXTURE_EMAIL = "e2e-fixture@agendaya.test";
 const ESTADO_PENDIENTE = "PendienteDeConfirmacion";
+const MARIA_EMAIL = "maria.garcia@agendaya.com";
+const TIPO_REUNION = "Reunión";
+
+interface BloqueoFixture {
+  fechaInicio: string;
+  fechaFin: string;
+  motivo?: string;
+}
+
+interface DisponibilidadFixture {
+  bloqueos?: BloqueoFixture[];
+}
 
 function connectionString(): string {
   const url = process.env.DATABASE_URL;
@@ -12,9 +24,12 @@ function connectionString(): string {
   return url;
 }
 
-function timestampLocal(fecha: Date): string {
+// Prisma guarda los DateTime como timestamp(3) en UTC, por eso el fixture
+// también debe escribir el wall-clock UTC para que las horas coincidan.
+function toDbTimestamp(valor: Date | string): string {
+  const fecha = valor instanceof Date ? valor : new Date(valor);
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${fecha.getFullYear()}-${pad(fecha.getMonth() + 1)}-${pad(fecha.getDate())} ${pad(fecha.getHours())}:${pad(fecha.getMinutes())}:00`;
+  return `${fecha.getUTCFullYear()}-${pad(fecha.getUTCMonth() + 1)}-${pad(fecha.getUTCDate())} ${pad(fecha.getUTCHours())}:${pad(fecha.getUTCMinutes())}:${pad(fecha.getUTCSeconds())}`;
 }
 
 async function withClient<T>(fn: (client: Client) => Promise<T>): Promise<T> {
@@ -71,6 +86,103 @@ async function asegurarTipoEvento(client: Client, adminId: number): Promise<numb
 }
 
 /**
+ * Busca un administrador por email o lo crea si no existe.
+ */
+async function obtenerOCrearAdminPorEmail(
+  client: Client,
+  email: string,
+  nombre: string
+): Promise<number> {
+  const { rows } = await client.query<{ id: number }>(
+    `SELECT id FROM usuario_administrador WHERE email = $1`,
+    [email]
+  );
+  if (rows.length > 0) return rows[0].id;
+
+  const insert = await client.query<{ id: number }>(
+    `INSERT INTO usuario_administrador (email, nombre, "updatedAt")
+     VALUES ($1, $2, now()) RETURNING id`,
+    [email, nombre]
+  );
+  return insert.rows[0].id;
+}
+
+/**
+ * Asegura el tipo de evento "Reunión" (30 min, antelación 1h, activo,
+ * confirmación automática) del admin.
+ */
+async function asegurarTipoEventoReunion(client: Client, adminId: number): Promise<number> {
+  const { rows } = await client.query<{ id: number }>(
+    `SELECT id FROM tipo_evento WHERE "administradorId" = $1 AND nombre = $2 LIMIT 1`,
+    [adminId, TIPO_REUNION]
+  );
+
+  if (rows.length > 0) {
+    await client.query(
+      `UPDATE tipo_evento
+       SET duracion = 30, "antelacionMinima" = 1, activo = true, confirmacion = 'AUTOMATICA', "updatedAt" = now()
+       WHERE id = $1`,
+      [rows[0].id]
+    );
+    return rows[0].id;
+  }
+
+  const insert = await client.query<{ id: number }>(
+    `INSERT INTO tipo_evento (nombre, duracion, "antelacionMinima", activo, confirmacion, "updatedAt", "administradorId")
+     VALUES ($1, 30, 1, true, 'AUTOMATICA', now(), $2) RETURNING id`,
+    [TIPO_REUNION, adminId]
+  );
+  return insert.rows[0].id;
+}
+
+/**
+ * Prepara el escenario de disponibilidad de María García para M04-RF02:
+ * disponibilidad solo lunes y martes (08:00–17:00) y los bloqueos indicados.
+ * Resetea reservas, disponibilidad y bloqueos previos de María para ser determinista.
+ */
+async function seedDisponibilidadEscenario(
+  input: DisponibilidadFixture = {}
+): Promise<null> {
+  const bloqueos = input.bloqueos ?? [];
+
+  await withClient(async (client) => {
+    const adminId = await obtenerOCrearAdminPorEmail(client, MARIA_EMAIL, "María García");
+    await asegurarTipoEventoReunion(client, adminId);
+
+    await client.query(
+      `DELETE FROM reserva_estado_historial
+       WHERE "reservaId" IN (SELECT id FROM reserva WHERE "administradorId" = $1)`,
+      [adminId]
+    );
+    await client.query(`DELETE FROM reserva WHERE "administradorId" = $1`, [adminId]);
+    await client.query(
+      `DELETE FROM disponibilidad_semanal WHERE "administradorId" = $1`,
+      [adminId]
+    );
+    await client.query(
+      `DELETE FROM bloqueo_agenda WHERE "administradorId" = $1`,
+      [adminId]
+    );
+
+    await client.query(
+      `INSERT INTO disponibilidad_semanal ("diaSemana", "horaInicio", "horaFin", "administradorId")
+       VALUES (1, 480, 1020, $1), (2, 480, 1020, $1)`,
+      [adminId]
+    );
+
+    for (const bloqueo of bloqueos) {
+      await client.query(
+        `INSERT INTO bloqueo_agenda ("fechaInicio", "fechaFin", motivo, "administradorId")
+         VALUES ($1, $2, $3, $4)`,
+        [toDbTimestamp(bloqueo.fechaInicio), toDbTimestamp(bloqueo.fechaFin), bloqueo.motivo ?? null, adminId]
+      );
+    }
+  });
+
+  return null;
+}
+
+/**
  * Prepara un estado determinista para el spec de gestión de reservas:
  * dos reservas PendienteDeConfirmacion del administrador que muestra la agenda,
  * fechadas hoy para que siempre sean visibles en la vista por defecto.
@@ -102,7 +214,7 @@ async function seedReservasPendientes(): Promise<null> {
         `INSERT INTO reserva ("fechaHoraInicio", duracion, "nombreInvitado", "emailInvitado", "updatedAt", "tipoEventoId", "administradorId", "estadoReservaId")
          VALUES ($1, $2, $3, $4, now(), $5, $6, $7)`,
         [
-          timestampLocal(inicio),
+          toDbTimestamp(inicio),
           30,
           `E2E Pendiente ${hora}hs`,
           FIXTURE_EMAIL,
@@ -117,4 +229,4 @@ async function seedReservasPendientes(): Promise<null> {
   return null;
 }
 
-export { seedReservasPendientes };
+export { seedReservasPendientes, seedDisponibilidadEscenario };
