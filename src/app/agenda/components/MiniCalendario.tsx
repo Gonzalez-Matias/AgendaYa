@@ -59,12 +59,12 @@ export function MiniCalendario({ month, year, diasDisponibles, selectedDate, onS
       <div className={styles.nav}>
         <span className={styles.monthTitle}>{MESES[month]} {year}</span>
         <div className={styles.arrows}>
-          <button className={styles.arrowBtn} onClick={handlePrevMonth} type="button">
+          <button data-cy="reagendar-mes-anterior" className={styles.arrowBtn} onClick={handlePrevMonth} type="button">
             <svg width="8" height="12" viewBox="0 0 8 12" fill="none">
               <path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <button className={styles.arrowBtn} onClick={handleNextMonth} type="button">
+          <button data-cy="reagendar-mes-siguiente" className={styles.arrowBtn} onClick={handleNextMonth} type="button">
             <svg width="8" height="12" viewBox="0 0 8 12" fill="none">
               <path d="M1 1l6 5-6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
