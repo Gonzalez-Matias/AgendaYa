@@ -13,19 +13,10 @@ export default defineConfig({
     viewportWidth: 1440,
     viewportHeight: 900,
     setupNodeEvents(on) {
-      on("task", { seedReservasPendientes });
-    },
-    reporter: "mochawesome",
-    reporterOptions: {
-      reportDir: "cypress/reports",
-      overwrite: false,
-      html: true,
-      json: true,
-    },
-    setupNodeEvents(on) {
       // Cypress 16 eliminó cy.exec(): las tareas de Node se exponen vía cy.task().
       // Permite que un spec siembre la base para garantizar sus precondiciones.
       on("task", {
+        seedReservasPendientes,
         seedDatabase() {
           return new Promise((resolve, reject) => {
             exec("npx prisma db seed", { timeout: 120000 }, (error, stdout) => {
@@ -38,6 +29,13 @@ export default defineConfig({
           });
         },
       });
+    },
+    reporter: "mochawesome",
+    reporterOptions: {
+      reportDir: "cypress/reports",
+      overwrite: false,
+      html: true,
+      json: true,
     },
   },
 });
