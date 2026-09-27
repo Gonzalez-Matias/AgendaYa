@@ -58,7 +58,7 @@ export async function consultarDisponibilidad(
   const tipoEvento = await findTipoEvento(datos.tipoEventoId);
   if (!tipoEvento) throw new Error("Tipo de evento no encontrado");
 
-  const { administradorId, antelacionMinima } = tipoEvento;
+  const { administradorId, duracion, antelacionMinima } = tipoEvento;
 
   const disponibilidades = await findDisponibilidadAdmin(administradorId);
 
@@ -124,14 +124,14 @@ export async function consultarDisponibilidad(
     for (const disp of disps) {
       for (
         let min = disp.horaInicio;
-        min + INTERVALO <= disp.horaFin;
+        min + duracion <= disp.horaFin;
         min += INTERVALO
       ) {
         if (minutosVistos.has(min)) continue;
         minutosVistos.add(min);
 
         const slotInicio = minutosAFecha(diaActual, min);
-        const slotFin = minutosAFecha(diaActual, min + INTERVALO);
+        const slotFin = minutosAFecha(diaActual, min + duracion);
 
         if (slotInicio < fechaMinima) continue;
 
