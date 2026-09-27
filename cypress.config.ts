@@ -1,4 +1,5 @@
 import { defineConfig } from "cypress";
+import { seedReservasPendientes } from "./cypress/support/db";
 
 export default defineConfig({
   e2e: {
@@ -9,6 +10,9 @@ export default defineConfig({
     screenshotOnRunFailure: true,
     viewportWidth: 1440,
     viewportHeight: 900,
+    setupNodeEvents(on) {
+      on("task", { seedReservasPendientes });
+    },
     reporter: "mochawesome",
     reporterOptions: {
       reportDir: "cypress/reports",

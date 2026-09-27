@@ -8,6 +8,7 @@ describe('AgendaYA - Gestión de Reservas (M05)', () => {
   const dialogPage = new ConfirmDialogPage()
 
   beforeEach(() => {
+    cy.task('seedReservasPendientes')
     agendaPage.visit()
   })
 
