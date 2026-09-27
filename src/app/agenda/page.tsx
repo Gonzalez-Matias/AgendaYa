@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CalendarToolbar } from "./components/CalendarToolbar";
 import { CalendarioMensual } from "./components/CalendarioMensual";
 import { CalendarioSemanal } from "./components/CalendarioSemanal";
@@ -32,12 +32,7 @@ export default function AgendaPage() {
       .catch(() => setAdminId(1));
   }, []);
 
-  useEffect(() => {
-    if (!adminId) return;
-    cargarReservas();
-  }, [adminId, fechaActual, subVista, modoVista]);
-
-  async function cargarReservas() {
+  const cargarReservas = useCallback(async () => {
     setCargando(true);
     try {
       let desde: Date;
@@ -79,7 +74,12 @@ export default function AgendaPage() {
     } finally {
       setCargando(false);
     }
-  }
+  }, [adminId, fechaActual, subVista, modoVista]);
+
+  useEffect(() => {
+    if (!adminId) return;
+    cargarReservas();
+  }, [adminId, cargarReservas]);
 
   function cambiarFecha(delta: number) {
     setFechaActual((prev) => {
