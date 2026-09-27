@@ -46,10 +46,6 @@ function formatKey(day: number, month: number, year: number): string {
   return `${String(day).padStart(2, "0")}/${String(month + 1).padStart(2, "0")}/${year}`;
 }
 
-function parseSlotLabel(inicio: string, fin: string): string {
-  return `${formatearSlotHora(inicio)} - ${formatearSlotHora(fin)}`;
-}
-
 function formatDateLong(dateStr: string): string {
   const d = new Date(dateStr);
   return `${DIAS_LARGOS[d.getDay()]}, ${MESES_LARGOS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;

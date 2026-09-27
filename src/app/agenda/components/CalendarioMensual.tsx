@@ -160,7 +160,6 @@ export function CalendarioMensual({ reservas, fechaActual, onReservaClick }: Cal
                     <div className={styles.popup} onClick={(e) => e.stopPropagation()}>
                       {reservasDelDia(fecha).map((reserva) => {
                         const colorInfo = tipoColorMap.get(reserva.tipoEvento);
-                        const bg = colorInfo?.bg || "#E0E3E5";
                         const border = colorInfo?.border || "#6B7280";
                         return (
                           <div
