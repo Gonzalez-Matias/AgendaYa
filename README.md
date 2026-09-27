@@ -79,6 +79,7 @@ Base URL: `http://localhost:3000`
 | Método | Ruta | Descripción |
 |--------|------|-------------|
 | `GET` | `/api/reservas/:id` | Obtener detalle de una reserva |
+| `POST` | `/api/reservas` | Crear una reserva (body: `{ tipoEventoId, fechaHoraInicio, nombreInvitado, emailInvitado, telefonoInvitado?, notaInvitado? }`) |
 | `POST` | `/api/visualizacion` | Listar reservas con paginación (body: `{ administradorId, fechaDesde, fechaHasta, modoVista }`) |
 | `POST` | `/api/disponibilidad` | Consultar slots disponibles (body: `{ tipoEventoId, fechaDesde, fechaHasta }`) |
 | `POST` | `/api/reservas/cancelar` | Cancelar una reserva (body: `{ reservaId, motivo? }`) |
