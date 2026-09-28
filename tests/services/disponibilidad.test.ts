@@ -4,18 +4,18 @@ import prismaRepo from "../../src/repositories/db";
 
 function proximoDia(diaSemana: number): Date {
   const ahora = new Date();
-  const actual = ahora.getUTCDay();
+  const actual = ahora.getDay();
   let dias = diaSemana - actual;
   if (dias <= 0) dias += 7;
   const resultado = new Date(ahora);
-  resultado.setUTCDate(ahora.getUTCDate() + dias);
-  resultado.setUTCHours(0, 0, 0, 0);
+  resultado.setDate(ahora.getDate() + dias);
+  resultado.setHours(0, 0, 0, 0);
   return resultado;
 }
 
 function diaEnDias(dia: Date, dias: number): Date {
   const resultado = new Date(dia);
-  resultado.setUTCDate(dia.getUTCDate() + dias);
+  resultado.setDate(dia.getDate() + dias);
   return resultado;
 }
 
@@ -61,11 +61,13 @@ describe("consultarDisponibilidad", () => {
     });
 
     expect(resultado).toHaveLength(1);
-    expect(resultado[0].slots).toHaveLength(36);
-    expect(resultado[0].slots[0].inicio.getUTCHours()).toBe(8);
-    expect(resultado[0].slots[0].inicio.getUTCMinutes()).toBe(0);
-    expect(resultado[0].slots[35].fin.getUTCHours()).toBe(17);
-    expect(resultado[0].slots[35].fin.getUTCMinutes()).toBe(0);
+    expect(resultado[0].slots).toHaveLength(35);
+    expect(resultado[0].slots[0].inicio.getHours()).toBe(8);
+    expect(resultado[0].slots[0].inicio.getMinutes()).toBe(0);
+    expect(resultado[0].slots[34].inicio.getHours()).toBe(16);
+    expect(resultado[0].slots[34].inicio.getMinutes()).toBe(30);
+    expect(resultado[0].slots[34].fin.getHours()).toBe(17);
+    expect(resultado[0].slots[34].fin.getMinutes()).toBe(0);
   });
 
   it("debería generar slots con intervalos de 15min", async () => {
@@ -100,16 +102,16 @@ describe("consultarDisponibilidad", () => {
     });
 
     const slots = resultado[0].slots;
-    expect(slots[0].inicio.getUTCHours()).toBe(8);
-    expect(slots[0].inicio.getUTCMinutes()).toBe(0);
-    expect(slots[1].inicio.getUTCHours()).toBe(8);
-    expect(slots[1].inicio.getUTCMinutes()).toBe(15);
-    expect(slots[2].inicio.getUTCHours()).toBe(8);
-    expect(slots[2].inicio.getUTCMinutes()).toBe(30);
-    expect(slots[3].inicio.getUTCHours()).toBe(8);
-    expect(slots[3].inicio.getUTCMinutes()).toBe(45);
-    expect(slots[4].inicio.getUTCHours()).toBe(9);
-    expect(slots[4].inicio.getUTCMinutes()).toBe(0);
+    expect(slots[0].inicio.getHours()).toBe(8);
+    expect(slots[0].inicio.getMinutes()).toBe(0);
+    expect(slots[1].inicio.getHours()).toBe(8);
+    expect(slots[1].inicio.getMinutes()).toBe(15);
+    expect(slots[2].inicio.getHours()).toBe(8);
+    expect(slots[2].inicio.getMinutes()).toBe(30);
+    expect(slots[3].inicio.getHours()).toBe(8);
+    expect(slots[3].inicio.getMinutes()).toBe(45);
+    expect(slots[4].inicio.getHours()).toBe(9);
+    expect(slots[4].inicio.getMinutes()).toBe(0);
   });
 
   it("debería excluir slots que se superponen con reservas existentes", async () => {
@@ -137,7 +139,7 @@ describe("consultarDisponibilidad", () => {
 
     const martes = proximoDia(2);
     const reservaInicio = new Date(martes);
-    reservaInicio.setUTCHours(10, 0, 0, 0);
+    reservaInicio.setHours(10, 0, 0, 0);
 
     const estado = await prisma.estadoReserva.create({
       data: { nombre: "Confirmada" },
@@ -163,12 +165,12 @@ describe("consultarDisponibilidad", () => {
 
     const slots = resultado[0].slots;
     const horarios = slots.map(
-      (s) => `${s.inicio.getUTCHours()}:${String(s.inicio.getUTCMinutes()).padStart(2, "0")}`
+      (s) => `${s.inicio.getHours()}:${String(s.inicio.getMinutes()).padStart(2, "0")}`
     );
 
     expect(horarios).not.toContain("10:00");
-    expect(horarios).not.toContain("10:15");
-    expect(horarios).toContain("9:45");
+    expect(horarios).not.toContain("9:45");
+    expect(horarios).toContain("9:30");
     expect(horarios).toContain("10:30");
   });
 
@@ -197,9 +199,9 @@ describe("consultarDisponibilidad", () => {
 
     const martes = proximoDia(2);
     const bloqueoInicio = new Date(martes);
-    bloqueoInicio.setUTCHours(12, 0, 0, 0);
+    bloqueoInicio.setHours(12, 0, 0, 0);
     const bloqueoFin = new Date(martes);
-    bloqueoFin.setUTCHours(13, 0, 0, 0);
+    bloqueoFin.setHours(13, 0, 0, 0);
 
     await prisma.bloqueoAgenda.create({
       data: {
@@ -218,7 +220,7 @@ describe("consultarDisponibilidad", () => {
 
     const slots = resultado[0].slots;
     const horarios = slots.map(
-      (s) => `${s.inicio.getUTCHours()}:${String(s.inicio.getUTCMinutes()).padStart(2, "0")}`
+      (s) => `${s.inicio.getHours()}:${String(s.inicio.getMinutes()).padStart(2, "0")}`
     );
 
     expect(horarios).toContain("11:30");
@@ -230,7 +232,7 @@ describe("consultarDisponibilidad", () => {
     const ahora = new Date();
     const antelacionHoras = 2;
     const fechaMinima = new Date(ahora);
-    fechaMinima.setUTCHours(fechaMinima.getUTCHours() + antelacionHoras);
+    fechaMinima.setHours(fechaMinima.getHours() + antelacionHoras);
 
     const admin = await prisma.usuarioAdministrador.create({
       data: { email: "test@test.com", nombre: "Test" },
@@ -359,9 +361,9 @@ describe("consultarDisponibilidad", () => {
 
     const martes = proximoDia(2);
     const bloqueoInicio = new Date(martes);
-    bloqueoInicio.setUTCHours(8, 0, 0, 0);
+    bloqueoInicio.setHours(8, 0, 0, 0);
     const bloqueoFin = new Date(martes);
-    bloqueoFin.setUTCHours(17, 0, 0, 0);
+    bloqueoFin.setHours(17, 0, 0, 0);
 
     await prisma.bloqueoAgenda.create({
       data: {
@@ -414,7 +416,7 @@ describe("consultarDisponibilidad", () => {
     });
 
     const reservaInicio = new Date(lunes);
-    reservaInicio.setUTCHours(10, 0, 0, 0);
+    reservaInicio.setHours(10, 0, 0, 0);
     await prisma.reserva.create({
       data: {
         fechaHoraInicio: reservaInicio,
@@ -428,9 +430,9 @@ describe("consultarDisponibilidad", () => {
     });
 
     const bloqueoInicio = new Date(martes);
-    bloqueoInicio.setUTCHours(12, 0, 0, 0);
+    bloqueoInicio.setHours(12, 0, 0, 0);
     const bloqueoFin = new Date(martes);
-    bloqueoFin.setUTCHours(13, 0, 0, 0);
+    bloqueoFin.setHours(13, 0, 0, 0);
     await prisma.bloqueoAgenda.create({
       data: {
         fechaInicio: bloqueoInicio,
@@ -455,7 +457,7 @@ describe("consultarDisponibilidad", () => {
     expect(martesSlots.length).toBeLessThan(36);
 
     const miercolesSlots = resultado[2].slots;
-    expect(miercolesSlots).toHaveLength(36);
+    expect(miercolesSlots).toHaveLength(35);
   });
 
   it("debería verificar horarios exactos por día — reserva en un día no afecta al siguiente", async () => {
@@ -489,7 +491,7 @@ describe("consultarDisponibilidad", () => {
     });
 
     const reservaInicio = new Date(lunes);
-    reservaInicio.setUTCHours(10, 0, 0, 0);
+    reservaInicio.setHours(10, 0, 0, 0);
     await prisma.reserva.create({
       data: {
         fechaHoraInicio: reservaInicio,
@@ -511,17 +513,17 @@ describe("consultarDisponibilidad", () => {
     expect(resultado).toHaveLength(2);
 
     const lunesHorarios = resultado[0].slots.map(
-      (s) => `${s.inicio.getUTCHours()}:${String(s.inicio.getUTCMinutes()).padStart(2, "0")}`
+      (s) => `${s.inicio.getHours()}:${String(s.inicio.getMinutes()).padStart(2, "0")}`
     );
     const martesHorarios = resultado[1].slots.map(
-      (s) => `${s.inicio.getUTCHours()}:${String(s.inicio.getUTCMinutes()).padStart(2, "0")}`
+      (s) => `${s.inicio.getHours()}:${String(s.inicio.getMinutes()).padStart(2, "0")}`
     );
 
     expect(lunesHorarios).not.toContain("10:00");
     expect(lunesHorarios).not.toContain("10:15");
     expect(martesHorarios).toContain("10:00");
     expect(martesHorarios).toContain("10:15");
-    expect(martesHorarios).toHaveLength(36);
+    expect(martesHorarios).toHaveLength(35);
   });
 
   it("debería funcionar con período de 7 días (semana completa)", async () => {
@@ -555,7 +557,7 @@ describe("consultarDisponibilidad", () => {
     });
 
     const reserva1Inicio = new Date(lunes);
-    reserva1Inicio.setUTCHours(10, 0, 0, 0);
+    reserva1Inicio.setHours(10, 0, 0, 0);
     await prisma.reserva.create({
       data: {
         fechaHoraInicio: reserva1Inicio,
@@ -570,7 +572,7 @@ describe("consultarDisponibilidad", () => {
 
     const martes = diaEnDias(lunes, 1);
     const reserva2Inicio = new Date(martes);
-    reserva2Inicio.setUTCHours(14, 0, 0, 0);
+    reserva2Inicio.setHours(14, 0, 0, 0);
     await prisma.reserva.create({
       data: {
         fechaHoraInicio: reserva2Inicio,
@@ -585,9 +587,9 @@ describe("consultarDisponibilidad", () => {
 
     const miercoles = diaEnDias(lunes, 2);
     const bloqueoInicio = new Date(miercoles);
-    bloqueoInicio.setUTCHours(9, 0, 0, 0);
+    bloqueoInicio.setHours(9, 0, 0, 0);
     const bloqueoFin = new Date(miercoles);
-    bloqueoFin.setUTCHours(11, 0, 0, 0);
+    bloqueoFin.setHours(11, 0, 0, 0);
     await prisma.bloqueoAgenda.create({
       data: {
         fechaInicio: bloqueoInicio,
@@ -609,24 +611,24 @@ describe("consultarDisponibilidad", () => {
     expect(resultado[1].slots.length).toBeLessThan(36);
     expect(resultado[2].slots.length).toBeLessThan(36);
 
-    expect(resultado[3].slots).toHaveLength(36);
-    expect(resultado[4].slots).toHaveLength(36);
+    expect(resultado[3].slots).toHaveLength(35);
+    expect(resultado[4].slots).toHaveLength(35);
 
     expect(resultado[5].slots).toHaveLength(0);
     expect(resultado[6].slots).toHaveLength(0);
 
     const lunesHorarios = resultado[0].slots.map(
-      (s) => `${s.inicio.getUTCHours()}:${String(s.inicio.getUTCMinutes()).padStart(2, "0")}`
+      (s) => `${s.inicio.getHours()}:${String(s.inicio.getMinutes()).padStart(2, "0")}`
     );
     expect(lunesHorarios).not.toContain("10:00");
 
     const martesHorarios = resultado[1].slots.map(
-      (s) => `${s.inicio.getUTCHours()}:${String(s.inicio.getUTCMinutes()).padStart(2, "0")}`
+      (s) => `${s.inicio.getHours()}:${String(s.inicio.getMinutes()).padStart(2, "0")}`
     );
     expect(martesHorarios).not.toContain("14:00");
 
     const miercolesHorarios = resultado[2].slots.map(
-      (s) => `${s.inicio.getUTCHours()}:${String(s.inicio.getUTCMinutes()).padStart(2, "0")}`
+      (s) => `${s.inicio.getHours()}:${String(s.inicio.getMinutes()).padStart(2, "0")}`
     );
     expect(miercolesHorarios).not.toContain("9:00");
     expect(miercolesHorarios).not.toContain("9:15");
@@ -636,7 +638,8 @@ describe("consultarDisponibilidad", () => {
     expect(miercolesHorarios).not.toContain("10:15");
     expect(miercolesHorarios).not.toContain("10:30");
     expect(miercolesHorarios).not.toContain("10:45");
-    expect(miercolesHorarios).toContain("8:45");
+    expect(miercolesHorarios).not.toContain("8:45");
+    expect(miercolesHorarios).toContain("8:30");
     expect(miercolesHorarios).toContain("11:00");
   });
 
@@ -700,7 +703,7 @@ describe("consultarDisponibilidad", () => {
 
     const desde = new Date();
     const hasta = new Date(desde);
-    hasta.setUTCDate(hasta.getUTCDate() + 31);
+    hasta.setDate(hasta.getDate() + 31);
 
     await expect(
       consultarDisponibilidad({
@@ -709,5 +712,124 @@ describe("consultarDisponibilidad", () => {
         fechaHasta: hasta,
       })
     ).rejects.toThrow("El período no puede superar 30 días");
+  });
+
+  it("debería devolver los slots en la misma fecha calendario consultada", async () => {
+    const admin = await prisma.usuarioAdministrador.create({
+      data: { email: "fechas@test.com", nombre: "Test fechas" },
+    });
+
+    const tipoEvento = await prisma.tipoEvento.create({
+      data: {
+        nombre: "Consulta de fechas",
+        duracion: 30,
+        antelacionMinima: 1,
+        administradorId: admin.id,
+      },
+    });
+
+    await prisma.disponibilidadSemanal.create({
+      data: {
+        diaSemana: 2,
+        horaInicio: 480,
+        horaFin: 540,
+        administradorId: admin.id,
+      },
+    });
+
+    // Próximo martes (día 2) al menos 48h en el futuro para respetar la antelación mínima.
+    let diasHastaMartes = (2 - new Date().getDay() + 7) % 7;
+    if (diasHastaMartes === 0) diasHastaMartes = 7;
+    if (diasHastaMartes === 1) diasHastaMartes += 7;
+    const proximoMartes = new Date();
+    proximoMartes.setDate(proximoMartes.getDate() + diasHastaMartes);
+    proximoMartes.setHours(0, 0, 0, 0);
+
+    const fechaConsultada = new Date(proximoMartes.toISOString().slice(0, 10) + "T00:00:00.000Z");
+
+    const resultado = await consultarDisponibilidad({
+      tipoEventoId: tipoEvento.id,
+      fechaDesde: fechaConsultada,
+      fechaHasta: fechaConsultada,
+    });
+
+    // Las aserciones usan componentes locales para funcionar en cualquier zona horaria (CI corre en UTC).
+    const dia = new Date(resultado[0].fecha);
+    expect(resultado).toHaveLength(1);
+    expect(dia.getFullYear()).toBe(proximoMartes.getFullYear());
+    expect(dia.getMonth()).toBe(proximoMartes.getMonth());
+    expect(dia.getDate()).toBe(proximoMartes.getDate());
+
+    const slotInicio = new Date(resultado[0].slots[0].inicio);
+    expect(slotInicio.getHours()).toBe(8);
+    expect(slotInicio.getMinutes()).toBe(0);
+  });
+
+  it("debería respetar la duración del evento (US_003 Esc.8)", async () => {
+    const admin = await prisma.usuarioAdministrador.create({
+      data: { email: "duracion@test.com", nombre: "Test duración" },
+    });
+
+    const tipoEvento = await prisma.tipoEvento.create({
+      data: {
+        nombre: "Consulta 60",
+        duracion: 60,
+        antelacionMinima: 1,
+        administradorId: admin.id,
+      },
+    });
+
+    await prisma.disponibilidadSemanal.createMany({
+      data: [1, 2, 3, 4, 5].map((d) => ({
+        diaSemana: d,
+        horaInicio: 480,
+        horaFin: 1020,
+        administradorId: admin.id,
+      })),
+    });
+
+    const martes = proximoDia(2);
+    const estado = await prisma.estadoReserva.create({
+      data: { nombre: "Confirmada" },
+    });
+
+    // Reservas existentes: 10:00–11:00 y 12:00–13:00.
+    for (const hora of [10, 12]) {
+      const inicio = new Date(martes);
+      inicio.setHours(hora, 0, 0, 0);
+      await prisma.reserva.create({
+        data: {
+          fechaHoraInicio: inicio,
+          duracion: 60,
+          nombreInvitado: "Ocupado",
+          emailInvitado: "ocupado@email.com",
+          tipoEventoId: tipoEvento.id,
+          administradorId: admin.id,
+          estadoReservaId: estado.id,
+        },
+      });
+    }
+
+    const resultado = await consultarDisponibilidad({
+      tipoEventoId: tipoEvento.id,
+      fechaDesde: martes,
+      fechaHasta: martes,
+    });
+
+    const horarios = resultado[0].slots.map(
+      (s) => `${s.inicio.getHours()}:${String(s.inicio.getMinutes()).padStart(2, "0")}`
+    );
+
+    // Debe ofrecer 11:00 (justo al terminar la reserva) y no ofrecer inicios
+    // que no completen los 60 minutos antes de la próxima reserva.
+    expect(horarios).toContain("11:00");
+    expect(horarios).not.toContain("10:00");
+    expect(horarios).not.toContain("11:15");
+    expect(horarios).not.toContain("11:30");
+
+    // El slot de 11:00 dura 60 minutos.
+    const slot11 = resultado[0].slots.find((s) => s.inicio.getHours() === 11);
+    expect(slot11?.fin.getHours()).toBe(12);
+    expect(slot11?.fin.getMinutes()).toBe(0);
   });
 });

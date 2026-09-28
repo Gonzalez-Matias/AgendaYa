@@ -27,7 +27,7 @@ export async function findReservasActivasEnRango(
       estadoReserva: {
         nombre: { in: ["Confirmada", "PendienteDeConfirmacion", "PendienteDeReagendar"] },
       },
-      fechaHoraInicio: { gte: desde, lte: hasta },
+      fechaHoraInicio: { gte: desde, lt: hasta },
     },
     select: { fechaHoraInicio: true, duracion: true },
   });
@@ -37,6 +37,66 @@ export async function findEstadoByNombre(nombre: string) {
   return prisma.estadoReserva.findUnique({
     where: { nombre },
     select: { id: true, nombre: true },
+  });
+}
+
+export async function findTipoEventoConConfirmacion(id: number) {
+  return prisma.tipoEvento.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      nombre: true,
+      duracion: true,
+      activo: true,
+      confirmacion: true,
+      administradorId: true,
+    },
+  });
+}
+
+export async function createReservaConHistorial(
+  data: {
+    fechaHoraInicio: Date;
+    duracion: number;
+    nombreInvitado: string;
+    emailInvitado: string;
+    telefonoInvitado?: string | null;
+    notaInvitado?: string | null;
+    tipoEventoId: number;
+    administradorId: number;
+  },
+  estadoReservaId: number,
+  motivo: string
+) {
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const reserva = await tx.reserva.create({
+      data: {
+        ...data,
+        estadoReservaId,
+      },
+      select: {
+        id: true,
+        fechaHoraInicio: true,
+        duracion: true,
+        nombreInvitado: true,
+        emailInvitado: true,
+        telefonoInvitado: true,
+        notaInvitado: true,
+        tipoEvento: { select: { id: true, nombre: true } },
+        estadoReserva: { select: { id: true, nombre: true } },
+        administrador: { select: { id: true, nombre: true, email: true } },
+      },
+    });
+
+    await tx.reservaEstadoHistorial.create({
+      data: {
+        reservaId: reserva.id,
+        estadoReservaId,
+        motivo,
+      },
+    });
+
+    return reserva;
   });
 }
 
