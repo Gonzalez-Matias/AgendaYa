@@ -45,17 +45,14 @@ describe('US_010 - Confirmar cambios (M05-RF01)', () => {
   const reagendarPage = new ReagendarModalPage()
 
   /**
-   * La suite E2E muta datos (cancelar / confirmar / reagendar) y no restaura el
-   * estado entre specs, por lo que un test que dependa de estados concretos puede
-   * quedarse sin datos según el orden de ejecución. Sembrar antes de este spec
-   * garantiza las precondiciones de ambos casos de prueba: una reserva en estado
-   * PendienteDeConfirmacion y una reserva Confirmada en la misma agenda.
+   * La suite E2E muta datos (cancelar / confirmar / reagendar) y no restaura el estado,
+   * por lo que un test puede quedarse sin datos según el orden y la fecha de ejecución.
+   * Cada caso siembra la base y recarga la agenda, así ambos quedan independientes entre
+   * sí y del resto de los specs: sus precondiciones siempre son una reserva en estado
+   * PendienteDeConfirmacion y una reserva Confirmada de la misma agenda.
    */
-  before(() => {
-    cy.task('seedDatabase', null, { timeout: 150000 })
-  })
-
   beforeEach(() => {
+    cy.task('seedDatabase', null, { timeout: 150000 })
     agendaPage.visit()
   })
 
@@ -147,6 +144,10 @@ describe('US_010 - Confirmar cambios (M05-RF01)', () => {
           const tipoEventoId = detalle.body.data.tipoEvento.id as number
           const fechaReserva = new Date(detalle.body.data.fechaHoraInicio as string)
 
+          // El seed ya crea un registro de historial por reserva: se guarda el total
+          // previo para poder verificar que el reagendar agregue uno NUEVO.
+          cy.task('getHistorial', reservaId).as('historialInicial')
+
           // Act: abrir el detalle de la reserva y el modal de reagendar
           asegurarReservaVisible(reservaId)
           agendaPage.clickReservaById(reservaId)
@@ -162,7 +163,7 @@ describe('US_010 - Confirmar cambios (M05-RF01)', () => {
               reagendarPage.selectDay(dia)
               reagendarPage.selectFirstSlot()
               reagendarPage.clickConfirmar()
-              reagendarPage.shouldShowConfirmacion()
+              reagendarPage.shouldShowConfirmacionConTurno()
               reagendarPage.confirmarCambio()
 
               // Assert: respuesta exitosa, mensaje de éxito visible y modal cerrado
@@ -178,6 +179,19 @@ describe('US_010 - Confirmar cambios (M05-RF01)', () => {
                 cy.request(`/api/reservas/${reservaId}`).then((actualizada) => {
                   expect(actualizada.body.data.estado.nombre).to.eq('Confirmada')
                   expect(actualizada.body.data.fechaHoraInicio).to.eq(nuevaFechaHora)
+                })
+
+                // Assert: se creó un NUEVO registro de historial, con estado Confirmada y
+                // marca de tiempo. Se consulta la base porque la API no expone el historial.
+                cy.get('@historialInicial').then((previo) => {
+                  const totalPrevio = (previo as unknown[]).length
+                  cy.task('getHistorial', reservaId).then((historial) => {
+                    const registros = historial as Array<{ estado: string; fechaCambio: string }>
+                    expect(registros).to.have.length(totalPrevio + 1)
+                    const nuevoRegistro = registros[registros.length - 1]
+                    expect(nuevoRegistro.estado).to.eq('Confirmada')
+                    expect(Number.isNaN(new Date(nuevoRegistro.fechaCambio).getTime())).to.eq(false)
+                  })
                 })
               })
             }
@@ -224,8 +238,72 @@ describe('US_010 - Confirmar cambios (M05-RF01)', () => {
                 expect(detalleFinal.body.data.fechaHoraInicio).to.eq(fechaOriginal)
                 expect(detalleFinal.body.data.estado.nombre).to.eq('PendienteDeConfirmacion')
               })
+
+              // Assert: la reserva obstáculo permanece intacta
+              cy.request(`/api/reservas/${reservaOcupadaId}`).then((detalleObstaculo) => {
+                expect(detalleObstaculo.body.data.fechaHoraInicio).to.eq(inicioOcupado)
+                expect(detalleObstaculo.body.data.estado.nombre).to.eq('Confirmada')
+              })
             })
           })
+        })
+      })
+    })
+  })
+
+  /**
+   * CP-US010-002 verificado a nivel interfaz. La UI solo ofrece horarios libres, por lo que
+   * el solapamiento no puede provocarse desde el modal: se simula la condición de carrera
+   * (el horario se ocupó entre la carga de la disponibilidad y la confirmación) interceptando
+   * la respuesta, para verificar que el sistema muestra el error al administrador.
+   */
+  it('CP-US010-002 (UI): debería mostrar el mensaje de error al confirmar un cambio no disponible', () => {
+    primerAdministradorId().then((administradorId) => {
+      reservasDelAdmin(administradorId).then((res) => {
+        const pendiente = res.body.reservas.find(
+          (r: { id: number; estado: string }) => r.estado === 'PendienteDeConfirmacion'
+        )
+        if (!pendiente) {
+          throw new Error('No hay ninguna reserva en estado PendienteDeConfirmacion')
+        }
+        const reservaId = pendiente.id as number
+
+        cy.request(`/api/reservas/${reservaId}`).then((detalle) => {
+          const tipoEventoId = detalle.body.data.tipoEvento.id as number
+          const fechaReserva = new Date(detalle.body.data.fechaHoraInicio as string)
+          const fechaOriginal = detalle.body.data.fechaHoraInicio as string
+          const estadoOriginal = detalle.body.data.estado.nombre as string
+
+          asegurarReservaVisible(reservaId)
+          agendaPage.clickReservaById(reservaId)
+          detallePage.waitForModal()
+          detallePage.clickReagendar()
+          reagendarPage.waitForModal()
+
+          buscarDiaConTurnos(tipoEventoId, fechaReserva.getFullYear(), fechaReserva.getMonth()).then(
+            (dia) => {
+              cy.intercept('POST', '**/api/reservas/reagendar', {
+                statusCode: 400,
+                body: { error: 'El nuevo horario elegido ya está ocupado' },
+              }).as('reagendarRechazado')
+
+              reagendarPage.selectDay(dia)
+              reagendarPage.selectFirstSlot()
+              reagendarPage.clickConfirmar()
+              reagendarPage.shouldShowConfirmacionConTurno()
+              reagendarPage.confirmarCambio()
+
+              // Assert: el sistema rechaza y el mensaje queda visible para el administrador
+              cy.wait('@reagendarRechazado')
+              reagendarPage.shouldShowError('El nuevo horario elegido ya está ocupado')
+
+              // Assert: la reserva conserva su fecha/hora y su estado originales
+              cy.request(`/api/reservas/${reservaId}`).then((actualizada) => {
+                expect(actualizada.body.data.fechaHoraInicio).to.eq(fechaOriginal)
+                expect(actualizada.body.data.estado.nombre).to.eq(estadoOriginal)
+              })
+            }
+          )
         })
       })
     })

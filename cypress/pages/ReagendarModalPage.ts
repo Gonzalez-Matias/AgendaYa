@@ -60,6 +60,7 @@ export class ReagendarModalPage {
 
   selectFirstSlot() {
     cy.get(this.slots, { timeout: 10000 }).should('have.length.greaterThan', 0)
+    cy.get(this.slots).first().invoke('text').as('turnoSeleccionado')
     cy.get(this.slots).first().click()
     return this
   }
@@ -71,6 +72,18 @@ export class ReagendarModalPage {
 
   shouldShowConfirmacion() {
     cy.get(this.confirmacion, { timeout: 10000 }).should('be.visible')
+    return this
+  }
+
+  /**
+   * CP-US010-001, paso 3: el diálogo de doble verificación debe reflejar
+   * el turno que el administrador acaba de seleccionar.
+   */
+  shouldShowConfirmacionConTurno() {
+    cy.get(this.confirmacion, { timeout: 10000 }).should('be.visible')
+    cy.get('@turnoSeleccionado').then((turno) => {
+      cy.get(this.confirmacion).should('contain', String(turno).trim())
+    })
     return this
   }
 
