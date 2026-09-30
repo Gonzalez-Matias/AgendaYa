@@ -1,0 +1,1 @@
+// Importar aquí comandos personalizados de Cypress cuando los haya.

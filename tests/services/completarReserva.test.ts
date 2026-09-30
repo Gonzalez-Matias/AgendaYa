@@ -1,38 +1,82 @@
-// src/services/completarReserva.test.ts
-import { completarReserva } from '../../src/services/completarReserva';
+import { prisma, cleanDB } from "../helpers";
+import { completarReserva } from "../../src/services/completarReserva";
 
 describe('Pruebas Unitarias - US_11: Marcar Reserva como Completada', () => {
 
+  beforeEach(async () => {
+    await cleanDB();
+  });
+
+  afterAll(async () => {
+    await prisma.$disconnect();
+  });
+
+  // Helper para crear datos base reutilizables
+  async function crearReservaConEstado(nombreEstado: string) {
+    const admin = await prisma.usuarioAdministrador.create({
+      data: { email: "test@test.com", nombre: "Test Admin" },
+    });
+
+    const tipoEvento = await prisma.tipoEvento.create({
+      data: {
+        nombre: "Reunión",
+        duracion: 30,
+        antelacionMinima: 1,
+        administradorId: admin.id,
+      },
+    });
+
+    const estado = await prisma.estadoReserva.create({
+      data: { nombre: nombreEstado },
+    });
+
+    const reserva = await prisma.reserva.create({
+      data: {
+        fechaHoraInicio: new Date(Date.now() + 86400000),
+        duracion: 30,
+        nombreInvitado: "Carlos",
+        emailInvitado: "carlos@email.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+        estadoReservaId: estado.id,
+      },
+    });
+
+    return { admin, reserva };
+  }
+
   // TEST 1: Flujo feliz (Cambio de estado exitoso)
-  test('Debe cambiar el nombre del estado a "Completada" si está previamente "Confirmada"', async () => {
-    // Arrange (ID 101 está configurado como Confirmada en nuestro mock)
-    const input = { reservaId: 101 };
+  it('Debe cambiar el estado a "Completada" si está previamente "Confirmada"', async () => {
+    // Arrange
+    await prisma.estadoReserva.create({ data: { nombre: "Completada" } });
+    const { reserva } = await crearReservaConEstado("Confirmada");
 
     // Act
-    const resultado = await completarReserva(input);
+    const resultado = await completarReserva({ reservaId: reserva.id });
 
     // Assert
-    expect(resultado.estadoReserva.nombre).toBe('Completada');
+    expect(resultado.estadoReserva.nombre).toBe("Completada");
   });
 
   // TEST 2: Control de errores de negocio (No está confirmada)
-  test('Debe lanzar un error si la reserva NO está en estado "Confirmada"', async () => {
-    // Arrange (ID 102 está configurado como Cancelada)
-    const input = { reservaId: 102 };
+  it('Debe lanzar un error si la reserva NO está en estado "Confirmada"', async () => {
+    // Arrange
+    const { reserva } = await crearReservaConEstado("Cancelada");
 
     // Act & Assert
-    await expect(completarReserva(input)).rejects.toThrow(
-      'Solo se pueden marcar como completadas las reservas en estado Confirmada'
-    );
+    await expect(
+      completarReserva({ reservaId: reserva.id })
+    ).rejects.toThrow("Solo se pueden marcar como completadas las reservas en estado Confirmada");
   });
 
   // TEST 3: Propiedades requeridas para la interfaz (Ventana emergente/Modal)
-  test('El resultado debe contener el nombre del invitado para mostrar en la ventana de confirmación', async () => {
+  it('El resultado debe contener el nombre del invitado para mostrar en la ventana de confirmación', async () => {
     // Arrange
-    const input = { reservaId: 101 };
+    await prisma.estadoReserva.create({ data: { nombre: "Completada" } });
+    const { reserva } = await crearReservaConEstado("Confirmada");
 
     // Act
-    const resultado = await completarReserva(input);
+    const resultado = await completarReserva({ reservaId: reserva.id });
 
     // Assert
     expect(resultado).toHaveProperty('id');

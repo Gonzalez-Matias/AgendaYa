@@ -1,5 +1,5 @@
 import { prisma, cleanDB, seed } from "../helpers";
-import { obtenerDetalleReserva } from "../../src/services/reserva";
+import { obtenerDetalleReserva } from "../../src/services/detalleReserva";
 import prismaRepo from "../../src/repositories/db";
 
 // M05-RF05 - Mostrar detalle de reserva
@@ -60,5 +60,61 @@ describe("obtenerDetalleReserva", () => {
     await expect(obtenerDetalleReserva(idInexistente)).rejects.toThrow(
       `No existe una reserva con id ${idInexistente}`
     );
+  });
+
+  it("debería rechazar si adminId no coincide con el dueño", async () => {
+    const admin = await prisma.usuarioAdministrador.upsert({
+      where: { email: "detalle_admin@test.com" },
+      create: { email: "detalle_admin@test.com", nombre: "Test Admin" },
+      update: {},
+    });
+    const otroAdmin = await prisma.usuarioAdministrador.upsert({
+      where: { email: "detalle_otro@test.com" },
+      create: { email: "detalle_otro@test.com", nombre: "Otro Admin" },
+      update: {},
+    });
+    const tipoEvento = await prisma.tipoEvento.create({
+      data: { nombre: "Reunión", duracion: 30, antelacionMinima: 1, administradorId: admin.id },
+    });
+    const estado = await prisma.estadoReserva.upsert({
+      where: { nombre: "Confirmada" }, create: { nombre: "Confirmada" }, update: {},
+    });
+
+    const reserva = await prisma.reserva.create({
+      data: {
+        fechaHoraInicio: new Date(Date.now() + 86400000), duracion: 30,
+        nombreInvitado: "Juan", emailInvitado: "juan@email.com",
+        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
+      },
+    });
+
+    await expect(
+      obtenerDetalleReserva(reserva.id, otroAdmin.id)
+    ).rejects.toThrow("No autorizado");
+  });
+
+  it("debería permitir obtener detalle cuando adminId coincide con el dueño", async () => {
+    const admin = await prisma.usuarioAdministrador.upsert({
+      where: { email: "detalle_admin2@test.com" },
+      create: { email: "detalle_admin2@test.com", nombre: "Test Admin" },
+      update: {},
+    });
+    const tipoEvento = await prisma.tipoEvento.create({
+      data: { nombre: "Reunión", duracion: 30, antelacionMinima: 1, administradorId: admin.id },
+    });
+    const estado = await prisma.estadoReserva.upsert({
+      where: { nombre: "Confirmada" }, create: { nombre: "Confirmada" }, update: {},
+    });
+
+    const reserva = await prisma.reserva.create({
+      data: {
+        fechaHoraInicio: new Date(Date.now() + 86400000), duracion: 30,
+        nombreInvitado: "Juan", emailInvitado: "juan@email.com",
+        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
+      },
+    });
+
+    const detalle = await obtenerDetalleReserva(reserva.id, admin.id);
+    expect(detalle.nombreInvitado).toBe("Juan");
   });
 });

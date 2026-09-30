@@ -17,7 +17,8 @@ const reservaIdSchema = z.number().int().positive();
  * @throws Error si no existe una reserva con el id indicado.
  */
 export async function obtenerDetalleReserva(
-  reservaId: number
+  reservaId: number,
+  adminId?: number
 ): Promise<DetalleReserva> {
   const idValidado = reservaIdSchema.parse(reservaId);
 
@@ -25,6 +26,10 @@ export async function obtenerDetalleReserva(
 
   if (!reserva) {
     throw new Error(`No existe una reserva con id ${idValidado}`);
+  }
+
+  if (adminId && reserva.administradorId !== adminId) {
+    throw new Error("No autorizado: la reserva no pertenece a este administrador");
   }
 
   const fechaHoraFin = new Date(
