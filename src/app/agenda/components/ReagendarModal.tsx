@@ -51,31 +51,18 @@ function formatDateLong(dateStr: string): string {
   return `${DIAS_LARGOS[d.getDay()]}, ${MESES_LARGOS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
-function agruparSlots(slotsBrutos: { inicio: string; fin: string }[], duracionMin: number): SlotInfo[] {
-  const resultado: SlotInfo[] = [];
-  const cantidad = duracionMin / 15;
-  for (let i = 0; i <= slotsBrutos.length - cantidad; i++) {
-    const inicio = slotsBrutos[i].inicio;
-    const inicioTime = new Date(inicio).getTime();
-    const finEsperadoTime = inicioTime + duracionMin * 60000;
-    const ultimo = slotsBrutos[i + cantidad - 1];
-    if (ultimo && new Date(ultimo.fin).getTime() === finEsperadoTime) {
-      const finEsperado = new Date(finEsperadoTime).toISOString();
-      resultado.push({
-        inicio,
-        fin: finEsperado,
-        label: `${formatearSlotHora(inicio)} - ${formatearSlotHora(finEsperado)}`,
-      });
-    }
-  }
-  return resultado;
+function mapearSlots(slotsBrutos: { inicio: string; fin: string }[]): SlotInfo[] {
+  return slotsBrutos.map((slot) => ({
+    inicio: slot.inicio,
+    fin: slot.fin,
+    label: `${formatearSlotHora(slot.inicio)} - ${formatearSlotHora(slot.fin)}`,
+  }));
 }
 
 export function ReagendarModal({
   reservaId,
   tipoEventoId,
   adminId,
-  duracion,
   fechaActual,
   horarioActual,
   nombreInvitado,
@@ -91,6 +78,7 @@ export function ReagendarModal({
   const [confirmando, setConfirmando] = useState(false);
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState("");
+  const [exito, setExito] = useState("");
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const d = new Date(fechaActual);
     return d.getMonth();
@@ -127,7 +115,7 @@ export function ReagendarModal({
       } else {
         const dias: DiaInfo[] = (data.data || []).map((d: { fecha: string; slots: { inicio: string; fin: string }[] }) => ({
           fecha: d.fecha,
-          slots: agruparSlots(d.slots, duracion),
+          slots: mapearSlots(d.slots),
         }));
         setDisponibilidad(dias);
       }
@@ -136,7 +124,7 @@ export function ReagendarModal({
     } finally {
       setCargando(false);
     }
-  }, [tipoEventoId, duracion]);
+  }, [tipoEventoId]);
 
   useEffect(() => {
     const desde = new Date(calendarYear, calendarMonth, 1);
@@ -186,13 +174,20 @@ export function ReagendarModal({
         }),
       });
       if (res.ok) {
+        // CP-US010-001: se muestra el mensaje de éxito antes de cerrar el modal.
+        const data = await res.json().catch(() => null);
+        setConfirmando(false);
+        setExito(data?.data?.mensaje ?? "¡La reserva se re-agendó con éxito!");
         onAction?.();
-        onClose();
+        setTimeout(onClose, 1500);
       } else {
+        // CP-US010-002: se cierra la confirmación para que el error sea visible.
         const data = await res.json();
+        setConfirmando(false);
         setError(data.error || "Error al reagendar");
       }
     } catch {
+      setConfirmando(false);
       setError("Error al reagendar");
     } finally {
       setProcesando(false);
@@ -381,6 +376,26 @@ export function ReagendarModal({
               >
                 Confirmar Cambios
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {exito && (
+        <div className={styles.confirmOverlay} data-cy="reagendar-exito-overlay">
+          <div className={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.confirmHeader}>
+              <div className={styles.confirmIcon}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="#54647A" strokeWidth="2" />
+                  <path d="M8 12l3 3 5-5" stroke="#54647A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <span className={styles.confirmTitle}>Cambio confirmado</span>
+            </div>
+
+            <div className={styles.confirmInfo}>
+              <div className={styles.confirmText} data-cy="reagendar-exito">{exito}</div>
             </div>
           </div>
         </div>
