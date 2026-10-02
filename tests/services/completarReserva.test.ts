@@ -82,4 +82,28 @@ describe('Pruebas Unitarias - US_11: Marcar Reserva como Completada', () => {
     expect(resultado).toHaveProperty('id');
     expect(resultado.nombreInvitado).toBe('Carlos');
   });
+
+    // TEST 4: Validación de input inválido
+  it('Debe lanzar un error si el reservaId es un número negativo o cero', async () => {
+    // Arrange
+    const inputInvalido = { reservaId: -1 };
+
+    // Act & Assert
+    await expect(
+      completarReserva(inputInvalido)
+    ).rejects.toThrow();
+  });
+
+  // TEST 5: Error si la reserva está en estado PendienteDeConfirmacion
+  it('Debe lanzar un error si la reserva está en estado "PendienteDeConfirmacion"', async () => {
+    // Arrange
+    await prisma.estadoReserva.create({ data: { nombre: "Completada" } });
+    const { reserva } = await crearReservaConEstado("PendienteDeConfirmacion");
+
+    // Act & Assert
+    await expect(
+      completarReserva({ reservaId: reserva.id })
+    ).rejects.toThrow("Solo se pueden marcar como completadas las reservas en estado Confirmada");
+  });
+
 });
