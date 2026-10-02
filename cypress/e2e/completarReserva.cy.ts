@@ -78,6 +78,14 @@ describe("US_011 - Opción Completar Reserva (E2E)", () => {
                             $b.find("#mock-toast").show();
                         }
                     );
+
+                    // Evento simulado: cancelar en el modal
+                    $b.find('[data-cy="btn-cancelar-modal"]').on(
+                        "click",
+                        function () {
+                            $b.find("#mock-modal").hide();
+                        }
+                    );
                 });
             }
         });
