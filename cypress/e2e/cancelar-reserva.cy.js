@@ -10,8 +10,7 @@ describe('US_016 - Cancelar Reserva', () => {
     
     // 1. Ir a la celda 31 y seleccionar su reserva
 // CÓDIGO CORREGIDO
-cy.get(':nth-child(8)').find('[data-cy="reserva-item"]').first().click();    
-    // 2. Ahora que el detalle está abierto, presionar el botón cancelar 
+    cy.get(':nth-child(10) > .CalendarioMensual-module__0-yAVa__events').find('[data-cy="reserva-item"]').first().click();    // 2. Ahora que el detalle está abierto, presionar el botón cancelar 
     cy.get('[data-cy="btn-cancelar"]').should('be.visible').click(); 
 
     // 3. Confirmar la acción en el modal emergente 
@@ -23,3 +22,4 @@ cy.get(':nth-child(8)').find('[data-cy="reserva-item"]').first().click();
   }); 
 
 });
+
