@@ -30,17 +30,17 @@ describe("US_018 - Confirmación Manual de Reservas (Pruebas Unitarias)", () => 
       estadoReserva: {
         nombre: "PendienteDeConfirmacion",
       },
-    } as any);
+    } as never);
 
     mockFindEstadoByNombre.mockResolvedValue({
       id: 2,
       nombre: "Confirmada",
-    } as any);
+    } as never);
 
     mockConfirmarReservaEnTransaccion.mockResolvedValue({
       id: 1,
       estadoReservaId: 2,
-    } as any);
+    } as never);
 
     const resultado = await confirmarReserva({
       reservaId: 1,
@@ -76,7 +76,7 @@ describe("US_018 - Confirmación Manual de Reservas (Pruebas Unitarias)", () => 
       estadoReserva: {
         nombre: "Confirmada",
       },
-    } as any);
+    } as never);
 
     await expect(
       confirmarReserva({
@@ -93,7 +93,7 @@ describe("US_018 - Confirmación Manual de Reservas (Pruebas Unitarias)", () => 
       estadoReserva: {
         nombre: "Cancelada",
       },
-    } as any);
+    } as never);
 
     await expect(
       confirmarReserva({
