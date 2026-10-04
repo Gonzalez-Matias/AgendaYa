@@ -83,7 +83,7 @@ describe("visualizacion service", () => {
       const reservas = Array.from({ length: 15 }, (_, i) => ({
         id: i + 1,
         nombreInvitado: `Invitado ${i}`,
-      })) as any[];
+      }));
 
       const pagina1 = paginarReservas(reservas, 1, 10);
       const pagina2 = paginarReservas(reservas, 2, 10);
@@ -95,7 +95,7 @@ describe("visualizacion service", () => {
     it("debería retornar array vacío si la página no existe", () => {
       const reservas = Array.from({ length: 5 }, (_, i) => ({
         id: i + 1,
-      })) as any[];
+      }));
 
       const resultado = paginarReservas(reservas, 3, 10);
 

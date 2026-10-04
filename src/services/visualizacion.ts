@@ -21,8 +21,6 @@ const ObtenerReservasInputSchema = z.object({
   fechaHasta: z.date(),
 });
 
-type ObtenerReservasInput = z.infer<typeof ObtenerReservasInputSchema>;
-
 /**
  * Retorna el modo de vista por defecto al ingresar a la sección.
  * Según M05-RF06, la vista por defecto es "calendario".
