@@ -1,2 +1,3 @@
-.github/  @Gonzalez-Matias @JPManucha
-prisma/   @Gonzalez-Matias @JPManucha
+.github/              @Gonzalez-Matias @JPManucha
+prisma/schema.prisma  @Gonzalez-Matias @JPManucha
+prisma/seed.ts        @Gonzalez-Matias @JPManucha
