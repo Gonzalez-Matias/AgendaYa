@@ -48,8 +48,12 @@ describe("findReservasActivasEnRango (repositorio)", () => {
     const tipoEvento = await crearTipoEvento(admin.id);
 
     const confirmada = await prisma.estadoReserva.create({ data: { nombre: "Confirmada" } });
-    const pendienteConfirmacion = await prisma.estadoReserva.create({ data: { nombre: "PendienteDeConfirmacion" } });
-    const pendienteReagendar = await prisma.estadoReserva.create({ data: { nombre: "PendienteDeReagendar" } });
+    const pendienteConfirmacion = await prisma.estadoReserva.create({
+      data: { nombre: "PendienteDeConfirmacion" },
+    });
+    const pendienteReagendar = await prisma.estadoReserva.create({
+      data: { nombre: "PendienteDeReagendar" },
+    });
     const cancelada = await prisma.estadoReserva.create({ data: { nombre: "Cancelada" } });
     const completada = await prisma.estadoReserva.create({ data: { nombre: "Completada" } });
 
@@ -61,17 +65,43 @@ describe("findReservasActivasEnRango (repositorio)", () => {
       new Date("2026-08-01T11:00:00Z"),
     ];
 
-    await crearReserva({ fechaHoraInicio: activas[0], tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: confirmada.id });
-    await crearReserva({ fechaHoraInicio: activas[1], tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: pendienteConfirmacion.id });
-    await crearReserva({ fechaHoraInicio: activas[2], tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: pendienteReagendar.id });
-    await crearReserva({ fechaHoraInicio: new Date("2026-08-01T12:00:00Z"), tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: cancelada.id });
-    await crearReserva({ fechaHoraInicio: new Date("2026-08-01T13:00:00Z"), tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: completada.id });
+    await crearReserva({
+      fechaHoraInicio: activas[0],
+      tipoEventoId: tipoEvento.id,
+      administradorId: admin.id,
+      estadoReservaId: confirmada.id,
+    });
+    await crearReserva({
+      fechaHoraInicio: activas[1],
+      tipoEventoId: tipoEvento.id,
+      administradorId: admin.id,
+      estadoReservaId: pendienteConfirmacion.id,
+    });
+    await crearReserva({
+      fechaHoraInicio: activas[2],
+      tipoEventoId: tipoEvento.id,
+      administradorId: admin.id,
+      estadoReservaId: pendienteReagendar.id,
+    });
+    await crearReserva({
+      fechaHoraInicio: new Date("2026-08-01T12:00:00Z"),
+      tipoEventoId: tipoEvento.id,
+      administradorId: admin.id,
+      estadoReservaId: cancelada.id,
+    });
+    await crearReserva({
+      fechaHoraInicio: new Date("2026-08-01T13:00:00Z"),
+      tipoEventoId: tipoEvento.id,
+      administradorId: admin.id,
+      estadoReservaId: completada.id,
+    });
 
     const resultado = await findReservasActivasEnRango(admin.id, -1, desde, hasta);
 
     expect(resultado).toHaveLength(3);
-    expect(resultado.map((r) => r.fechaHoraInicio.toISOString()).sort())
-      .toEqual(activas.map((d) => d.toISOString()).sort());
+    expect(resultado.map((r) => r.fechaHoraInicio.toISOString()).sort()).toEqual(
+      activas.map((d) => d.toISOString()).sort()
+    );
   });
 
   it("debería excluir la reserva indicada en excludeReservaId (auto-exclusión)", async () => {
@@ -82,8 +112,18 @@ describe("findReservasActivasEnRango (repositorio)", () => {
     const desde = new Date("2026-08-01T08:00:00Z");
     const hasta = new Date("2026-08-01T18:00:00Z");
 
-    const primera = await crearReserva({ fechaHoraInicio: new Date("2026-08-01T09:00:00Z"), tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: confirmada.id });
-    await crearReserva({ fechaHoraInicio: new Date("2026-08-01T10:00:00Z"), tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: confirmada.id });
+    const primera = await crearReserva({
+      fechaHoraInicio: new Date("2026-08-01T09:00:00Z"),
+      tipoEventoId: tipoEvento.id,
+      administradorId: admin.id,
+      estadoReservaId: confirmada.id,
+    });
+    await crearReserva({
+      fechaHoraInicio: new Date("2026-08-01T10:00:00Z"),
+      tipoEventoId: tipoEvento.id,
+      administradorId: admin.id,
+      estadoReservaId: confirmada.id,
+    });
 
     const resultado = await findReservasActivasEnRango(admin.id, primera.id, desde, hasta);
 
@@ -101,8 +141,18 @@ describe("findReservasActivasEnRango (repositorio)", () => {
     const desde = new Date("2026-08-01T08:00:00Z");
     const hasta = new Date("2026-08-01T18:00:00Z");
 
-    await crearReserva({ fechaHoraInicio: new Date("2026-08-01T09:00:00Z"), tipoEventoId: tipo1.id, administradorId: admin1.id, estadoReservaId: confirmada.id });
-    await crearReserva({ fechaHoraInicio: new Date("2026-08-01T10:00:00Z"), tipoEventoId: tipo2.id, administradorId: admin2.id, estadoReservaId: confirmada.id });
+    await crearReserva({
+      fechaHoraInicio: new Date("2026-08-01T09:00:00Z"),
+      tipoEventoId: tipo1.id,
+      administradorId: admin1.id,
+      estadoReservaId: confirmada.id,
+    });
+    await crearReserva({
+      fechaHoraInicio: new Date("2026-08-01T10:00:00Z"),
+      tipoEventoId: tipo2.id,
+      administradorId: admin2.id,
+      estadoReservaId: confirmada.id,
+    });
 
     const resultado = await findReservasActivasEnRango(admin1.id, -1, desde, hasta);
 
@@ -118,10 +168,30 @@ describe("findReservasActivasEnRango (repositorio)", () => {
     const desde = new Date("2026-08-01T08:00:00Z");
     const hasta = new Date("2026-08-01T12:00:00Z");
 
-    await crearReserva({ fechaHoraInicio: new Date("2026-07-31T23:00:00Z"), tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: confirmada.id }); // antes
-    await crearReserva({ fechaHoraInicio: new Date("2026-08-01T08:00:00Z"), tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: confirmada.id }); // == desde -> incluida
-    await crearReserva({ fechaHoraInicio: new Date("2026-08-01T12:00:00Z"), tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: confirmada.id }); // == hasta -> excluida
-    await crearReserva({ fechaHoraInicio: new Date("2026-08-01T13:00:00Z"), tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: confirmada.id }); // después
+    await crearReserva({
+      fechaHoraInicio: new Date("2026-07-31T23:00:00Z"),
+      tipoEventoId: tipoEvento.id,
+      administradorId: admin.id,
+      estadoReservaId: confirmada.id,
+    }); // antes
+    await crearReserva({
+      fechaHoraInicio: new Date("2026-08-01T08:00:00Z"),
+      tipoEventoId: tipoEvento.id,
+      administradorId: admin.id,
+      estadoReservaId: confirmada.id,
+    }); // == desde -> incluida
+    await crearReserva({
+      fechaHoraInicio: new Date("2026-08-01T12:00:00Z"),
+      tipoEventoId: tipoEvento.id,
+      administradorId: admin.id,
+      estadoReservaId: confirmada.id,
+    }); // == hasta -> excluida
+    await crearReserva({
+      fechaHoraInicio: new Date("2026-08-01T13:00:00Z"),
+      tipoEventoId: tipoEvento.id,
+      administradorId: admin.id,
+      estadoReservaId: confirmada.id,
+    }); // después
 
     const resultado = await findReservasActivasEnRango(admin.id, -1, desde, hasta);
 
