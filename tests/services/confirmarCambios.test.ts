@@ -4,10 +4,7 @@
 
 import { prisma, cleanDB } from "../helpers";
 import prismaRepo from "../../src/repositories/db";
-import {
-  reagendarReserva,
-  ReagendarError,
-} from "../../src/services/reagendarReserva";
+import { reagendarReserva, ReagendarError } from "../../src/services/reagendarReserva";
 
 describe("M05-RF01 / US_010 - Confirmar cambios", () => {
   beforeEach(async () => {
@@ -45,10 +42,7 @@ describe("M05-RF01 / US_010 - Confirmar cambios", () => {
       data: { nombre: "Confirmada" },
     });
 
-    const { admin, tipoEvento } = await crearAdminConTipoEvento(
-      "admin@agendaya.com",
-      60
-    );
+    const { admin, tipoEvento } = await crearAdminConTipoEvento("admin@agendaya.com", 60);
 
     // resv_001: 25/06/2026 10:00, en estado "Pendiente de confirmación manual"
     const reserva = await prisma.reserva.create({
@@ -75,9 +69,7 @@ describe("M05-RF01 / US_010 - Confirmar cambios", () => {
 
     // El sistema confirma la actualización y responde con mensaje de éxito
     expect(resultado.mensaje).toBe("¡La reserva se re-agendó con éxito!");
-    expect(resultado.reserva.fechaHoraInicio.toISOString()).toBe(
-      nuevaFecha.toISOString()
-    );
+    expect(resultado.reserva.fechaHoraInicio.toISOString()).toBe(nuevaFecha.toISOString());
     expect(resultado.reserva.estadoReserva.nombre).toBe("Confirmada");
 
     // La reserva persistida queda "Confirmada" con la nueva fecha y hora
@@ -86,9 +78,7 @@ describe("M05-RF01 / US_010 - Confirmar cambios", () => {
       include: { estadoReserva: true },
     });
     expect(reservaPersistida.estadoReserva.nombre).toBe("Confirmada");
-    expect(reservaPersistida.fechaHoraInicio.toISOString()).toBe(
-      nuevaFecha.toISOString()
-    );
+    expect(reservaPersistida.fechaHoraInicio.toISOString()).toBe(nuevaFecha.toISOString());
 
     // Se crea un nuevo registro de historial con estado "Confirmada" y marca de tiempo
     const historial = await prisma.reservaEstadoHistorial.findMany({
@@ -97,9 +87,7 @@ describe("M05-RF01 / US_010 - Confirmar cambios", () => {
     expect(historial).toHaveLength(1);
     expect(historial[0].estadoReservaId).toBe(estadoConfirmada.id);
     expect(historial[0].fechaCambio).toBeInstanceOf(Date);
-    expect(historial[0].fechaCambio.getTime()).toBeGreaterThanOrEqual(
-      antesDeConfirmar.getTime()
-    );
+    expect(historial[0].fechaCambio.getTime()).toBeGreaterThanOrEqual(antesDeConfirmar.getTime());
     expect(historial[0].fechaCambio.getTime()).toBeLessThanOrEqual(Date.now());
   });
 
@@ -111,10 +99,7 @@ describe("M05-RF01 / US_010 - Confirmar cambios", () => {
       data: { nombre: "Confirmada" },
     });
 
-    const { admin, tipoEvento } = await crearAdminConTipoEvento(
-      "admin@agendaya.com",
-      60
-    );
+    const { admin, tipoEvento } = await crearAdminConTipoEvento("admin@agendaya.com", 60);
 
     // resv_002: reserva obstáculo, 26/06/2026 15:00 en estado "Confirmada"
     const reservaObstaculo = await prisma.reserva.create({
@@ -156,21 +141,15 @@ describe("M05-RF01 / US_010 - Confirmar cambios", () => {
 
     // El sistema aborta con un error de negocio explícito
     expect(errorLanzado).toBeInstanceOf(ReagendarError);
-    expect((errorLanzado as Error).message).toBe(
-      "El nuevo horario elegido ya está ocupado"
-    );
+    expect((errorLanzado as Error).message).toBe("El nuevo horario elegido ya está ocupado");
 
     // resv_001 conserva fecha/hora original y estado: no libera el turno anterior
     const reservaPersistida = await prisma.reserva.findUniqueOrThrow({
       where: { id: reservaAReagendar.id },
       include: { estadoReserva: true },
     });
-    expect(reservaPersistida.fechaHoraInicio.toISOString()).toBe(
-      fechaOriginal.toISOString()
-    );
-    expect(reservaPersistida.estadoReserva.nombre).toBe(
-      "PendienteDeConfirmacion"
-    );
+    expect(reservaPersistida.fechaHoraInicio.toISOString()).toBe(fechaOriginal.toISOString());
+    expect(reservaPersistida.estadoReserva.nombre).toBe("PendienteDeConfirmacion");
     expect(reservaPersistida.estadoReservaId).toBe(estadoPendiente.id);
 
     // La transacción aborta sin escrituras parciales: no hay historial nuevo
@@ -185,8 +164,6 @@ describe("M05-RF01 / US_010 - Confirmar cambios", () => {
       include: { estadoReserva: true },
     });
     expect(obstaculoPersistido.estadoReserva.nombre).toBe("Confirmada");
-    expect(obstaculoPersistido.fechaHoraInicio.toISOString()).toBe(
-      "2026-06-26T15:00:00.000Z"
-    );
+    expect(obstaculoPersistido.fechaHoraInicio.toISOString()).toBe("2026-06-26T15:00:00.000Z");
   });
 });

@@ -50,17 +50,17 @@ npm run dev
 
 ## Comandos
 
-| Comando | Descripción |
-|---------|-------------|
-| `npm test` | Ejecuta todos los tests con Jest (usa DB de test separada) |
-| `npm run dev` | Inicia el servidor de desarrollo en http://localhost:3000 |
-| `npx prisma db seed` | Ejecuta el seed de la DB (idempotente) |
-| `npx prisma db push` | Sincroniza el schema de Prisma con la DB |
-| `npx prisma studio` | Abre el explorador de Prisma |
-| `npm run cypress:open` | Abre Cypress en modo interactivo (requiere `npm run dev`) |
-| `npm run cypress:run` | Ejecuta los tests E2E de Cypress en modo headless |
-| `docker compose up -d` | Levanta PostgreSQL |
-| `docker compose down` | Detiene PostgreSQL |
+| Comando                | Descripción                                                |
+| ---------------------- | ---------------------------------------------------------- |
+| `npm test`             | Ejecuta todos los tests con Jest (usa DB de test separada) |
+| `npm run dev`          | Inicia el servidor de desarrollo en http://localhost:3000  |
+| `npx prisma db seed`   | Ejecuta el seed de la DB (idempotente)                     |
+| `npx prisma db push`   | Sincroniza el schema de Prisma con la DB                   |
+| `npx prisma studio`    | Abre el explorador de Prisma                               |
+| `npm run cypress:open` | Abre Cypress en modo interactivo (requiere `npm run dev`)  |
+| `npm run cypress:run`  | Ejecuta los tests E2E de Cypress en modo headless          |
+| `docker compose up -d` | Levanta PostgreSQL                                         |
+| `docker compose down`  | Detiene PostgreSQL                                         |
 
 ## API Endpoints
 
@@ -68,23 +68,23 @@ Base URL: `http://localhost:3000`
 
 ### Administradores
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| `GET` | `/api/administradores` | Listar todos los administradores |
-| `GET` | `/api/administradores/:id/tipos-evento` | Listar tipos de evento de un administrador |
+| Método | Ruta                                    | Descripción                                |
+| ------ | --------------------------------------- | ------------------------------------------ |
+| `GET`  | `/api/administradores`                  | Listar todos los administradores           |
+| `GET`  | `/api/administradores/:id/tipos-evento` | Listar tipos de evento de un administrador |
 
 ### Reservas
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| `GET` | `/api/reservas/:id` | Obtener detalle de una reserva |
-| `POST` | `/api/reservas` | Crear una reserva (body: `{ tipoEventoId, fechaHoraInicio, nombreInvitado, emailInvitado, telefonoInvitado?, notaInvitado? }`) |
-| `POST` | `/api/visualizacion` | Listar reservas con paginación (body: `{ administradorId, fechaDesde, fechaHasta, modoVista }`) |
-| `POST` | `/api/disponibilidad` | Consultar slots disponibles (body: `{ tipoEventoId, fechaDesde, fechaHasta }`) |
-| `POST` | `/api/reservas/cancelar` | Cancelar una reserva (body: `{ reservaId, motivo? }`) |
-| `POST` | `/api/reservas/completar` | Completar una reserva confirmada (body: `{ reservaId }`) |
-| `POST` | `/api/reservas/confirmar` | Confirmar una reserva pendiente (body: `{ reservaId }`) |
-| `POST` | `/api/reservas/reagendar` | Reagendar una reserva (body: `{ reservaId, nuevaFechaHoraInicio, motivo? }`) |
+| Método | Ruta                      | Descripción                                                                                                                    |
+| ------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`  | `/api/reservas/:id`       | Obtener detalle de una reserva                                                                                                 |
+| `POST` | `/api/reservas`           | Crear una reserva (body: `{ tipoEventoId, fechaHoraInicio, nombreInvitado, emailInvitado, telefonoInvitado?, notaInvitado? }`) |
+| `POST` | `/api/visualizacion`      | Listar reservas con paginación (body: `{ administradorId, fechaDesde, fechaHasta, modoVista }`)                                |
+| `POST` | `/api/disponibilidad`     | Consultar slots disponibles (body: `{ tipoEventoId, fechaDesde, fechaHasta }`)                                                 |
+| `POST` | `/api/reservas/cancelar`  | Cancelar una reserva (body: `{ reservaId, motivo? }`)                                                                          |
+| `POST` | `/api/reservas/completar` | Completar una reserva confirmada (body: `{ reservaId }`)                                                                       |
+| `POST` | `/api/reservas/confirmar` | Confirmar una reserva pendiente (body: `{ reservaId }`)                                                                        |
+| `POST` | `/api/reservas/reagendar` | Reagendar una reserva (body: `{ reservaId, nuevaFechaHoraInicio, motivo? }`)                                                   |
 
 Todos los endpoints de mutación de reservas aceptan un `adminId` opcional en el body/query. Si se envía, validan que la reserva pertenezca a ese administrador. Sin `adminId`, el comportamiento es sin restricciones (compatibilidad hacia atrás mientras no hay auth).
 
@@ -165,15 +165,15 @@ API Route  →  Service  →  Repository  →  Prisma  →  PostgreSQL
 
 ### Esquema (7 modelos)
 
-| Modelo | Tabla | Descripción |
-|--------|-------|-------------|
-| `UsuarioAdministrador` | `usuario_administrador` | Administradores del sistema |
-| `TipoEvento` | `tipo_evento` | Tipos de evento (Reunión, Consulta, etc.) |
-| `EstadoReserva` | `estado_reserva` | Estados posibles de una reserva |
-| `Reserva` | `reserva` | Reservas de turnos |
-| `ReservaEstadoHistorial` | `reserva_estado_historial` | Historial de cambios de estado |
-| `DisponibilidadSemanal` | `disponibilidad_semanal` | Franjas horarias semanales por admin |
-| `BloqueoAgenda` | `bloqueo_agenda` | Períodos de bloqueo de agenda |
+| Modelo                   | Tabla                      | Descripción                               |
+| ------------------------ | -------------------------- | ----------------------------------------- |
+| `UsuarioAdministrador`   | `usuario_administrador`    | Administradores del sistema               |
+| `TipoEvento`             | `tipo_evento`              | Tipos de evento (Reunión, Consulta, etc.) |
+| `EstadoReserva`          | `estado_reserva`           | Estados posibles de una reserva           |
+| `Reserva`                | `reserva`                  | Reservas de turnos                        |
+| `ReservaEstadoHistorial` | `reserva_estado_historial` | Historial de cambios de estado            |
+| `DisponibilidadSemanal`  | `disponibilidad_semanal`   | Franjas horarias semanales por admin      |
+| `BloqueoAgenda`          | `bloqueo_agenda`           | Períodos de bloqueo de agenda             |
 
 ### Estados de reserva
 
@@ -187,15 +187,15 @@ PendienteDeReagendar    → Confirmada (al reagendar)
 
 El seed es idempotente: limpia los datos previos antes de insertar. Las fechas son **relativas a hoy** (reservas cerca de la fecha actual y bloqueos futuros), así la UI siempre muestra datos vigentes. Crea:
 
-| Tabla | Cantidad |
-|-------|----------|
-| `estado_reserva` | 5 |
-| `usuario_administrador` | 3 |
-| `tipo_evento` | 9 |
-| `disponibilidad_semanal` | 15 |
-| `reserva` | 15 |
-| `reserva_estado_historial` | 15 |
-| `bloqueo_agenda` | 3 |
+| Tabla                      | Cantidad |
+| -------------------------- | -------- |
+| `estado_reserva`           | 5        |
+| `usuario_administrador`    | 3        |
+| `tipo_evento`              | 9        |
+| `disponibilidad_semanal`   | 15       |
+| `reserva`                  | 15       |
+| `reserva_estado_historial` | 15       |
+| `bloqueo_agenda`           | 3        |
 
 ## Testing
 
@@ -216,11 +216,11 @@ Jest carga `.env.test` automáticamente vía `tests/setup.ts`. Los tests nunca t
 
 ### Tests por capa
 
-| Capa | Suite | Tests |
-|------|-------|-------|
-| DB | `tests/db.test.ts` | Verifica counts del seed |
-| Repositories | `tests/repositories/*.test.ts` | Queries Prisma (4 suites) |
-| Services | `tests/services/*.test.ts` | Lógica de negocio + validación + auth (9 suites) |
+| Capa         | Suite                          | Tests                                            |
+| ------------ | ------------------------------ | ------------------------------------------------ |
+| DB           | `tests/db.test.ts`             | Verifica counts del seed                         |
+| Repositories | `tests/repositories/*.test.ts` | Queries Prisma (4 suites)                        |
+| Services     | `tests/services/*.test.ts`     | Lógica de negocio + validación + auth (9 suites) |
 
 ### Ejecución
 
@@ -247,6 +247,7 @@ El binario de Cypress se instala con `npm install`. En CI se fuerza `CYPRESS_INS
 ### GitHub Actions
 
 Al abrir un PR (workflow `.github/workflows/ci.yml`):
+
 1. Checkout + `npm ci` (sin descargar binario de Cypress)
 2. `prisma generate`
 3. `prisma migrate deploy` contra `agendaya`

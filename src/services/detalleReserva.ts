@@ -32,9 +32,7 @@ export async function obtenerDetalleReserva(
     throw new Error("No autorizado: la reserva no pertenece a este administrador");
   }
 
-  const fechaHoraFin = new Date(
-    reserva.fechaHoraInicio.getTime() + reserva.duracion * 60000
-  );
+  const fechaHoraFin = new Date(reserva.fechaHoraInicio.getTime() + reserva.duracion * 60000);
 
   return {
     id: reserva.id,

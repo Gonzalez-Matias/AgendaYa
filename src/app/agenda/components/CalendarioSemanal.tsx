@@ -52,7 +52,11 @@ function esHoy(fecha: Date): boolean {
   );
 }
 
-export function CalendarioSemanal({ reservas, fechaActual, onReservaClick }: CalendarioSemanalProps) {
+export function CalendarioSemanal({
+  reservas,
+  fechaActual,
+  onReservaClick,
+}: CalendarioSemanalProps) {
   const weekStart = getWeekStart(fechaActual);
 
   const tipoColorMap = new Map<string, number>();
@@ -82,7 +86,10 @@ export function CalendarioSemanal({ reservas, fechaActual, onReservaClick }: Cal
           const isToday = esHoy(d);
           const isWeekend = i >= 5;
           return (
-            <div key={i} className={`${styles.dayHeader} ${isWeekend ? styles.dayHeaderWeekend : ""}`}>
+            <div
+              key={i}
+              className={`${styles.dayHeader} ${isWeekend ? styles.dayHeaderWeekend : ""}`}
+            >
               <span className={`${styles.dayName} ${isToday ? styles.dayNameToday : ""}`}>
                 {DIAS_CORTOS[i]}
               </span>
@@ -120,72 +127,81 @@ export function CalendarioSemanal({ reservas, fechaActual, onReservaClick }: Cal
                 />
               ))}
 
-              {dayReservas.filter((r) => r.estado === "Cancelada").map((r) => {
-                const [startStr, endStr] = r.horario.split(" - ");
-                const startH = parseTime(startStr);
-                const endH = parseTime(endStr);
-                const top = (startH - HOUR_START) * HOUR_HEIGHT;
-                const height = Math.max((endH - startH) * HOUR_HEIGHT, 32);
+              {dayReservas
+                .filter((r) => r.estado === "Cancelada")
+                .map((r) => {
+                  const [startStr, endStr] = r.horario.split(" - ");
+                  const startH = parseTime(startStr);
+                  const endH = parseTime(endStr);
+                  const top = (startH - HOUR_START) * HOUR_HEIGHT;
+                  const height = Math.max((endH - startH) * HOUR_HEIGHT, 32);
 
-                return (
-                  <div
-                    key={r.id}
-                    data-cy="reserva-item"
-                    data-reserva-id={r.id}
-                    data-cy-estado={r.estado}
-                    className={styles.eventCardCancelled}
-                    style={{ top: `${top}px`, height: `${height}px`, outline: `1px solid #DC2626`, outlineOffset: -1 }}
-                    onClick={() => onReservaClick?.(r.id)}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <span className={styles.eventTime}>{r.horario}</span>
-                    <span className={styles.eventName}>
-                      <StatusIcon estado={r.estado} size={12} />
-                      {r.tipoEvento} - {r.nombreInvitado}
-                    </span>
-                  </div>
-                );
-              })}
+                  return (
+                    <div
+                      key={r.id}
+                      data-cy="reserva-item"
+                      data-reserva-id={r.id}
+                      data-cy-estado={r.estado}
+                      className={styles.eventCardCancelled}
+                      style={{
+                        top: `${top}px`,
+                        height: `${height}px`,
+                        outline: `1px solid #DC2626`,
+                        outlineOffset: -1,
+                      }}
+                      onClick={() => onReservaClick?.(r.id)}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <span className={styles.eventTime}>{r.horario}</span>
+                      <span className={styles.eventName}>
+                        <StatusIcon estado={r.estado} size={12} />
+                        {r.tipoEvento} - {r.nombreInvitado}
+                      </span>
+                    </div>
+                  );
+                })}
 
-              {dayReservas.filter((r) => r.estado !== "Cancelada").map((r) => {
-                const tipoIdx = tipoColorMap.get(r.tipoEvento) ?? 3;
-                const colors = EVENT_COLORS[tipoIdx];
-                const [startStr, endStr] = r.horario.split(" - ");
-                const startH = parseTime(startStr);
-                const endH = parseTime(endStr);
-                const top = (startH - HOUR_START) * HOUR_HEIGHT;
-                const height = Math.max((endH - startH) * HOUR_HEIGHT, 32);
+              {dayReservas
+                .filter((r) => r.estado !== "Cancelada")
+                .map((r) => {
+                  const tipoIdx = tipoColorMap.get(r.tipoEvento) ?? 3;
+                  const colors = EVENT_COLORS[tipoIdx];
+                  const [startStr, endStr] = r.horario.split(" - ");
+                  const startH = parseTime(startStr);
+                  const endH = parseTime(endStr);
+                  const top = (startH - HOUR_START) * HOUR_HEIGHT;
+                  const height = Math.max((endH - startH) * HOUR_HEIGHT, 32);
 
-                return (
-                  <div
-                    key={r.id}
-                    data-cy="reserva-item"
-                    data-reserva-id={r.id}
-                    data-cy-estado={r.estado}
-                    className={styles.eventCard}
-                  style={{
-                    top: `${top}px`,
-                    height: `${height}px`,
-                    background: colors.bg,
-                    borderLeft: `4px solid ${colors.border}`,
-                    outline: `1px solid ${colors.outline}`,
-                    outlineOffset: -1,
-                  }}
-                    onClick={() => onReservaClick?.(r.id)}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <span className={styles.eventTime} style={{ color: colors.time }}>
-                      {r.horario}
-                    </span>
-                    <span className={styles.eventName} style={{ color: colors.name }}>
-                      <StatusIcon estado={r.estado} size={12} />
-                      {r.tipoEvento} - {r.nombreInvitado}
-                    </span>
-                  </div>
-                );
-              })}
+                  return (
+                    <div
+                      key={r.id}
+                      data-cy="reserva-item"
+                      data-reserva-id={r.id}
+                      data-cy-estado={r.estado}
+                      className={styles.eventCard}
+                      style={{
+                        top: `${top}px`,
+                        height: `${height}px`,
+                        background: colors.bg,
+                        borderLeft: `4px solid ${colors.border}`,
+                        outline: `1px solid ${colors.outline}`,
+                        outlineOffset: -1,
+                      }}
+                      onClick={() => onReservaClick?.(r.id)}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <span className={styles.eventTime} style={{ color: colors.time }}>
+                        {r.horario}
+                      </span>
+                      <span className={styles.eventName} style={{ color: colors.name }}>
+                        <StatusIcon estado={r.estado} size={12} />
+                        {r.tipoEvento} - {r.nombreInvitado}
+                      </span>
+                    </div>
+                  );
+                })}
             </div>
           );
         })}

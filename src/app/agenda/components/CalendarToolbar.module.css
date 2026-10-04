@@ -7,7 +7,7 @@
 .monthTitle {
   font-size: 32px;
   font-weight: 700;
-  color: #191C1E;
+  color: #191c1e;
   font-family: var(--font-geist-sans), Inter, sans-serif;
 }
 
@@ -24,7 +24,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #C3C5D9;
+  border: 1px solid #c3c5d9;
   border-radius: 4px;
   background: transparent;
   cursor: pointer;
@@ -34,7 +34,7 @@
 }
 
 .arrowBtn:hover {
-  background: #F2F4F6;
+  background: #f2f4f6;
 }
 
 .toggles {
@@ -47,9 +47,9 @@
 .toggleGroup {
   display: flex;
   padding: 4px;
-  background: #F2F4F6;
+  background: #f2f4f6;
   border-radius: 6px;
-  outline: 1px solid #C3C5D9;
+  outline: 1px solid #c3c5d9;
   outline-offset: -1px;
 }
 
@@ -67,18 +67,18 @@
 }
 
 .toggleBtn:hover {
-  color: #191C1E;
+  color: #191c1e;
 }
 
 .toggleBtnActive {
-  background: #003EC7;
+  background: #003ec7;
   color: white;
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .toggleBtnActive:hover {
   color: white;
-  background: #0034B0;
+  background: #0034b0;
 }
 
 .pickerOverlay {
@@ -93,7 +93,7 @@
   left: 0;
   margin-top: 8px;
   background: white;
-  border: 1px solid #C3C5D9;
+  border: 1px solid #c3c5d9;
   border-radius: 12px;
   box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.12);
   padding: 16px;
@@ -115,7 +115,7 @@
   align-items: center;
   justify-content: center;
   border: none;
-  background: #F2F4F6;
+  background: #f2f4f6;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
@@ -123,7 +123,7 @@
 }
 
 .pickerYearBtn:hover {
-  background: #E0E3E5;
+  background: #e0e3e5;
 }
 
 .pickerGrid {
@@ -144,15 +144,15 @@
 }
 
 .pickerMonth:hover {
-  background: #F2F4F6;
+  background: #f2f4f6;
 }
 
 .pickerMonthActive {
-  background: #003EC7;
+  background: #003ec7;
   color: white;
 }
 
 .pickerMonthActive:hover {
-  background: #0034B0;
+  background: #0034b0;
   color: white;
 }
