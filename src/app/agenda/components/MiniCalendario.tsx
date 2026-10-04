@@ -81,7 +81,12 @@ export function MiniCalendario({
           {MESES[month]} {year}
         </span>
         <div className={styles.arrows}>
-          <button data-cy="reagendar-mes-anterior" className={styles.arrowBtn} onClick={handlePrevMonth} type="button">
+          <button
+            data-cy="reagendar-mes-anterior"
+            className={styles.arrowBtn}
+            onClick={handlePrevMonth}
+            type="button"
+          >
             <svg width="8" height="12" viewBox="0 0 8 12" fill="none">
               <path
                 d="M7 1L1 6l6 5"
@@ -92,7 +97,12 @@ export function MiniCalendario({
               />
             </svg>
           </button>
-          <button data-cy="reagendar-mes-siguiente" className={styles.arrowBtn} onClick={handleNextMonth} type="button">
+          <button
+            data-cy="reagendar-mes-siguiente"
+            className={styles.arrowBtn}
+            onClick={handleNextMonth}
+            type="button"
+          >
             <svg width="8" height="12" viewBox="0 0 8 12" fill="none">
               <path
                 d="M1 1l6 5-6 5"

@@ -69,22 +69,21 @@ function verificarSeparacion(slots: Slot[]): void {
 
 function obtenerTipoReunion(): Cypress.Chainable<number> {
   return cy.request("GET", "/api/administradores").then((adminsRes) => {
-    const administradores = (adminsRes.body as { administradores: Administrador[] }).administradores;
+    const administradores = (adminsRes.body as { administradores: Administrador[] })
+      .administradores;
     const maria = administradores.find((a) => a.email === MARIA_EMAIL);
     if (!maria) {
       throw new Error(`No se encontró el administrador ${MARIA_EMAIL}`);
     }
 
-    return cy
-      .request("GET", `/api/administradores/${maria.id}/tipos-evento`)
-      .then((tiposRes) => {
-        const tipos = (tiposRes.body as { tiposEvento: TipoEvento[] }).tiposEvento;
-        const reunion = tipos.find((t) => t.nombre === TIPO_REUNION);
-        if (!reunion) {
-          throw new Error(`No se encontró el tipo de evento ${TIPO_REUNION}`);
-        }
-        return reunion.id;
-      });
+    return cy.request("GET", `/api/administradores/${maria.id}/tipos-evento`).then((tiposRes) => {
+      const tipos = (tiposRes.body as { tiposEvento: TipoEvento[] }).tiposEvento;
+      const reunion = tipos.find((t) => t.nombre === TIPO_REUNION);
+      if (!reunion) {
+        throw new Error(`No se encontró el tipo de evento ${TIPO_REUNION}`);
+      }
+      return reunion.id;
+    });
   });
 }
 

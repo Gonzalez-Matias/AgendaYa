@@ -33,12 +33,10 @@ export class CrearReservaError extends Error {
   }
 }
 
-const MENSAJE_CONFIRMADA =
-  "¡Tu reserva fue confirmada! Revisá tu email para más detalles.";
+const MENSAJE_CONFIRMADA = "¡Tu reserva fue confirmada! Revisá tu email para más detalles.";
 const MENSAJE_PENDIENTE =
   "¡Tu solicitud fue enviada! El profesional confirmará tu turno a la brevedad.";
-const MENSAJE_SLOT_OCUPADO =
-  "Este horario ya fue reservado. Por favor elegí otro.";
+const MENSAJE_SLOT_OCUPADO = "Este horario ya fue reservado. Por favor elegí otro.";
 
 /**
  * Registra una reserva para un usuario invitado (M04-RF04 / M04-RF05).
@@ -49,14 +47,10 @@ export async function crearReserva(input: CrearReservaInput) {
   const datos = CrearReservaSchema.parse(input);
 
   if (!validarNombre(datos.nombreInvitado)) {
-    throw new CrearReservaError(
-      "El nombre completo es obligatorio (máximo 100 caracteres)"
-    );
+    throw new CrearReservaError("El nombre completo es obligatorio (máximo 100 caracteres)");
   }
   if (!validarEmail(datos.emailInvitado)) {
-    throw new CrearReservaError(
-      "Ingresá un email válido. Ej: nombre@dominio.com"
-    );
+    throw new CrearReservaError("Ingresá un email válido. Ej: nombre@dominio.com");
   }
   if (datos.notaInvitado && datos.notaInvitado.length > 300) {
     throw new CrearReservaError("La nota no puede superar los 300 caracteres");
@@ -74,17 +68,13 @@ export async function crearReserva(input: CrearReservaInput) {
     fechaHasta: datos.fechaHoraInicio,
   });
   const solicitado = datos.fechaHoraInicio.getTime();
-  const estaDisponible = dias[0]?.slots.some(
-    (slot) => slot.inicio.getTime() === solicitado
-  );
+  const estaDisponible = dias[0]?.slots.some((slot) => slot.inicio.getTime() === solicitado);
   if (!estaDisponible) {
     throw new CrearReservaError(MENSAJE_SLOT_OCUPADO);
   }
 
   // Re-check de solapamiento para acotar la ventana de carrera antes de insertar.
-  const fechaFin = new Date(
-    datos.fechaHoraInicio.getTime() + tipoEvento.duracion * 60000
-  );
+  const fechaFin = new Date(datos.fechaHoraInicio.getTime() + tipoEvento.duracion * 60000);
   const ventanaInicio = new Date(datos.fechaHoraInicio.getTime() - 24 * 60 * 60000);
   const ventanaFin = new Date(fechaFin.getTime() + 24 * 60 * 60000);
   const reservasActivas = await findReservasActivasEnRango(
@@ -102,14 +92,10 @@ export async function crearReserva(input: CrearReservaInput) {
   }
 
   const estadoNombre =
-    tipoEvento.confirmacion === "AUTOMATICA"
-      ? "Confirmada"
-      : "PendienteDeConfirmacion";
+    tipoEvento.confirmacion === "AUTOMATICA" ? "Confirmada" : "PendienteDeConfirmacion";
   const estado = await findEstadoByNombre(estadoNombre);
   if (!estado) {
-    throw new CrearReservaError(
-      `El estado '${estadoNombre}' no está configurado en el sistema`
-    );
+    throw new CrearReservaError(`El estado '${estadoNombre}' no está configurado en el sistema`);
   }
 
   const reserva = await createReservaConHistorial(
@@ -132,7 +118,6 @@ export async function crearReserva(input: CrearReservaInput) {
   return {
     reserva,
     estado: estado.nombre,
-    mensaje:
-      estadoNombre === "Confirmada" ? MENSAJE_CONFIRMADA : MENSAJE_PENDIENTE,
+    mensaje: estadoNombre === "Confirmada" ? MENSAJE_CONFIRMADA : MENSAJE_PENDIENTE,
   };
 }

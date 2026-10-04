@@ -1,8 +1,7 @@
 import { prisma, cleanDB } from "../helpers";
 import { completarReserva } from "../../src/services/completarReserva";
 
-describe('Pruebas Unitarias - US_11: Marcar Reserva como Completada', () => {
-
+describe("Pruebas Unitarias - US_11: Marcar Reserva como Completada", () => {
   beforeEach(async () => {
     await cleanDB();
   });
@@ -64,13 +63,13 @@ describe('Pruebas Unitarias - US_11: Marcar Reserva como Completada', () => {
     const { reserva } = await crearReservaConEstado("Cancelada");
 
     // Act & Assert
-    await expect(
-      completarReserva({ reservaId: reserva.id })
-    ).rejects.toThrow("Solo se pueden marcar como completadas las reservas en estado Confirmada");
+    await expect(completarReserva({ reservaId: reserva.id })).rejects.toThrow(
+      "Solo se pueden marcar como completadas las reservas en estado Confirmada"
+    );
   });
 
   // TEST 3: Propiedades requeridas para la interfaz (Ventana emergente/Modal)
-  it('El resultado debe contener el nombre del invitado para mostrar en la ventana de confirmación', async () => {
+  it("El resultado debe contener el nombre del invitado para mostrar en la ventana de confirmación", async () => {
     // Arrange
     await prisma.estadoReserva.create({ data: { nombre: "Completada" } });
     const { reserva } = await crearReservaConEstado("Confirmada");
@@ -79,19 +78,17 @@ describe('Pruebas Unitarias - US_11: Marcar Reserva como Completada', () => {
     const resultado = await completarReserva({ reservaId: reserva.id });
 
     // Assert
-    expect(resultado).toHaveProperty('id');
-    expect(resultado.nombreInvitado).toBe('Carlos');
+    expect(resultado).toHaveProperty("id");
+    expect(resultado.nombreInvitado).toBe("Carlos");
   });
 
-    // TEST 4: Validación de input inválido
-  it('Debe lanzar un error si el reservaId es un número negativo o cero', async () => {
+  // TEST 4: Validación de input inválido
+  it("Debe lanzar un error si el reservaId es un número negativo o cero", async () => {
     // Arrange
     const inputInvalido = { reservaId: -1 };
 
     // Act & Assert
-    await expect(
-      completarReserva(inputInvalido)
-    ).rejects.toThrow();
+    await expect(completarReserva(inputInvalido)).rejects.toThrow();
   });
 
   // TEST 5: Error si la reserva está en estado PendienteDeConfirmacion
@@ -101,9 +98,8 @@ describe('Pruebas Unitarias - US_11: Marcar Reserva como Completada', () => {
     const { reserva } = await crearReservaConEstado("PendienteDeConfirmacion");
 
     // Act & Assert
-    await expect(
-      completarReserva({ reservaId: reserva.id })
-    ).rejects.toThrow("Solo se pueden marcar como completadas las reservas en estado Confirmada");
+    await expect(completarReserva({ reservaId: reserva.id })).rejects.toThrow(
+      "Solo se pueden marcar como completadas las reservas en estado Confirmada"
+    );
   });
-
 });
