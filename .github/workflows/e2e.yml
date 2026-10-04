@@ -3,6 +3,8 @@ name: E2E Tests
 # Cypress: ejecución manual (con input opcional de spec) y tras cada push a main.
 # Misma zona horaria que CI: el código depende de la hora local del servidor.
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
   workflow_dispatch:
@@ -14,7 +16,7 @@ on:
 
 concurrency:
   group: e2e-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'push' }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
 
 permissions:
   contents: read
@@ -24,6 +26,8 @@ env:
 
 jobs:
   e2e:
+    name: e2e
+    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'hotfix/')
     runs-on: ubuntu-latest
 
     services:
