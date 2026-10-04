@@ -26,6 +26,8 @@ interface DiaDisponible {
   slots: Slot[];
 }
 
+// Devuelve la fecha (00:00 local) del próximo día de semana indicado (1=lun…0=dom).
+// Se usa para no depender de fechas fijas que se vencen con el tiempo.
 function proximoDia(diaSemana: number): Date {
   const ahora = new Date();
   let dias = diaSemana - ahora.getDay();
@@ -36,29 +38,37 @@ function proximoDia(diaSemana: number): Date {
   return resultado;
 }
 
+// Devuelve una copia de la fecha sumándole N días.
 function diaEnDias(dia: Date, dias: number): Date {
   const resultado = new Date(dia);
   resultado.setDate(dia.getDate() + dias);
   return resultado;
 }
 
+// Formatea una fecha local como YYYY-MM-DD (el formato que espera la API en
+// fechaDesde/fechaHasta).
 function ymd(fecha: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${fecha.getFullYear()}-${pad(fecha.getMonth() + 1)}-${pad(fecha.getDate())}`;
 }
 
+// Arma un ISO timestamp con la hora local indicada. Necesario porque el server
+// corre en TZ America/Argentina/Mendoza y los bloqueos se comparan en esa zona.
 function timestampLocal(fecha: Date, horas: number, minutos: number): string {
   const resultado = new Date(fecha);
   resultado.setHours(horas, minutos, 0, 0);
   return resultado.toISOString();
 }
 
+// Extrae "HH:mm" en hora local de un ISO, para comparar contra los horarios
+// exactos definidos en el caso de prueba.
 function horaLocal(iso: string): string {
   const fecha = new Date(iso);
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${pad(fecha.getHours())}:${pad(fecha.getMinutes())}`;
 }
 
+// Valida que slots consecutivos estén separados por exactamente 15 minutos.
 function verificarSeparacion(slots: Slot[]): void {
   for (let i = 1; i < slots.length; i++) {
     const anterior = new Date(slots[i - 1].inicio).getTime();
@@ -67,6 +77,8 @@ function verificarSeparacion(slots: Slot[]): void {
   }
 }
 
+// Pasos 1-4 del caso: GET administradores -> ubicar a María García ->
+// GET sus tipos-evento -> devolver el id del tipo "Reunión".
 function obtenerTipoReunion(): Cypress.Chainable<number> {
   return cy.request("GET", "/api/administradores").then((adminsRes) => {
     const administradores = (adminsRes.body as { administradores: Administrador[] })
