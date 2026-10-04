@@ -10,7 +10,6 @@ Sistema de gestión de agenda y reserva de turnos para profesionales. Permite a 
 - **Testing**: Jest + @swc/jest (93 tests, 14 suites) + Cypress (E2E)
 - **Frontend**: UI de gestión de reservas en `/agenda` preparada para tests E2E (`data-cy`)
 - **CI**: GitHub Actions
-- **Code Review**: CodeRabbit (AI)
 
 ## Setup
 
@@ -254,10 +253,6 @@ Al abrir un PR (workflow `.github/workflows/ci.yml`):
 4. Crear `agendaya_test` + `prisma migrate deploy` contra esa DB
 5. `npm test` (con `continue-on-error`)
 6. Publicar reporte HTML en GitHub Pages
-
-### CodeRabbit
-
-Revisión automática de código en cada PR siguiendo las reglas de `.coderabbit.yaml`.
 
 ## Integrantes
 
