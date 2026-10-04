@@ -1,0 +1,102 @@
+name: E2E Tests
+
+# Cypress: ejecución manual (con input opcional de spec) y tras cada push a main.
+# Misma zona horaria que CI: el código depende de la hora local del servidor.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      spec:
+        description: "Spec a ejecutar (vacío = todos)"
+        required: false
+        default: ""
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'push' }}
+
+permissions:
+  contents: read
+
+env:
+  TZ: America/Argentina/Mendoza
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: agendaya
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/agendaya?schema=public
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Generar Prisma Client
+        run: npx prisma generate
+
+      - name: Correr migraciones
+        run: npx prisma migrate deploy
+
+      - name: Semillar base de datos
+        run: npx prisma db seed
+
+      - name: Iniciar aplicación en background
+        run: npm run dev &
+
+      - name: Esperar que la app esté lista
+        run: npx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Ejecutar tests E2E con Cypress
+        uses: cypress-io/github-action@v6
+        with:
+          install: false
+          spec: ${{ inputs.spec }}
+
+      - name: Generar reporte HTML de E2E
+        if: always()
+        run: |
+          npx mochawesome-merge "cypress/reports/mochawesome*.json" > cypress/reports/merged.json
+          npx marge cypress/reports/merged.json --reportDir ./cypress/reports --inline
+          mv cypress/reports/merged.html cypress/reports/e2e-report.html
+
+      - name: Subir screenshots si falla
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+
+      - name: Subir reporte E2E como artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-report
+          path: cypress/reports/e2e-report.html
+          if-no-files-found: ignore

@@ -1,13 +1,71 @@
 name: CI
 
+# Se ejecuta ante Pull Requests hacia develop y main (las ramas hotfix/** pasan por PR
+# hacia main y luego hacia develop, por lo que quedan cubiertas) y tras cada merge.
+# Si el plan agrega otra rama de paso (por ejemplo release/**), sumarla a ambas listas.
+# Los tests E2E (Cypress) viven en un workflow aparte de ejecución manual (e2e.yml).
 on:
-  push:
-    branches: [main]
   pull_request:
-    branches: [main]
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  # Zona horaria fija: el código depende de la hora local del servidor,
+  # así los resultados no cambian entre notebooks y runners.
+  TZ: America/Argentina/Mendoza
 
 jobs:
-  test:
+  # ---------------------------------------------------------------------------
+  # Calidad estática: formato, linter y build (no necesita base de datos)
+  # ---------------------------------------------------------------------------
+  quality:
+    name: quality
+    runs-on: ubuntu-latest
+
+    env:
+      # db.ts lanza error al importarse si DATABASE_URL no existe; el build solo la necesita definida.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/agendaya?schema=public
+      CYPRESS_INSTALL_BINARY: 0
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Generar Prisma Client
+        run: npx prisma generate
+
+      - name: Verificar formato (Prettier)
+        run: npm run format:check
+
+      - name: Linter (ESLint)
+        run: npm run lint
+
+      - name: Build (Next.js)
+        run: npm run build
+
+  # ---------------------------------------------------------------------------
+  # Tests unitarios (Jest) contra PostgreSQL
+  # ---------------------------------------------------------------------------
+  unit-tests:
+    name: unit-tests
     runs-on: ubuntu-latest
 
     services:
@@ -55,7 +113,7 @@ jobs:
       - name: Correr migraciones en la base de test
         run: DATABASE_URL="postgresql://postgres:postgres@localhost:5432/agendaya_test?schema=public" npx prisma migrate deploy
 
-      - name: Correr tests
+      - name: Tests unitarios (Jest)
         id: tests
         run: npm test
         continue-on-error: true
@@ -68,91 +126,21 @@ jobs:
           path: test-report.html
           if-no-files-found: ignore
 
-      - name: Fallar el workflow si los tests fallaron
+      - name: Fallar el job si los tests fallaron
         if: steps.tests.outcome != 'success'
         run: exit 1
 
-  e2e:
-    runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: agendaya
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/agendaya?schema=public
-
-    steps:
-      - name: Checkout código
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "npm"
-
-      - name: Instalar dependencias
-        run: npm ci
-
-      - name: Generar Prisma Client
-        run: npx prisma generate
-
-      - name: Correr migraciones
-        run: npx prisma migrate deploy
-
-      - name: Semillar base de datos
-        run: npx prisma db seed
-
-      - name: Iniciar aplicación en background
-        run: npm run dev &
-
-      - name: Esperar que la app esté lista
-        run: npx wait-on http://localhost:3000 --timeout 60000
-
-      - name: Ejecutar tests E2E con Cypress
-        uses: cypress-io/github-action@v6
-        with:
-          install: false
-
-      - name: Generar reporte HTML de E2E
-        if: always()
-        run: |
-          npx mochawesome-merge "cypress/reports/mochawesome*.json" > cypress/reports/merged.json
-          npx marge cypress/reports/merged.json --reportDir ./cypress/reports --inline
-          mv cypress/reports/merged.html cypress/reports/e2e-report.html
-
-      - name: Subir screenshots si falla
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-screenshots
-          path: cypress/screenshots
-          if-no-files-found: ignore
-
-      - name: Subir reporte E2E como artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-test-report
-          path: cypress/reports/e2e-report.html
-          if-no-files-found: ignore
-
+  # ---------------------------------------------------------------------------
+  # Publicación de reportes (solo tras merge a develop/main; no es check requerido)
+  # ---------------------------------------------------------------------------
   publish:
-    needs: [test, e2e]
+    name: publish-reports
+    needs: [unit-tests]
     runs-on: ubuntu-latest
-    if: always()
+    if: always() && github.event_name == 'push'
+
+    permissions:
+      contents: write
 
     steps:
       - name: Download unit test report
@@ -162,31 +150,11 @@ jobs:
           path: reports
         continue-on-error: true
 
-      - name: Download E2E test report
-        uses: actions/download-artifact@v4
-        with:
-          name: e2e-test-report
-          path: reports
-        continue-on-error: true
-
-      - name: Download E2E screenshots
-        uses: actions/download-artifact@v4
-        with:
-          name: cypress-screenshots
-          path: reports/screenshots
-        continue-on-error: true
-
       - name: Preparar carpeta para publicar
         run: |
           mkdir -p pages-deploy
           if [ -f reports/test-report.html ]; then
             cp reports/test-report.html pages-deploy/
-          fi
-          if [ -f reports/e2e-report.html ]; then
-            cp reports/e2e-report.html pages-deploy/
-          fi
-          if [ -d reports/screenshots ]; then
-            cp -r reports/screenshots pages-deploy/
           fi
 
       - name: Publicar reporte en GitHub Pages
@@ -214,14 +182,6 @@ jobs:
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ -f pages-deploy/e2e-report.html ]; then
-            echo "### ✅ Tests E2E (Cypress)" >> $GITHUB_STEP_SUMMARY
-            echo "- 📈 [Ver reporte en línea](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/test-reports/e2e-report.html)" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "### ❌ Tests E2E (Cypress)" >> $GITHUB_STEP_SUMMARY
-            echo "- No se generó el reporte" >> $GITHUB_STEP_SUMMARY
-          fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🔗 Enlaces útiles" >> $GITHUB_STEP_SUMMARY
