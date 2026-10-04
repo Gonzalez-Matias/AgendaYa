@@ -88,7 +88,9 @@ function obtenerTipoReunion(): Cypress.Chainable<number> {
 }
 
 describe("M04-RF02 - Consultar disponibilidad", () => {
-  it("CP1: devuelve 3 y 7 slots para días con disponibilidad y bloqueos", () => {
+  it("CP1: devuelve 2 y 6 slots para días con disponibilidad y bloqueos", () => {
+    // Arrange: elegir el próximo lunes y martes, y sembrar la disponibilidad de
+    // María (Lun/Mar 08:00–17:00) con los bloqueos definidos en el caso de prueba.
     const lunes = proximoDia(1);
     const martes = diaEnDias(lunes, 1);
 
@@ -107,12 +109,15 @@ describe("M04-RF02 - Consultar disponibilidad", () => {
       ],
     });
 
+    // Arrange: obtener el id del tipo de evento "Reunión" de María García.
     obtenerTipoReunion().then((tipoEventoId) => {
+      // Act: consultar la disponibilidad para el rango lunes–martes.
       cy.request("POST", "/api/disponibilidad", {
         tipoEventoId,
         fechaDesde: ymd(lunes),
         fechaHasta: ymd(martes),
       }).then((res) => {
+        // Assert: 200, dos días y la cantidad de slots esperada por día.
         expect(res.status).to.eq(200);
 
         const dias = res.body.data as DiaDisponible[];
@@ -124,10 +129,11 @@ describe("M04-RF02 - Consultar disponibilidad", () => {
         expect(dias[0].slots).to.have.length(2);
         expect(dias[1].slots).to.have.length(6);
 
+        // Assert: los slots están separados por 15 minutos.
         verificarSeparacion(dias[0].slots);
         verificarSeparacion(dias[1].slots);
 
-        // Los slots no coinciden con los períodos bloqueados.
+        // Assert: los slots no coinciden con los períodos bloqueados.
         expect(horaLocal(dias[0].slots[0].inicio)).to.eq("16:15");
         expect(horaLocal(dias[0].slots[dias[0].slots.length - 1].fin)).to.eq("17:00");
         expect(horaLocal(dias[1].slots[0].inicio)).to.eq("15:15");
@@ -136,17 +142,22 @@ describe("M04-RF02 - Consultar disponibilidad", () => {
   });
 
   it("CP2: devuelve slots vacíos para sábado y domingo", () => {
+    // Arrange: sin bloqueos y eligiendo el próximo sábado y domingo (días sin
+    // disponibilidad semanal configurada para María).
     cy.task("seedDisponibilidadEscenario", { bloqueos: [] });
 
     const sabado = proximoDia(6);
     const domingo = diaEnDias(sabado, 1);
 
+    // Arrange: obtener el id del tipo de evento "Reunión" de María García.
     obtenerTipoReunion().then((tipoEventoId) => {
+      // Act: consultar la disponibilidad para sábado y domingo.
       cy.request("POST", "/api/disponibilidad", {
         tipoEventoId,
         fechaDesde: ymd(sabado),
         fechaHasta: ymd(domingo),
       }).then((res) => {
+        // Assert: 200, dos días y ambos con la lista de slots vacía.
         expect(res.status).to.eq(200);
 
         const dias = res.body.data as DiaDisponible[];
