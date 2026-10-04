@@ -31,16 +31,10 @@ export async function reagendarReserva(input: {
     throw new ReagendarError("La reserva no existe");
   }
 
-  const nuevaFechaFin = new Date(
-    datos.nuevaFechaHoraInicio.getTime() + reserva.duracion * 60000
-  );
+  const nuevaFechaFin = new Date(datos.nuevaFechaHoraInicio.getTime() + reserva.duracion * 60000);
 
-  const ventanaInicio = new Date(
-    datos.nuevaFechaHoraInicio.getTime() - 24 * 60 * 60000
-  );
-  const ventanaFin = new Date(
-    datos.nuevaFechaHoraInicio.getTime() + 24 * 60 * 60000
-  );
+  const ventanaInicio = new Date(datos.nuevaFechaHoraInicio.getTime() - 24 * 60 * 60000);
+  const ventanaFin = new Date(datos.nuevaFechaHoraInicio.getTime() + 24 * 60 * 60000);
 
   const reservasActivas = await findReservasActivasEnRango(
     reserva.administradorId,

@@ -10,26 +10,25 @@ export async function reagendarReservaAction(input: {
   try {
     // Llamamos a tu lógica de negocio
     const resultado = await reagendarReserva(input);
-    
+
     // Retornamos un objeto de éxito para el frontend
-    return { 
-        success: true, 
-        data: resultado 
+    return {
+      success: true,
+      data: resultado,
     };
-    
   } catch (error) {
     // Si atrapamos el error específico de negocio que creaste, lo devolvemos
     if (error instanceof ReagendarError) {
-      return { 
-          success: false, 
-          error: error.message 
+      return {
+        success: false,
+        error: error.message,
       };
     }
-    
+
     // Fallback para errores no controlados (ej. caídas de base de datos)
-    return { 
-        success: false, 
-        error: "Ocurrió un error inesperado al intentar re-agendar la reserva." 
+    return {
+      success: false,
+      error: "Ocurrió un error inesperado al intentar re-agendar la reserva.",
     };
   }
 }

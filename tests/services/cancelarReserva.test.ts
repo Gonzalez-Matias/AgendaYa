@@ -48,9 +48,9 @@ describe("cancelarReserva (unitario con mocks)", () => {
     it("Test 2 (Error): lanza error si la reserva no existe", async () => {
       (repositorio.obtenerReservaPorId as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        cancelarReserva({ reservaId: 99999, motivo: "No existe" })
-      ).rejects.toThrow("Reserva no encontrada");
+      await expect(cancelarReserva({ reservaId: 99999, motivo: "No existe" })).rejects.toThrow(
+        "Reserva no encontrada"
+      );
 
       // Nunca intenta cancelar en la base de datos
       expect(repositorio.cancelarReservaAtomica).not.toHaveBeenCalled();
@@ -63,9 +63,7 @@ describe("cancelarReserva (unitario con mocks)", () => {
         estadoReserva: { id: 1, nombre: "Confirmada" },
       });
 
-      await expect(
-        cancelarReserva({ reservaId: 12, adminId: 2 })
-      ).rejects.toThrow(
+      await expect(cancelarReserva({ reservaId: 12, adminId: 2 })).rejects.toThrow(
         "No autorizado: la reserva no pertenece a este administrador"
       );
 
@@ -78,12 +76,8 @@ describe("cancelarReserva (unitario con mocks)", () => {
   // ---------------------------------------------------------------------------
   describe("validación de CancelarReservaInputSchema (Zod)", () => {
     it("Test 4 (Caso inválido): lanza error de validación si reservaId es negativo o no entero", async () => {
-      await expect(cancelarReserva({ reservaId: -1 })).rejects.toThrow(
-        z.ZodError
-      );
-      await expect(cancelarReserva({ reservaId: 1.5 })).rejects.toThrow(
-        z.ZodError
-      );
+      await expect(cancelarReserva({ reservaId: -1 })).rejects.toThrow(z.ZodError);
+      await expect(cancelarReserva({ reservaId: 1.5 })).rejects.toThrow(z.ZodError);
 
       // La validación falla antes de tocar el repositorio
       expect(repositorio.obtenerReservaPorId).not.toHaveBeenCalled();
@@ -105,11 +99,7 @@ describe("cancelarReserva (unitario con mocks)", () => {
       await expect(cancelarReserva({ reservaId: 10 })).resolves.toBeUndefined();
 
       // El campo motivo es opcional: se pasa undefined al repositorio
-      expect(repositorio.cancelarReservaAtomica).toHaveBeenCalledWith(
-        10,
-        2,
-        undefined
-      );
+      expect(repositorio.cancelarReservaAtomica).toHaveBeenCalledWith(10, 2, undefined);
     });
   });
 });

@@ -103,7 +103,10 @@ export default function AgendaPage() {
         <div className={styles.logo}>
           <div className={styles.logoIcon}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" fill="white" />
+              <path
+                d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"
+                fill="white"
+              />
             </svg>
           </div>
           <span className={styles.logoText}>AgendaYa</span>
@@ -120,19 +123,30 @@ export default function AgendaPage() {
             <span className={styles.navLabel}>Disponibilidad</span>
           </div>
           <div className={`${styles.navItem} ${styles.navItemActive}`}>
-            <span className={`${styles.navLabel} ${styles.navLabelActive}`}>Gestión de Reservas</span>
+            <span className={`${styles.navLabel} ${styles.navLabelActive}`}>
+              Gestión de Reservas
+            </span>
           </div>
         </nav>
 
         <div className={styles.userArea}>
           <div className={styles.userIcon}>
-            {adminNombre ? adminNombre.split(" ").map(p => p.charAt(0)).join("").toUpperCase().slice(0, 2) : "A"}
+            {adminNombre
+              ? adminNombre
+                  .split(" ")
+                  .map((p) => p.charAt(0))
+                  .join("")
+                  .toUpperCase()
+                  .slice(0, 2)
+              : "A"}
           </div>
         </div>
       </header>
 
       <div className={styles.body}>
-        <div className={`${styles.main} ${modoVista === "calendario" && subVista === "semanal" ? styles.mainFull : ""}`}>
+        <div
+          className={`${styles.main} ${modoVista === "calendario" && subVista === "semanal" ? styles.mainFull : ""}`}
+        >
           <CalendarToolbar
             fechaActual={fechaActual}
             modoVista={modoVista}
@@ -149,12 +163,25 @@ export default function AgendaPage() {
             </div>
           ) : modoVista === "calendario" ? (
             subVista === "semanal" ? (
-              <CalendarioSemanal reservas={reservas} fechaActual={fechaActual} onReservaClick={setReservaSeleccionada} />
+              <CalendarioSemanal
+                reservas={reservas}
+                fechaActual={fechaActual}
+                onReservaClick={setReservaSeleccionada}
+              />
             ) : (
-              <CalendarioMensual reservas={reservas} fechaActual={fechaActual} onReservaClick={setReservaSeleccionada} />
+              <CalendarioMensual
+                reservas={reservas}
+                fechaActual={fechaActual}
+                onReservaClick={setReservaSeleccionada}
+              />
             )
           ) : (
-            <ListaReservas reservas={reservas} fechaActual={fechaActual} subVista={subVista} onReservaClick={setReservaSeleccionada} />
+            <ListaReservas
+              reservas={reservas}
+              fechaActual={fechaActual}
+              subVista={subVista}
+              onReservaClick={setReservaSeleccionada}
+            />
           )}
         </div>
 

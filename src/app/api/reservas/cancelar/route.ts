@@ -10,13 +10,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "reservaId es requerido" }, { status: 400 });
     }
 
-    await cancelarReserva({ reservaId: Number(reservaId), motivo, adminId: Number(adminId) > 0 ? Number(adminId) : undefined });
+    await cancelarReserva({
+      reservaId: Number(reservaId),
+      motivo,
+      adminId: Number(adminId) > 0 ? Number(adminId) : undefined,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof Error) {
-      if (error.message.includes("no encontrada")) return NextResponse.json({ error: error.message }, { status: 404 });
-      if (error.message.includes("No autorizado")) return NextResponse.json({ error: error.message }, { status: 403 });
+      if (error.message.includes("no encontrada"))
+        return NextResponse.json({ error: error.message }, { status: 404 });
+      if (error.message.includes("No autorizado"))
+        return NextResponse.json({ error: error.message }, { status: 403 });
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });

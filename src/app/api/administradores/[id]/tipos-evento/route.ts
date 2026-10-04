@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findTiposEventoByAdmin } from "@/repositories/tipoEvento";
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const adminId = Number(id);

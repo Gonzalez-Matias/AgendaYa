@@ -12,13 +12,33 @@ interface MiniCalendarioProps {
 }
 
 const DIAS_CORTOS = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
-const MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+const MESES = [
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
+];
 
 function formatKey(day: number, month: number, year: number): string {
   return `${String(day).padStart(2, "0")}/${String(month + 1).padStart(2, "0")}/${year}`;
 }
 
-export function MiniCalendario({ month, year, diasDisponibles, selectedDate, onSelectDate, onMonthChange }: MiniCalendarioProps) {
+export function MiniCalendario({
+  month,
+  year,
+  diasDisponibles,
+  selectedDate,
+  onSelectDate,
+  onMonthChange,
+}: MiniCalendarioProps) {
   const primerDia = new Date(year, month, 1);
   const ultimoDia = new Date(year, month + 1, 0);
   const diasEnMes = ultimoDia.getDate();
@@ -57,16 +77,40 @@ export function MiniCalendario({ month, year, diasDisponibles, selectedDate, onS
   return (
     <div className={styles.container}>
       <div className={styles.nav}>
-        <span className={styles.monthTitle}>{MESES[month]} {year}</span>
+        <span className={styles.monthTitle}>
+          {MESES[month]} {year}
+        </span>
         <div className={styles.arrows}>
-          <button data-cy="reagendar-mes-anterior" className={styles.arrowBtn} onClick={handlePrevMonth} type="button">
+          <button
+            data-cy="reagendar-mes-anterior"
+            className={styles.arrowBtn}
+            onClick={handlePrevMonth}
+            type="button"
+          >
             <svg width="8" height="12" viewBox="0 0 8 12" fill="none">
-              <path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M7 1L1 6l6 5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
-          <button data-cy="reagendar-mes-siguiente" className={styles.arrowBtn} onClick={handleNextMonth} type="button">
+          <button
+            data-cy="reagendar-mes-siguiente"
+            className={styles.arrowBtn}
+            onClick={handleNextMonth}
+            type="button"
+          >
             <svg width="8" height="12" viewBox="0 0 8 12" fill="none">
-              <path d="M1 1l6 5-6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M1 1l6 5-6 5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
         </div>
@@ -74,7 +118,9 @@ export function MiniCalendario({ month, year, diasDisponibles, selectedDate, onS
 
       <div className={styles.dayHeaders}>
         {DIAS_CORTOS.map((d) => (
-          <div key={d} className={styles.dayHeader}>{d}</div>
+          <div key={d} className={styles.dayHeader}>
+            {d}
+          </div>
         ))}
       </div>
 

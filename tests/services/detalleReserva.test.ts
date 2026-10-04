@@ -27,9 +27,7 @@ describe("obtenerDetalleReserva", () => {
     expect(detalle.id).toBe(reservaSeed.id);
     expect(detalle.nombreInvitado).toBe("Juan Pérez");
     expect(detalle.emailInvitado).toBe("juan@email.com");
-    expect(detalle.fechaHoraInicio.getTime()).toBe(
-      reservaSeed.fechaHoraInicio.getTime()
-    );
+    expect(detalle.fechaHoraInicio.getTime()).toBe(reservaSeed.fechaHoraInicio.getTime());
     expect(detalle.fechaHoraFin.getTime()).toBe(
       reservaSeed.fechaHoraInicio.getTime() + reservaSeed.duracion * 60000
     );
@@ -77,20 +75,24 @@ describe("obtenerDetalleReserva", () => {
       data: { nombre: "Reunión", duracion: 30, antelacionMinima: 1, administradorId: admin.id },
     });
     const estado = await prisma.estadoReserva.upsert({
-      where: { nombre: "Confirmada" }, create: { nombre: "Confirmada" }, update: {},
+      where: { nombre: "Confirmada" },
+      create: { nombre: "Confirmada" },
+      update: {},
     });
 
     const reserva = await prisma.reserva.create({
       data: {
-        fechaHoraInicio: new Date(Date.now() + 86400000), duracion: 30,
-        nombreInvitado: "Juan", emailInvitado: "juan@email.com",
-        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
+        fechaHoraInicio: new Date(Date.now() + 86400000),
+        duracion: 30,
+        nombreInvitado: "Juan",
+        emailInvitado: "juan@email.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+        estadoReservaId: estado.id,
       },
     });
 
-    await expect(
-      obtenerDetalleReserva(reserva.id, otroAdmin.id)
-    ).rejects.toThrow("No autorizado");
+    await expect(obtenerDetalleReserva(reserva.id, otroAdmin.id)).rejects.toThrow("No autorizado");
   });
 
   it("debería permitir obtener detalle cuando adminId coincide con el dueño", async () => {
@@ -103,14 +105,20 @@ describe("obtenerDetalleReserva", () => {
       data: { nombre: "Reunión", duracion: 30, antelacionMinima: 1, administradorId: admin.id },
     });
     const estado = await prisma.estadoReserva.upsert({
-      where: { nombre: "Confirmada" }, create: { nombre: "Confirmada" }, update: {},
+      where: { nombre: "Confirmada" },
+      create: { nombre: "Confirmada" },
+      update: {},
     });
 
     const reserva = await prisma.reserva.create({
       data: {
-        fechaHoraInicio: new Date(Date.now() + 86400000), duracion: 30,
-        nombreInvitado: "Juan", emailInvitado: "juan@email.com",
-        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
+        fechaHoraInicio: new Date(Date.now() + 86400000),
+        duracion: 30,
+        nombreInvitado: "Juan",
+        emailInvitado: "juan@email.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+        estadoReservaId: estado.id,
       },
     });
 

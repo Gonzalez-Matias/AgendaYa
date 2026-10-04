@@ -22,18 +22,18 @@
 /* ── Variants ── */
 
 .dialogCancelar {
-  background: #F7F9FB;
-  outline: 1px solid #E0E3E5;
+  background: #f7f9fb;
+  outline: 1px solid #e0e3e5;
 }
 
 .dialogConfirmar {
   background: white;
-  outline: 1px solid #C3C5D9;
+  outline: 1px solid #c3c5d9;
 }
 
 .dialogCompletar {
-  background: #F7F9FB;
-  outline: 1px solid #C3C5D9;
+  background: #f7f9fb;
+  outline: 1px solid #c3c5d9;
 }
 
 /* ── Header ── */
@@ -77,7 +77,7 @@
 }
 
 .closeBtn:hover {
-  background: #E0E3E5;
+  background: #e0e3e5;
 }
 
 /* ── Icon boxes ── */
@@ -85,7 +85,7 @@
 .iconBoxCancelar {
   width: 48px;
   height: 48px;
-  background: #FFDAD6;
+  background: #ffdad6;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -105,7 +105,7 @@
 .iconBoxCompletar {
   width: 20px;
   height: 20px;
-  background: #003EC7;
+  background: #003ec7;
   border-radius: 12px;
   flex-shrink: 0;
 }
@@ -123,14 +123,14 @@
   font-size: 24px;
   font-weight: 600;
   line-height: 32px;
-  color: #191C1E;
+  color: #191c1e;
 }
 
 .titleCompletar {
   font-size: 18px;
   font-weight: 600;
   line-height: 24px;
-  color: #191C1E;
+  color: #191c1e;
 }
 
 .bodyText {
@@ -141,7 +141,7 @@
 }
 
 .bodyTextStrong {
-  color: #191C1E;
+  color: #191c1e;
   font-weight: 400;
 }
 
@@ -164,12 +164,12 @@
   width: 100%;
   min-height: 80px;
   padding: 12px;
-  border: 1px solid #C3C5D9;
+  border: 1px solid #c3c5d9;
   border-radius: 4px;
   font-size: 14px;
   font-family: Inter, sans-serif;
   line-height: 20px;
-  color: #191C1E;
+  color: #191c1e;
   background: white;
   resize: vertical;
   outline: none;
@@ -178,18 +178,18 @@
 }
 
 .textarea:focus {
-  border-color: #003EC7;
+  border-color: #003ec7;
 }
 
 .textarea::placeholder {
-  color: #9CA3AF;
+  color: #9ca3af;
 }
 
 /* ── Footer ── */
 
 .footer {
   padding: 16px 24px;
-  border-top: 1px solid #C3C5D9;
+  border-top: 1px solid #c3c5d9;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -207,7 +207,7 @@
 .btnVolver {
   padding: 8px 16px;
   border-radius: 4px;
-  outline: 1px solid #C3C5D9;
+  outline: 1px solid #c3c5d9;
   outline-offset: -1px;
   background: white;
   font-size: 12px;
@@ -225,12 +225,12 @@
 }
 
 .btnVolver:hover {
-  background: #F2F4F6;
+  background: #f2f4f6;
 }
 
 .btnConfirmCancelar {
   padding: 10px 16px;
-  background: #BA1A1A;
+  background: #ba1a1a;
   border: none;
   border-radius: 0;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
@@ -243,12 +243,12 @@
 }
 
 .btnConfirmCancelar:hover:not(:disabled) {
-  background: #9A1414;
+  background: #9a1414;
 }
 
 .btnConfirmar {
   padding: 8px 16px;
-  background: #0052FF;
+  background: #0052ff;
   border: none;
   border-radius: 4px;
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
@@ -261,12 +261,12 @@
 }
 
 .btnConfirmar:hover:not(:disabled) {
-  background: #0040CC;
+  background: #0040cc;
 }
 
 .btnCompletar {
   padding: 8px 16px;
-  background: #003EC7;
+  background: #003ec7;
   border: none;
   border-radius: 2px;
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
@@ -279,7 +279,7 @@
 }
 
 .btnCompletar:hover:not(:disabled) {
-  background: #002F9E;
+  background: #002f9e;
 }
 
 .btnDisabled {

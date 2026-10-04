@@ -140,9 +140,7 @@ async function asegurarTipoEventoReunion(client: Client, adminId: number): Promi
  * disponibilidad solo lunes y martes (08:00–17:00) y los bloqueos indicados.
  * Resetea reservas, disponibilidad y bloqueos previos de María para ser determinista.
  */
-async function seedDisponibilidadEscenario(
-  input: DisponibilidadFixture = {}
-): Promise<null> {
+async function seedDisponibilidadEscenario(input: DisponibilidadFixture = {}): Promise<null> {
   const bloqueos = input.bloqueos ?? [];
 
   await withClient(async (client) => {
@@ -155,14 +153,10 @@ async function seedDisponibilidadEscenario(
       [adminId]
     );
     await client.query(`DELETE FROM reserva WHERE "administradorId" = $1`, [adminId]);
-    await client.query(
-      `DELETE FROM disponibilidad_semanal WHERE "administradorId" = $1`,
-      [adminId]
-    );
-    await client.query(
-      `DELETE FROM bloqueo_agenda WHERE "administradorId" = $1`,
-      [adminId]
-    );
+    await client.query(`DELETE FROM disponibilidad_semanal WHERE "administradorId" = $1`, [
+      adminId,
+    ]);
+    await client.query(`DELETE FROM bloqueo_agenda WHERE "administradorId" = $1`, [adminId]);
 
     await client.query(
       `INSERT INTO disponibilidad_semanal ("diaSemana", "horaInicio", "horaFin", "administradorId")
@@ -174,7 +168,12 @@ async function seedDisponibilidadEscenario(
       await client.query(
         `INSERT INTO bloqueo_agenda ("fechaInicio", "fechaFin", motivo, "administradorId")
          VALUES ($1, $2, $3, $4)`,
-        [toDbTimestamp(bloqueo.fechaInicio), toDbTimestamp(bloqueo.fechaFin), bloqueo.motivo ?? null, adminId]
+        [
+          toDbTimestamp(bloqueo.fechaInicio),
+          toDbTimestamp(bloqueo.fechaFin),
+          bloqueo.motivo ?? null,
+          adminId,
+        ]
       );
     }
   });
