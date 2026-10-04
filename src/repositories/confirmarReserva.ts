@@ -10,10 +10,7 @@ export async function findReservaById(id: number) {
   });
 }
 
-export async function confirmarReservaEnTransaccion(
-  reservaId: number,
-  nuevoEstadoId: number
-) {
+export async function confirmarReservaEnTransaccion(reservaId: number, nuevoEstadoId: number) {
   return prisma.$transaction(async (tx) => {
     const reserva = await tx.reserva.update({
       where: { id: reservaId },

@@ -1,0 +1,10 @@
+node_modules
+.next
+coverage
+src/generated
+prisma/migrations
+package-lock.json
+cypress/reports
+cypress/screenshots
+test-report.html
+public

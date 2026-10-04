@@ -11,7 +11,20 @@ interface ListaReservasProps {
 }
 
 const DIAS_CORTOS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
-const MESES_CORTOS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+const MESES_CORTOS = [
+  "ene",
+  "feb",
+  "mar",
+  "abr",
+  "may",
+  "jun",
+  "jul",
+  "ago",
+  "sep",
+  "oct",
+  "nov",
+  "dic",
+];
 
 const PALETTE = [
   { bg: "#003EC7", text: "#FFFFFF" },
@@ -44,7 +57,11 @@ function parseDateKey(fecha: string): string {
 }
 
 function esMismaFecha(a: Date, b: Date): boolean {
-  return a.getDate() === b.getDate() && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
+  return (
+    a.getDate() === b.getDate() &&
+    a.getMonth() === b.getMonth() &&
+    a.getFullYear() === b.getFullYear()
+  );
 }
 
 function esHoy(fecha: Date): boolean {
@@ -59,12 +76,24 @@ function esManana(fecha: Date): boolean {
 
 function formatDayHeader(fecha: Date): { label: string; dateStr: string; isToday: boolean } {
   if (esHoy(fecha)) {
-    return { label: "Hoy", dateStr: `${fecha.getDate()} ${MESES_CORTOS[fecha.getMonth()]}, ${DIAS_CORTOS[fecha.getDay()]}`, isToday: true };
+    return {
+      label: "Hoy",
+      dateStr: `${fecha.getDate()} ${MESES_CORTOS[fecha.getMonth()]}, ${DIAS_CORTOS[fecha.getDay()]}`,
+      isToday: true,
+    };
   }
   if (esManana(fecha)) {
-    return { label: "Mañana", dateStr: `${fecha.getDate()} ${MESES_CORTOS[fecha.getMonth()]}, ${DIAS_CORTOS[fecha.getDay()]}`, isToday: false };
+    return {
+      label: "Mañana",
+      dateStr: `${fecha.getDate()} ${MESES_CORTOS[fecha.getMonth()]}, ${DIAS_CORTOS[fecha.getDay()]}`,
+      isToday: false,
+    };
   }
-  return { label: `${fecha.getDate()} ${MESES_CORTOS[fecha.getMonth()]}`, dateStr: DIAS_CORTOS[fecha.getDay()], isToday: false };
+  return {
+    label: `${fecha.getDate()} ${MESES_CORTOS[fecha.getMonth()]}`,
+    dateStr: DIAS_CORTOS[fecha.getDay()],
+    isToday: false,
+  };
 }
 
 function esPasada(reserva: ReservaVista): boolean {
@@ -88,29 +117,39 @@ function getWeekDays(fechaActual: Date): Date[] {
   });
 }
 
-export function ListaReservas({ reservas, fechaActual, subVista, onReservaClick }: ListaReservasProps) {
+export function ListaReservas({
+  reservas,
+  fechaActual,
+  subVista,
+  onReservaClick,
+}: ListaReservasProps) {
   const tipoColorMap = buildTipoColorMap(reservas);
 
   if (reservas.length === 0) {
     return (
       <div className={styles.listaContainer}>
-        <div className={`${styles.noEvents}`} data-cy="no-reservas">No hay reservas para este período</div>
+        <div className={`${styles.noEvents}`} data-cy="no-reservas">
+          No hay reservas para este período
+        </div>
       </div>
     );
   }
 
-  const datesToFechas = subVista === "semanal"
-    ? getWeekDays(fechaActual)
-    : (() => {
-        const y = fechaActual.getFullYear();
-        const m = fechaActual.getMonth();
-        const diasMes = new Date(y, m + 1, 0).getDate();
-        return Array.from({ length: diasMes }, (_, i) => new Date(y, m, i + 1));
-      })();
+  const datesToFechas =
+    subVista === "semanal"
+      ? getWeekDays(fechaActual)
+      : (() => {
+          const y = fechaActual.getFullYear();
+          const m = fechaActual.getMonth();
+          const diasMes = new Date(y, m + 1, 0).getDate();
+          return Array.from({ length: diasMes }, (_, i) => new Date(y, m, i + 1));
+        })();
 
   const dateKeyToFechas = new Map<string, Date>();
   datesToFechas.forEach((f) => {
-    const key = parseDateKey(`${String(f.getDate()).padStart(2, "0")}/${String(f.getMonth() + 1).padStart(2, "0")}/${f.getFullYear()}`);
+    const key = parseDateKey(
+      `${String(f.getDate()).padStart(2, "0")}/${String(f.getMonth() + 1).padStart(2, "0")}/${f.getFullYear()}`
+    );
     dateKeyToFechas.set(key, f);
   });
 
@@ -141,7 +180,9 @@ export function ListaReservas({ reservas, fechaActual, subVista, onReservaClick 
           return (
             <div key={dateKey} className={styles.dayGroup}>
               <div className={styles.dayHeader}>
-                <span className={`${styles.dayLabel} ${header.isToday ? styles.dayLabelToday : ""}`}>
+                <span
+                  className={`${styles.dayLabel} ${header.isToday ? styles.dayLabelToday : ""}`}
+                >
                   {header.label}
                 </span>
                 <span className={styles.dayDate}>• {header.dateStr}</span>
@@ -160,18 +201,35 @@ export function ListaReservas({ reservas, fechaActual, subVista, onReservaClick 
                     const past = esPasada(r);
 
                     return (
-                      <div key={r.id} data-cy="reserva-item" data-reserva-id={r.id} data-cy-estado={r.estado} className={`${styles.eventCard} ${past ? styles.eventCardPast : ""}`} onClick={() => onReservaClick?.(r.id)} role="button" tabIndex={0}>
+                      <div
+                        key={r.id}
+                        data-cy="reserva-item"
+                        data-reserva-id={r.id}
+                        data-cy-estado={r.estado}
+                        className={`${styles.eventCard} ${past ? styles.eventCardPast : ""}`}
+                        onClick={() => onReservaClick?.(r.id)}
+                        role="button"
+                        tabIndex={0}
+                      >
                         <div className={styles.timeColumn}>
                           <span className={styles.startTime}>{startStr}</span>
                           <span className={styles.endTime}>{endStr}</span>
                         </div>
                         <div className={styles.detailsColumn}>
-                          <span className={styles.eventTitle}>{r.tipoEvento} - {r.nombreInvitado}</span>
+                          <span className={styles.eventTitle}>
+                            {r.tipoEvento} - {r.nombreInvitado}
+                          </span>
                           <div className={styles.badgesRow}>
-                            <span className={styles.typeBadge} style={{ background: tc.bg, color: tc.text }}>
+                            <span
+                              className={styles.typeBadge}
+                              style={{ background: tc.bg, color: tc.text }}
+                            >
                               {r.tipoEvento}
                             </span>
-                            <span className={styles.statusBadge} style={{ background: sc.bg, color: sc.text }}>
+                            <span
+                              className={styles.statusBadge}
+                              style={{ background: sc.bg, color: sc.text }}
+                            >
                               {sc.label}
                             </span>
                           </div>

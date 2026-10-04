@@ -49,9 +49,7 @@ describe("confirmarReserva service", () => {
   });
 
   it("debería lanzar un error si la reserva no existe", async () => {
-    await expect(
-      confirmarReserva({ reservaId: 99999 })
-    ).rejects.toThrow("Reserva no encontrada");
+    await expect(confirmarReserva({ reservaId: 99999 })).rejects.toThrow("Reserva no encontrada");
   });
 
   it("debería lanzar un error si la reserva ya está confirmada", async () => {
@@ -84,9 +82,9 @@ describe("confirmarReserva service", () => {
       },
     });
 
-    await expect(
-      confirmarReserva({ reservaId: reserva.id })
-    ).rejects.toThrow("La reserva ya está confirmada");
+    await expect(confirmarReserva({ reservaId: reserva.id })).rejects.toThrow(
+      "La reserva ya está confirmada"
+    );
   });
 
   it("debería lanzar un error si la reserva está cancelada", async () => {
@@ -119,9 +117,9 @@ describe("confirmarReserva service", () => {
       },
     });
 
-    await expect(
-      confirmarReserva({ reservaId: reserva.id })
-    ).rejects.toThrow("No se puede confirmar una reserva cancelada");
+    await expect(confirmarReserva({ reservaId: reserva.id })).rejects.toThrow(
+      "No se puede confirmar una reserva cancelada"
+    );
   });
 
   it("debería lanzar un error si la reserva está completada", async () => {
@@ -154,9 +152,9 @@ describe("confirmarReserva service", () => {
       },
     });
 
-    await expect(
-      confirmarReserva({ reservaId: reserva.id })
-    ).rejects.toThrow("No se puede confirmar una reserva completada");
+    await expect(confirmarReserva({ reservaId: reserva.id })).rejects.toThrow(
+      "No se puede confirmar una reserva completada"
+    );
   });
 
   it("debería rechazar si adminId no coincide con el dueño", async () => {
@@ -169,13 +167,19 @@ describe("confirmarReserva service", () => {
     const tipoEvento = await prisma.tipoEvento.create({
       data: { nombre: "Consulta", duracion: 60, antelacionMinima: 1, administradorId: admin.id },
     });
-    const estadoPendiente = await prisma.estadoReserva.create({ data: { nombre: "PendienteDeConfirmacion" } });
+    const estadoPendiente = await prisma.estadoReserva.create({
+      data: { nombre: "PendienteDeConfirmacion" },
+    });
 
     const reserva = await prisma.reserva.create({
       data: {
-        fechaHoraInicio: new Date(Date.now() + 86400000), duracion: 60,
-        nombreInvitado: "María", emailInvitado: "maria@email.com",
-        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estadoPendiente.id,
+        fechaHoraInicio: new Date(Date.now() + 86400000),
+        duracion: 60,
+        nombreInvitado: "María",
+        emailInvitado: "maria@email.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+        estadoReservaId: estadoPendiente.id,
       },
     });
 
@@ -191,14 +195,20 @@ describe("confirmarReserva service", () => {
     const tipoEvento = await prisma.tipoEvento.create({
       data: { nombre: "Consulta", duracion: 60, antelacionMinima: 1, administradorId: admin.id },
     });
-    const estadoPendiente = await prisma.estadoReserva.create({ data: { nombre: "PendienteDeConfirmacion" } });
+    const estadoPendiente = await prisma.estadoReserva.create({
+      data: { nombre: "PendienteDeConfirmacion" },
+    });
     await prisma.estadoReserva.create({ data: { nombre: "Confirmada" } });
 
     const reserva = await prisma.reserva.create({
       data: {
-        fechaHoraInicio: new Date(Date.now() + 86400000), duracion: 60,
-        nombreInvitado: "María", emailInvitado: "maria@email.com",
-        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estadoPendiente.id,
+        fechaHoraInicio: new Date(Date.now() + 86400000),
+        duracion: 60,
+        nombreInvitado: "María",
+        emailInvitado: "maria@email.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+        estadoReservaId: estadoPendiente.id,
       },
     });
 

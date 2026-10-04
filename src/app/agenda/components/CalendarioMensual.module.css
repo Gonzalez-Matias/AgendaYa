@@ -2,7 +2,7 @@
   background: white;
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
   border-radius: 8px;
-  outline: 1px solid #C3C5D9;
+  outline: 1px solid #c3c5d9;
   outline-offset: -1px;
 }
 
@@ -10,7 +10,7 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   background: rgba(242, 244, 246, 0.5);
-  border-bottom: 1px solid #C3C5D9;
+  border-bottom: 1px solid #c3c5d9;
 }
 
 .headerCell {
@@ -19,7 +19,7 @@
   font-size: 11px;
   font-weight: 700;
   color: #434656;
-  border-right: 1px solid #C3C5D9;
+  border-right: 1px solid #c3c5d9;
 }
 
 .headerCell:last-child {
@@ -36,8 +36,8 @@
   min-height: 100px;
   padding: 4px;
   background: white;
-  border-right: 1px solid #C3C5D9;
-  border-top: 1px solid #C3C5D9;
+  border-right: 1px solid #c3c5d9;
+  border-top: 1px solid #c3c5d9;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -47,7 +47,7 @@
   border-right: none;
 }
 
-.cell:nth-child(-n+7) {
+.cell:nth-child(-n + 7) {
   border-top: none;
 }
 
@@ -66,7 +66,7 @@
 .dayNumber {
   font-size: 12px;
   font-weight: 600;
-  color: #191C1E;
+  color: #191c1e;
   padding: 4px;
   height: 24px;
 }
@@ -78,7 +78,7 @@
 .todayNumber {
   width: 24px;
   height: 24px;
-  background: #003EC7;
+  background: #003ec7;
   border-radius: 12px;
   color: white;
   display: flex;
@@ -113,14 +113,14 @@
 
 .eventTime {
   flex-shrink: 0;
-  color: #191C1E;
+  color: #191c1e;
 }
 
 .eventName {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #191C1E;
+  color: #191c1e;
   display: flex;
   align-items: center;
   gap: 3px;
@@ -128,7 +128,7 @@
 
 .moreEvents {
   font-size: 10px;
-  color: #003EC7;
+  color: #003ec7;
   padding: 2px 4px;
   cursor: pointer;
   font-weight: 600;
@@ -146,7 +146,7 @@
   left: 0;
   right: 0;
   background: white;
-  border: 1px solid #C3C5D9;
+  border: 1px solid #c3c5d9;
   border-radius: 6px;
   box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.12);
   z-index: 50;
@@ -169,7 +169,7 @@
 }
 
 .popupEvent:hover {
-  background: #F2F4F6;
+  background: #f2f4f6;
 }
 
 .popupEventColor {
@@ -196,7 +196,7 @@
 .popupEventName {
   font-size: 11px;
   font-weight: 500;
-  color: #191C1E;
+  color: #191c1e;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

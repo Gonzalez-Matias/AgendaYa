@@ -13,7 +13,7 @@
   max-width: 768px;
   background: white;
   border-radius: 8px;
-  outline: 1px solid #C3C5D9;
+  outline: 1px solid #c3c5d9;
   outline-offset: -1px;
   display: flex;
   flex-direction: column;
@@ -24,7 +24,7 @@
 .header {
   padding: 24px 32px;
   background: white;
-  border-bottom: 1px solid #C3C5D9;
+  border-bottom: 1px solid #c3c5d9;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -37,7 +37,7 @@
 }
 
 .title {
-  color: #191C1E;
+  color: #191c1e;
   font-size: 24px;
   font-weight: 600;
   line-height: 32px;
@@ -63,7 +63,7 @@
 }
 
 .closeBtn:hover {
-  background: #F2F4F6;
+  background: #f2f4f6;
 }
 
 .body {
@@ -82,7 +82,7 @@
 }
 
 .eventName {
-  color: #191C1E;
+  color: #191c1e;
   font-size: 18px;
   font-weight: 600;
   line-height: 24px;
@@ -145,30 +145,30 @@
   padding: 8px 16px;
   background: white;
   border-radius: 4px;
-  outline: 1px solid #C3C5D9;
+  outline: 1px solid #c3c5d9;
   outline-offset: -1px;
   border: none;
   cursor: pointer;
-  color: #191C1E;
+  color: #191c1e;
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
 }
 
 .slotBtn:hover {
-  background: #F7F9FB;
+  background: #f7f9fb;
 }
 
 .slotBtnSelected {
-  background: #DDE1FF;
-  outline: 2px solid #003EC7;
+  background: #dde1ff;
+  outline: 2px solid #003ec7;
   outline-offset: -2px;
-  color: #003EC7;
+  color: #003ec7;
   font-weight: 500;
 }
 
 .noSlots {
-  color: #9CA3AF;
+  color: #9ca3af;
   font-size: 14px;
   font-style: italic;
   padding: 8px 0;
@@ -177,7 +177,7 @@
 .footer {
   padding: 20px 32px;
   background: white;
-  border-top: 1px solid #C3C5D9;
+  border-top: 1px solid #c3c5d9;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -190,7 +190,7 @@
   border: none;
   background: none;
   cursor: pointer;
-  color: #191C1E;
+  color: #191c1e;
   font-size: 12px;
   font-weight: 600;
   line-height: 16px;
@@ -199,12 +199,12 @@
 }
 
 .cancelBtn:hover:not(:disabled) {
-  background: #F2F4F6;
+  background: #f2f4f6;
 }
 
 .confirmBtn {
   padding: 8px 24px;
-  background: #0052FF;
+  background: #0052ff;
   border-radius: 4px;
   border: none;
   cursor: pointer;
@@ -217,7 +217,7 @@
 }
 
 .confirmBtn:hover:not(:disabled) {
-  background: #003EC7;
+  background: #003ec7;
 }
 
 .confirmBtn:disabled,
@@ -243,7 +243,7 @@
   background: white;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
   border-radius: 8px;
-  outline: 1px solid #C3C5D9;
+  outline: 1px solid #c3c5d9;
   outline-offset: -1px;
   display: flex;
   flex-direction: column;
@@ -260,16 +260,16 @@
 .confirmIcon {
   width: 48px;
   height: 48px;
-  background: #D0E1FB;
+  background: #d0e1fb;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #54647A;
+  color: #54647a;
 }
 
 .confirmTitle {
-  color: #191C1E;
+  color: #191c1e;
   font-size: 24px;
   font-weight: 600;
   line-height: 32px;
@@ -278,7 +278,7 @@
 
 .confirmInfo {
   padding: 16px;
-  background: #F2F4F6;
+  background: #f2f4f6;
   border-radius: 4px;
   outline: 1px solid rgba(195, 197, 217, 0.5);
   outline-offset: -1px;
@@ -314,14 +314,14 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #191C1E;
+  color: #191c1e;
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
 }
 
 .confirmDetailIcon {
-  color: #003EC7;
+  color: #003ec7;
   display: flex;
   align-items: center;
 }
@@ -337,7 +337,7 @@
 .confirmCancelBtn {
   padding: 10px 16px;
   border-radius: 12px;
-  outline: 1px solid #C3C5D9;
+  outline: 1px solid #c3c5d9;
   outline-offset: -1px;
   border: none;
   background: none;
@@ -350,17 +350,17 @@
 }
 
 .confirmCancelBtn:hover:not(:disabled) {
-  background: #F2F4F6;
+  background: #f2f4f6;
 }
 
 .confirmAcceptBtn {
   padding: 10px 16px;
-  background: #0052FF;
+  background: #0052ff;
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
   border-radius: 12px;
   border: none;
   cursor: pointer;
-  color: #DFE3FF;
+  color: #dfe3ff;
   font-size: 12px;
   font-weight: 600;
   line-height: 16px;
@@ -368,7 +368,7 @@
 }
 
 .confirmAcceptBtn:hover:not(:disabled) {
-  background: #003EC7;
+  background: #003ec7;
 }
 
 .confirmCancelBtn:disabled,
@@ -379,7 +379,7 @@
 
 .noteSection {
   padding-top: 24px;
-  border-top: 1px solid #C3C5D9;
+  border-top: 1px solid #c3c5d9;
   display: flex;
   flex-direction: column;
   gap: 8px;
