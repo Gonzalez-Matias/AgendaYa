@@ -10,7 +10,8 @@ export interface ReservaVista {
   nombreInvitado: string;
   emailInvitado: string;
   tipoEvento: string;
-  estado: "Confirmada" | "PendienteDeConfirmacion" | "PendienteDeReagendar" | "Cancelada" | "Completada";
+  estado:
+    "Confirmada" | "PendienteDeConfirmacion" | "PendienteDeReagendar" | "Cancelada" | "Completada";
   colorFondo: string;
 }
 
@@ -34,10 +35,7 @@ export function getModoVistaDefault(): ModoVista {
  * Cambia el modo de vista actual al modo seleccionado por el administrador.
  * No recarga datos, solo cambia la representación.
  */
-export function cambiarModoVista(
-  vistaActual: ModoVista,
-  nuevaVista: ModoVista
-): ModoVista {
+export function cambiarModoVista(vistaActual: ModoVista, nuevaVista: ModoVista): ModoVista {
   return nuevaVista;
 }
 

@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { obtenerDetalleReserva } from "@/services/detalleReserva";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const reservaId = Number(id);
@@ -15,7 +12,10 @@ export async function GET(
 
     const adminId = request.nextUrl.searchParams.get("adminId");
     const adminIdNum = Number(adminId);
-    const resultado = await obtenerDetalleReserva(reservaId, adminIdNum > 0 ? adminIdNum : undefined);
+    const resultado = await obtenerDetalleReserva(
+      reservaId,
+      adminIdNum > 0 ? adminIdNum : undefined
+    );
 
     return NextResponse.json({ data: resultado });
   } catch (error) {

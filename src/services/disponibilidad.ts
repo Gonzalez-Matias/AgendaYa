@@ -20,12 +20,7 @@ const Schema = z.object({
   fechaHasta: z.date(),
 });
 
-function haySuperposicion(
-  slotInicio: Date,
-  slotFin: Date,
-  objInicio: Date,
-  objFin: Date
-): boolean {
+function haySuperposicion(slotInicio: Date, slotFin: Date, objInicio: Date, objFin: Date): boolean {
   return slotInicio < objFin && slotFin > objInicio;
 }
 
@@ -67,16 +62,8 @@ export async function consultarDisponibilidad(
   const ultimoDia = new Date(ultimoDiaConsultado);
   ultimoDia.setDate(ultimoDia.getDate() + 1);
 
-  const reservas = await findReservasEnRango(
-    administradorId,
-    primerDia,
-    ultimoDia
-  );
-  const bloqueos = await findBloqueosEnRango(
-    administradorId,
-    primerDia,
-    ultimoDia
-  );
+  const reservas = await findReservasEnRango(administradorId, primerDia, ultimoDia);
+  const bloqueos = await findBloqueosEnRango(administradorId, primerDia, ultimoDia);
 
   const dispMap = new Map<number, typeof disponibilidades>();
   for (const d of disponibilidades) {
@@ -114,19 +101,13 @@ export async function consultarDisponibilidad(
       const rFin = new Date(r.fechaHoraInicio.getTime() + r.duracion * 60000);
       return r.fechaHoraInicio < diaFin && rFin > diaInicio;
     });
-    const bloqueosDelDia = bloqueos.filter(
-      (b) => b.fechaInicio < diaFin && b.fechaFin > diaInicio
-    );
+    const bloqueosDelDia = bloqueos.filter((b) => b.fechaInicio < diaFin && b.fechaFin > diaInicio);
 
     const slots: SlotDisponible[] = [];
     const minutosVistos = new Set<number>();
 
     for (const disp of disps) {
-      for (
-        let min = disp.horaInicio;
-        min + INTERVALO <= disp.horaFin;
-        min += INTERVALO
-      ) {
+      for (let min = disp.horaInicio; min + INTERVALO <= disp.horaFin; min += INTERVALO) {
         if (minutosVistos.has(min)) continue;
         minutosVistos.add(min);
 

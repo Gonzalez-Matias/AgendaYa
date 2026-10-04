@@ -48,9 +48,7 @@ describe("completarReserva service", () => {
   });
 
   it("debería lanzar un error si la reserva no existe", async () => {
-    await expect(
-      completarReserva({ reservaId: 99999 })
-    ).rejects.toThrow("Reserva no encontrada");
+    await expect(completarReserva({ reservaId: 99999 })).rejects.toThrow("Reserva no encontrada");
   });
 
   it("debería lanzar un error si la reserva está Cancelada", async () => {
@@ -83,9 +81,9 @@ describe("completarReserva service", () => {
       },
     });
 
-    await expect(
-      completarReserva({ reservaId: reserva.id })
-    ).rejects.toThrow("Solo se pueden marcar como completadas las reservas en estado Confirmada");
+    await expect(completarReserva({ reservaId: reserva.id })).rejects.toThrow(
+      "Solo se pueden marcar como completadas las reservas en estado Confirmada"
+    );
   });
 
   it("debería lanzar un error si la reserva está PendienteDeConfirmacion", async () => {
@@ -118,15 +116,13 @@ describe("completarReserva service", () => {
       },
     });
 
-    await expect(
-      completarReserva({ reservaId: reserva.id })
-    ).rejects.toThrow("Solo se pueden marcar como completadas las reservas en estado Confirmada");
+    await expect(completarReserva({ reservaId: reserva.id })).rejects.toThrow(
+      "Solo se pueden marcar como completadas las reservas en estado Confirmada"
+    );
   });
 
   it("debería lanzar un error si el ID no es válido", async () => {
-    await expect(
-      completarReserva({ reservaId: -1 })
-    ).rejects.toThrow();
+    await expect(completarReserva({ reservaId: -1 })).rejects.toThrow();
   });
 
   it("debería rechazar si adminId no coincide con el dueño de la reserva", async () => {
@@ -146,9 +142,13 @@ describe("completarReserva service", () => {
 
     const reserva = await prisma.reserva.create({
       data: {
-        fechaHoraInicio: new Date(Date.now() + 86400000), duracion: 30,
-        nombreInvitado: "Juan", emailInvitado: "juan@email.com",
-        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
+        fechaHoraInicio: new Date(Date.now() + 86400000),
+        duracion: 30,
+        nombreInvitado: "Juan",
+        emailInvitado: "juan@email.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+        estadoReservaId: estado.id,
       },
     });
 
@@ -171,9 +171,13 @@ describe("completarReserva service", () => {
 
     const reserva = await prisma.reserva.create({
       data: {
-        fechaHoraInicio: new Date(Date.now() + 86400000), duracion: 30,
-        nombreInvitado: "Juan", emailInvitado: "juan@email.com",
-        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
+        fechaHoraInicio: new Date(Date.now() + 86400000),
+        duracion: 30,
+        nombreInvitado: "Juan",
+        emailInvitado: "juan@email.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+        estadoReservaId: estado.id,
       },
     });
 

@@ -10,7 +10,13 @@ export function StatusIcon({ estado, size = 16 }: StatusIconProps) {
   if (estado === "Confirmada") {
     return (
       <svg width={s} height={s} viewBox="0 0 16 16" fill="none">
-        <path d="M3 8l4 4 6-6" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          d="M3 8l4 4 6-6"
+          stroke="#16A34A"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     );
   }

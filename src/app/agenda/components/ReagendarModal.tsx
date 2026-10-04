@@ -30,7 +30,20 @@ interface ReagendarModalProps {
 }
 
 const DIAS_LARGOS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-const MESES_LARGOS = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+const MESES_LARGOS = [
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
+];
 
 function formatearSlotHora(isoStr: string): string {
   const d = new Date(isoStr);
@@ -55,7 +68,10 @@ function formatDateLong(dateStr: string): string {
   return `${DIAS_LARGOS[d.getDay()]}, ${MESES_LARGOS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
-function agruparSlots(slotsBrutos: { inicio: string; fin: string }[], duracionMin: number): SlotInfo[] {
+function agruparSlots(
+  slotsBrutos: { inicio: string; fin: string }[],
+  duracionMin: number
+): SlotInfo[] {
   const resultado: SlotInfo[] = [];
   const cantidad = duracionMin / 15;
   for (let i = 0; i <= slotsBrutos.length - cantidad; i++) {
@@ -111,36 +127,41 @@ export function ReagendarModal({
     })
   );
 
-  const fetchDisponibilidad = useCallback(async (desde: Date, hasta: Date) => {
-    setCargando(true);
-    setError("");
-    try {
-      const res = await fetch("/api/disponibilidad", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tipoEventoId,
-          fechaDesde: desde.toISOString(),
-          fechaHasta: hasta.toISOString(),
-        }),
-      });
-      const data = await res.json();
-      if (data.error) {
-        setError(data.error);
-        setDisponibilidad([]);
-      } else {
-        const dias: DiaInfo[] = (data.data || []).map((d: { fecha: string; slots: { inicio: string; fin: string }[] }) => ({
-          fecha: d.fecha,
-          slots: agruparSlots(d.slots, duracion),
-        }));
-        setDisponibilidad(dias);
+  const fetchDisponibilidad = useCallback(
+    async (desde: Date, hasta: Date) => {
+      setCargando(true);
+      setError("");
+      try {
+        const res = await fetch("/api/disponibilidad", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tipoEventoId,
+            fechaDesde: desde.toISOString(),
+            fechaHasta: hasta.toISOString(),
+          }),
+        });
+        const data = await res.json();
+        if (data.error) {
+          setError(data.error);
+          setDisponibilidad([]);
+        } else {
+          const dias: DiaInfo[] = (data.data || []).map(
+            (d: { fecha: string; slots: { inicio: string; fin: string }[] }) => ({
+              fecha: d.fecha,
+              slots: agruparSlots(d.slots, duracion),
+            })
+          );
+          setDisponibilidad(dias);
+        }
+      } catch {
+        setError("Error al cargar disponibilidad");
+      } finally {
+        setCargando(false);
       }
-    } catch {
-      setError("Error al cargar disponibilidad");
-    } finally {
-      setCargando(false);
-    }
-  }, [tipoEventoId, duracion]);
+    },
+    [tipoEventoId, duracion]
+  );
 
   useEffect(() => {
     const desde = new Date(calendarYear, calendarMonth, 1);
@@ -225,23 +246,48 @@ export function ReagendarModal({
             <span className={styles.title}>Reagendar Reserva</span>
             <span className={styles.subtitle}>Elija nueva fecha y horario</span>
           </div>
-          <button data-cy="reagendar-close" className={styles.closeBtn} onClick={onClose} type="button">
+          <button
+            data-cy="reagendar-close"
+            className={styles.closeBtn}
+            onClick={onClose}
+            type="button"
+          >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M1 1l12 12M13 1L1 13" stroke="#434656" strokeWidth="1.5" strokeLinecap="round" />
+              <path
+                d="M1 1l12 12M13 1L1 13"
+                stroke="#434656"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </svg>
           </button>
         </div>
 
         <div className={styles.body}>
           <div className={styles.eventInfo}>
-            <span className={styles.eventName}>{tipoEvento} - {nombreInvitado}</span>
+            <span className={styles.eventName}>
+              {tipoEvento} - {nombreInvitado}
+            </span>
             <div className={styles.eventDetails}>
               <div className={styles.detailRow}>
                 <div className={styles.detailIcon}>
                   <svg width="18" height="20" viewBox="0 0 18 20" fill="none">
-                    <rect x="1" y="2" width="16" height="17" rx="2" stroke="#737688" strokeWidth="1.5" />
+                    <rect
+                      x="1"
+                      y="2"
+                      width="16"
+                      height="17"
+                      rx="2"
+                      stroke="#737688"
+                      strokeWidth="1.5"
+                    />
                     <path d="M1 7h16" stroke="#737688" strokeWidth="1.5" />
-                    <path d="M5 1v3M13 1v3" stroke="#737688" strokeWidth="1.5" strokeLinecap="round" />
+                    <path
+                      d="M5 1v3M13 1v3"
+                      stroke="#737688"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
                   </svg>
                 </div>
                 <span className={styles.detailText}>{formatDateLong(fechaActual)}</span>
@@ -250,7 +296,12 @@ export function ReagendarModal({
                 <div className={styles.detailIcon}>
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <circle cx="10" cy="10" r="8" stroke="#737688" strokeWidth="1.5" />
-                    <path d="M10 5v5l4 2" stroke="#737688" strokeWidth="1.5" strokeLinecap="round" />
+                    <path
+                      d="M10 5v5l4 2"
+                      stroke="#737688"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
                   </svg>
                 </div>
                 <span className={styles.detailText}>{horarioActual}</span>
@@ -267,9 +318,17 @@ export function ReagendarModal({
 
           <div className={styles.calendarSection}>
             {cargando ? (
-              <span className={styles.noSlots} data-cy="reagendar-loading">Cargando disponibilidad...</span>
+              <span className={styles.noSlots} data-cy="reagendar-loading">
+                Cargando disponibilidad...
+              </span>
             ) : error ? (
-              <span data-cy="reagendar-error" className={styles.noSlots} style={{ color: "#EF4444" }}>{error}</span>
+              <span
+                data-cy="reagendar-error"
+                className={styles.noSlots}
+                style={{ color: "#EF4444" }}
+              >
+                {error}
+              </span>
             ) : (
               <MiniCalendario
                 month={calendarMonth}
@@ -303,13 +362,21 @@ export function ReagendarModal({
 
           {selectedDate && slotsDelDia.length === 0 && !cargando && (
             <div className={styles.slotsSection}>
-              <span data-cy="reagendar-sin-turnos" className={styles.noSlots}>No hay turnos disponibles para esta fecha</span>
+              <span data-cy="reagendar-sin-turnos" className={styles.noSlots}>
+                No hay turnos disponibles para esta fecha
+              </span>
             </div>
           )}
         </div>
 
         <div className={styles.footer}>
-          <button data-cy="reagendar-cancelar" className={styles.cancelBtn} onClick={onClose} disabled={procesando} type="button">
+          <button
+            data-cy="reagendar-cancelar"
+            className={styles.cancelBtn}
+            onClick={onClose}
+            disabled={procesando}
+            type="button"
+          >
             Cancelar
           </button>
           <button
@@ -325,13 +392,23 @@ export function ReagendarModal({
       </div>
 
       {confirmando && selectedSlot && (
-        <div className={styles.confirmOverlay} onClick={() => setConfirmando(false)} data-cy="reagendar-confirmacion">
+        <div
+          className={styles.confirmOverlay}
+          onClick={() => setConfirmando(false)}
+          data-cy="reagendar-confirmacion"
+        >
           <div className={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
             <div className={styles.confirmHeader}>
               <div className={styles.confirmIcon}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                   <circle cx="12" cy="12" r="10" stroke="#54647A" strokeWidth="2" />
-                  <path d="M8 12l3 3 5-5" stroke="#54647A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path
+                    d="M8 12l3 3 5-5"
+                    stroke="#54647A"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </div>
               <span className={styles.confirmTitle}>Confirmar cambio de turno</span>
@@ -340,16 +417,31 @@ export function ReagendarModal({
             <div className={styles.confirmInfo}>
               <div className={styles.confirmText}>
                 Está a punto de reagendar la reserva{" "}
-                <span className={styles.confirmTextBold}>{tipoEvento} - {nombreInvitado}</span>.{" "}
-                ¿Desea confirmar los cambios?
+                <span className={styles.confirmTextBold}>
+                  {tipoEvento} - {nombreInvitado}
+                </span>
+                . ¿Desea confirmar los cambios?
               </div>
               <div className={styles.confirmDetails}>
                 <div className={styles.confirmDetailRow}>
                   <div className={styles.confirmDetailIcon}>
                     <svg width="14" height="15" viewBox="0 0 14 15" fill="none">
-                      <rect x="1" y="1.5" width="12" height="12.5" rx="1.5" stroke="#003EC7" strokeWidth="1.5" />
+                      <rect
+                        x="1"
+                        y="1.5"
+                        width="12"
+                        height="12.5"
+                        rx="1.5"
+                        stroke="#003EC7"
+                        strokeWidth="1.5"
+                      />
                       <path d="M1 5.5h12" stroke="#003EC7" strokeWidth="1.5" />
-                      <path d="M4 1v3M10 1v3" stroke="#003EC7" strokeWidth="1.5" strokeLinecap="round" />
+                      <path
+                        d="M4 1v3M10 1v3"
+                        stroke="#003EC7"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
                     </svg>
                   </div>
                   <span>{formatDateLong(selectedSlot.inicio)}</span>
@@ -358,7 +450,13 @@ export function ReagendarModal({
                   <div className={styles.confirmDetailIcon}>
                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
                       <circle cx="7.5" cy="7.5" r="6.5" stroke="#003EC7" strokeWidth="1.5" />
-                      <path d="M7.5 4v3.5l2.5 1.5" stroke="#003EC7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      <path
+                        d="M7.5 4v3.5l2.5 1.5"
+                        stroke="#003EC7"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </div>
                   <span>{selectedSlot.label}</span>

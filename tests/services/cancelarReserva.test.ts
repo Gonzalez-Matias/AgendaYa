@@ -128,9 +128,9 @@ describe("cancelarReserva", () => {
   });
 
   it("debería lanzar un error si la reserva no existe", async () => {
-    await expect(
-      cancelarReserva({ reservaId: 99999, motivo: "No existe" })
-    ).rejects.toThrow("Reserva no encontrada");
+    await expect(cancelarReserva({ reservaId: 99999, motivo: "No existe" })).rejects.toThrow(
+      "Reserva no encontrada"
+    );
   });
 
   it("debería rechazar si adminId no coincide con el dueño", async () => {
@@ -148,15 +148,19 @@ describe("cancelarReserva", () => {
 
     const reserva = await prisma.reserva.create({
       data: {
-        fechaHoraInicio: new Date(Date.now() + 86400000), duracion: 30,
-        nombreInvitado: "Juan", emailInvitado: "juan@email.com",
-        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
+        fechaHoraInicio: new Date(Date.now() + 86400000),
+        duracion: 30,
+        nombreInvitado: "Juan",
+        emailInvitado: "juan@email.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+        estadoReservaId: estado.id,
       },
     });
 
-    await expect(
-      cancelarReserva({ reservaId: reserva.id, adminId: otroAdmin.id })
-    ).rejects.toThrow("No autorizado");
+    await expect(cancelarReserva({ reservaId: reserva.id, adminId: otroAdmin.id })).rejects.toThrow(
+      "No autorizado"
+    );
   });
 
   it("debería permitir cancelar cuando adminId coincide con el dueño", async () => {
@@ -171,14 +175,21 @@ describe("cancelarReserva", () => {
 
     const reserva = await prisma.reserva.create({
       data: {
-        fechaHoraInicio: new Date(Date.now() + 86400000), duracion: 30,
-        nombreInvitado: "Juan", emailInvitado: "juan@email.com",
-        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
+        fechaHoraInicio: new Date(Date.now() + 86400000),
+        duracion: 30,
+        nombreInvitado: "Juan",
+        emailInvitado: "juan@email.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+        estadoReservaId: estado.id,
       },
     });
 
     await cancelarReserva({ reservaId: reserva.id, adminId: admin.id });
-    const actualizada = await prisma.reserva.findUnique({ where: { id: reserva.id }, include: { estadoReserva: true } });
+    const actualizada = await prisma.reserva.findUnique({
+      where: { id: reserva.id },
+      include: { estadoReserva: true },
+    });
     expect(actualizada?.estadoReserva.nombre).toBe("Cancelada");
   });
 });

@@ -229,9 +229,13 @@ describe("reagendarReserva", () => {
 
     const reserva = await prisma.reserva.create({
       data: {
-        fechaHoraInicio: new Date("2026-08-01T10:00:00Z"), duracion: 30,
-        nombreInvitado: "Juan", emailInvitado: "juan@test.com",
-        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
+        fechaHoraInicio: new Date("2026-08-01T10:00:00Z"),
+        duracion: 30,
+        nombreInvitado: "Juan",
+        emailInvitado: "juan@test.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+        estadoReservaId: estado.id,
       },
     });
 
@@ -255,9 +259,13 @@ describe("reagendarReserva", () => {
 
     const reserva = await prisma.reserva.create({
       data: {
-        fechaHoraInicio: new Date("2026-08-01T10:00:00Z"), duracion: 30,
-        nombreInvitado: "Juan", emailInvitado: "juan@test.com",
-        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
+        fechaHoraInicio: new Date("2026-08-01T10:00:00Z"),
+        duracion: 30,
+        nombreInvitado: "Juan",
+        emailInvitado: "juan@test.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+        estadoReservaId: estado.id,
       },
     });
 

@@ -192,38 +192,59 @@ describe("visualizacion service", () => {
       const mañana = new Date(hoy);
       mañana.setDate(mañana.getDate() + 1);
 
-      const f1 = new Date(mañana); f1.setHours(9, 0, 0, 0);
-      const f2 = new Date(mañana); f2.setHours(10, 0, 0, 0);
-      const f3 = new Date(mañana); f3.setHours(11, 0, 0, 0);
+      const f1 = new Date(mañana);
+      f1.setHours(9, 0, 0, 0);
+      const f2 = new Date(mañana);
+      f2.setHours(10, 0, 0, 0);
+      const f3 = new Date(mañana);
+      f3.setHours(11, 0, 0, 0);
 
       await prisma.reserva.create({
         data: {
-          fechaHoraInicio: f1, duracion: 30, nombreInvitado: "R1",
-          emailInvitado: "r1@email.com", tipoEventoId: tipoEvento.id,
-          administradorId: admin.id, estadoReservaId: estadoConfirmada.id,
+          fechaHoraInicio: f1,
+          duracion: 30,
+          nombreInvitado: "R1",
+          emailInvitado: "r1@email.com",
+          tipoEventoId: tipoEvento.id,
+          administradorId: admin.id,
+          estadoReservaId: estadoConfirmada.id,
         },
       });
       await prisma.reserva.create({
         data: {
-          fechaHoraInicio: f2, duracion: 30, nombreInvitado: "R2",
-          emailInvitado: "r2@email.com", tipoEventoId: tipoEvento.id,
-          administradorId: admin.id, estadoReservaId: estadoPendiente.id,
+          fechaHoraInicio: f2,
+          duracion: 30,
+          nombreInvitado: "R2",
+          emailInvitado: "r2@email.com",
+          tipoEventoId: tipoEvento.id,
+          administradorId: admin.id,
+          estadoReservaId: estadoPendiente.id,
         },
       });
       await prisma.reserva.create({
         data: {
-          fechaHoraInicio: f3, duracion: 30, nombreInvitado: "R3",
-          emailInvitado: "r3@email.com", tipoEventoId: tipoEvento.id,
-          administradorId: admin.id, estadoReservaId: estadoCancelada.id,
+          fechaHoraInicio: f3,
+          duracion: 30,
+          nombreInvitado: "R3",
+          emailInvitado: "r3@email.com",
+          tipoEventoId: tipoEvento.id,
+          administradorId: admin.id,
+          estadoReservaId: estadoCancelada.id,
         },
       });
 
-      const resultado = await obtenerReservasPorRango(admin.id, hoy, new Date(mañana.getTime() + 86400000));
+      const resultado = await obtenerReservasPorRango(
+        admin.id,
+        hoy,
+        new Date(mañana.getTime() + 86400000)
+      );
 
       expect(resultado).toHaveLength(3);
-      expect(resultado.find(r => r.nombreInvitado === "R1")?.estado).toBe("Confirmada");
-      expect(resultado.find(r => r.nombreInvitado === "R2")?.estado).toBe("PendienteDeConfirmacion");
-      expect(resultado.find(r => r.nombreInvitado === "R3")?.estado).toBe("Cancelada");
+      expect(resultado.find((r) => r.nombreInvitado === "R1")?.estado).toBe("Confirmada");
+      expect(resultado.find((r) => r.nombreInvitado === "R2")?.estado).toBe(
+        "PendienteDeConfirmacion"
+      );
+      expect(resultado.find((r) => r.nombreInvitado === "R3")?.estado).toBe("Cancelada");
     });
   });
 });

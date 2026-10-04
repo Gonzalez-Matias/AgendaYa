@@ -70,8 +70,20 @@ describe("tipoEvento repository", () => {
 
     await prisma.tipoEvento.createMany({
       data: [
-        { nombre: "Reunión", duracion: 30, antelacionMinima: 1, administradorId: admin.id, activo: true },
-        { nombre: "Consulta", duracion: 60, antelacionMinima: 2, administradorId: admin.id, activo: false },
+        {
+          nombre: "Reunión",
+          duracion: 30,
+          antelacionMinima: 1,
+          administradorId: admin.id,
+          activo: true,
+        },
+        {
+          nombre: "Consulta",
+          duracion: 60,
+          antelacionMinima: 2,
+          administradorId: admin.id,
+          activo: false,
+        },
       ],
     });
 
