@@ -1,5 +1,5 @@
 // cypress/e2e/disponibilidad.cy.ts
-// E2E de la API M04-RF02 (Consultar disponibilidad) — CasosDePrueba.md CP1 y CP2.
+// E2E de la API M04-RF02 (Consultar disponibilidad)
 // Pasos según el documento: GET administradores -> GET tipos-evento -> POST disponibilidad.
 
 const MARIA_EMAIL = "maria.garcia@agendaya.com";
