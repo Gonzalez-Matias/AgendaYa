@@ -12,8 +12,9 @@ import { ReagendarModalPage } from "../pages/ReagendarModalPage";
  *
  * Notas de diseño:
  *  - La interfaz solo ofrece horarios libres, por lo que el solapamiento del
- *    CP-US010-002 no es alcanzable desde el modal: se valida a nivel API, que es
- *    donde el servicio re-verifica la disponibilidad al confirmar.
+ *    CP-US010-002 no es alcanzable de forma directa desde el modal: se valida a
+ *    nivel API (donde el servicio re-verifica la disponibilidad al confirmar) y,
+ *    a nivel UI, se reproduce la condición de carrera real.
  *  - El día y el turno se calculan consultando la MISMA API que consume la UI
  *    (/api/disponibilidad), para no depender de fechas fijas ni del día de la semana.
  */
@@ -54,6 +55,12 @@ describe("US_010 - Confirmar cambios (M05-RF01)", () => {
   beforeEach(() => {
     cy.task("seedDatabase", null, { timeout: 150000 });
     agendaPage.visit();
+  });
+
+  // El caso de carrera crea una reserva extra por el link público (M04). Se restaura el
+  // seed al terminar el spec para no dejar datos sueltos a los specs que corren después.
+  after(() => {
+    cy.task("seedDatabase", null, { timeout: 150000 });
   });
 
   /** /agenda carga el primer administrador (la API lo devuelve ordenado por nombre). */
@@ -116,6 +123,48 @@ describe("US_010 - Confirmar cambios (M05-RF01)", () => {
           const dia = res.body.data.find((d: { slots: unknown[] }) => d.slots.length > 0);
           if (dia) {
             return cy.wrap(fechaKey(dia.fecha));
+          }
+          if (restantes <= 0) {
+            throw new Error("No se encontró ningún día con turnos libres");
+          }
+          reagendarPage.nextMonth();
+          const siguiente = new Date(y, m + 1, 1);
+          return intentar(restantes - 1, siguiente.getFullYear(), siguiente.getMonth());
+        });
+    };
+
+    return intentar(mesesMaximos, year, monthIndex);
+  }
+
+  /**
+   * Variante de buscarDiaConTurnos que, además del día (DD/MM/AAAA), devuelve el ISO del
+   * primer turno ofrecido. Se usa para reproducir la condición de carrera: ocupar ese turno
+   * por el link público antes de que el administrador confirme.
+   */
+  function buscarDiaYTurno(
+    tipoEventoId: number,
+    year: number,
+    monthIndex: number,
+    mesesMaximos = 3
+  ): Cypress.Chainable<{ dia: string; slotIso: string }> {
+    const intentar = (
+      restantes: number,
+      y: number,
+      m: number
+    ): Cypress.Chainable<{ dia: string; slotIso: string }> => {
+      const { desde, hasta } = rangoDeMes(y, m);
+
+      return cy
+        .request("POST", "/api/disponibilidad", {
+          tipoEventoId,
+          fechaDesde: desde.toISOString(),
+          fechaHasta: hasta.toISOString(),
+        })
+        .then((res) => {
+          const dia = res.body.data.find((d: { slots: unknown[] }) => d.slots.length > 0) as
+            { fecha: string; slots: { inicio: string }[] } | undefined;
+          if (dia) {
+            return cy.wrap({ dia: fechaKey(dia.fecha), slotIso: dia.slots[0].inicio });
           }
           if (restantes <= 0) {
             throw new Error("No se encontró ningún día con turnos libres");
@@ -256,10 +305,12 @@ describe("US_010 - Confirmar cambios (M05-RF01)", () => {
   });
 
   /**
-   * CP-US010-002 verificado a nivel interfaz. La UI solo ofrece horarios libres, por lo que
-   * el solapamiento no puede provocarse desde el modal: se simula la condición de carrera
-   * (el horario se ocupó entre la carga de la disponibilidad y la confirmación) interceptando
-   * la respuesta, para verificar que el sistema muestra el error al administrador.
+   * CP-US010-002 verificado a nivel interfaz mediante la condición de carrera REAL.
+   * El modal solo ofrece horarios libres, así que el solapamiento no puede elegirse
+   * directamente desde la UI. Se reproduce el escenario de producción: mientras el
+   * administrador tiene la disponibilidad cargada, otro usuario ocupa ese turno por
+   * el link público (M04); al confirmar, el backend revalida, rechaza con 400 y la
+   * interfaz muestra el error.
    */
   it("CP-US010-002 (UI): debería mostrar el mensaje de error al confirmar un cambio no disponible", () => {
     primerAdministradorId().then((administradorId) => {
@@ -278,38 +329,42 @@ describe("US_010 - Confirmar cambios (M05-RF01)", () => {
           const fechaOriginal = detalle.body.data.fechaHoraInicio as string;
           const estadoOriginal = detalle.body.data.estado.nombre as string;
 
+          // Arrange: abrir el detalle y el modal de reagendar (el modal carga turnos libres)
           asegurarReservaVisible(reservaId);
           agendaPage.clickReservaById(reservaId);
           detallePage.waitForModal();
           detallePage.clickReagendar();
           reagendarPage.waitForModal();
 
-          buscarDiaConTurnos(
-            tipoEventoId,
-            fechaReserva.getFullYear(),
-            fechaReserva.getMonth()
-          ).then((dia) => {
-            cy.intercept("POST", "**/api/reservas/reagendar", {
-              statusCode: 400,
-              body: { error: "El nuevo horario elegido ya está ocupado" },
-            }).as("reagendarRechazado");
+          buscarDiaYTurno(tipoEventoId, fechaReserva.getFullYear(), fechaReserva.getMonth()).then(
+            ({ dia, slotIso }) => {
+              // Arrange (carrera): otro usuario ocupa ese turno por el link público antes de confirmar
+              cy.request("POST", "/api/reservas", {
+                tipoEventoId,
+                fechaHoraInicio: slotIso,
+                nombreInvitado: "Invitado Carrera",
+                emailInvitado: "invitado.carrera@test.com",
+              })
+                .its("status")
+                .should("eq", 201);
 
-            reagendarPage.selectDay(dia);
-            reagendarPage.selectFirstSlot();
-            reagendarPage.clickConfirmar();
-            reagendarPage.shouldShowConfirmacionConTurno();
-            reagendarPage.confirmarCambio();
+              // Act: el administrador, con la disponibilidad ya desactualizada, confirma ese turno
+              reagendarPage.selectDay(dia);
+              reagendarPage.selectFirstSlot();
+              reagendarPage.clickConfirmar();
+              reagendarPage.shouldShowConfirmacionConTurno();
+              reagendarPage.confirmarCambio();
 
-            // Assert: el sistema rechaza y el mensaje queda visible para el administrador
-            cy.wait("@reagendarRechazado");
-            reagendarPage.shouldShowError("El nuevo horario elegido ya está ocupado");
+              // Assert: el backend rechaza y el mensaje queda visible para el administrador
+              reagendarPage.shouldShowError("El nuevo horario elegido ya está ocupado");
 
-            // Assert: la reserva conserva su fecha/hora y su estado originales
-            cy.request(`/api/reservas/${reservaId}`).then((actualizada) => {
-              expect(actualizada.body.data.fechaHoraInicio).to.eq(fechaOriginal);
-              expect(actualizada.body.data.estado.nombre).to.eq(estadoOriginal);
-            });
-          });
+              // Assert: la reserva conserva su fecha/hora y su estado originales
+              cy.request(`/api/reservas/${reservaId}`).then((actualizada) => {
+                expect(actualizada.body.data.fechaHoraInicio).to.eq(fechaOriginal);
+                expect(actualizada.body.data.estado.nombre).to.eq(estadoOriginal);
+              });
+            }
+          );
         });
       });
     });
