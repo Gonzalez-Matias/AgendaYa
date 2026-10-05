@@ -30,6 +30,10 @@ export async function cancelarReserva(input: CancelarReservaInput) {
     throw new Error("No autorizado: la reserva no pertenece a este administrador");
   }
 
+  if (reserva.estadoReserva.nombre === "Cancelada") {
+    throw new Error("La reserva ya está cancelada");
+  }
+
   const estadoCancelada = await obtenerEstadoPorNombre("Cancelada");
 
   if (!estadoCancelada) {
