@@ -11,8 +11,8 @@ jest.mock("../../src/repositories/cancelarReserva", () => ({
 
 describe("cancelarReserva (unitario con mocks)", () => {
   afterEach(() => {
-  jest.resetAllMocks();
-});
+    jest.resetAllMocks();
+  });
 
   // ---------------------------------------------------------------------------
   // Comportamiento 1: cancelarReserva (procesamiento de la cancelación)
@@ -85,7 +85,6 @@ describe("cancelarReserva (unitario con mocks)", () => {
         administradorId: 1,
         estadoReserva: { id: 1, nombre: "Confirmada" },
       });
-      
       (repositorio.obtenerEstadoPorNombre as jest.Mock).mockResolvedValue(null);
 
       await expect(cancelarReserva({ reservaId: 10 })).rejects.toThrow();
