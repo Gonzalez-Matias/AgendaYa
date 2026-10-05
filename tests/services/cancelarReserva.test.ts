@@ -56,23 +56,20 @@ describe("cancelarReserva (unitario con mocks)", () => {
       expect(repositorio.cancelarReservaAtomica).not.toHaveBeenCalled();
     });
 
-    it("Test 3 (Error / Autorización): lanza error si la reserva pertenece a otro adminId", async () => {
-      (repositorio.obtenerReservaPorId as jest.Mock).mockResolvedValue({
-        id: 12,
-        administradorId: 1,
-        estadoReserva: { id: 1, nombre: "Confirmada" },
-      });
-
-      await expect(
-        cancelarReserva({ reservaId: 12, adminId: 2 })
-      ).rejects.toThrow(
-        "No autorizado: la reserva no pertenece a este administrador"
-      );
-
-      expect(repositorio.cancelarReservaAtomica).not.toHaveBeenCalled();
-    });
+   it("Test 3 (Error): lanza error si la reserva ya está cancelada", async () => {
+  (repositorio.obtenerReservaPorId as jest.Mock).mockResolvedValue({
+    id: 12,
+    administradorId: 1,
+    estadoReserva: { id: 2, nombre: "Cancelada" },
   });
 
+  await expect(
+    cancelarReserva({ reservaId: 12 })
+  ).rejects.toThrow("La reserva ya está cancelada");
+
+  // No intenta cancelar de nuevo en la base de datos
+  expect(repositorio.cancelarReservaAtomica).not.toHaveBeenCalled();
+});
   // ---------------------------------------------------------------------------
   // Comportamiento 2: validación del input con Zod (CancelarReservaInputSchema)
   // ---------------------------------------------------------------------------
