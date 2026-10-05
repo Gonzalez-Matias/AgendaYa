@@ -31,8 +31,8 @@ export async function cancelarReserva(input: CancelarReservaInput) {
   }
 
   if (reserva.estadoReserva.nombre === "Cancelada") {
-  throw new Error("La reserva ya está cancelada");
-}
+    throw new Error("La reserva ya está cancelada");
+  }
 
   const estadoCancelada = await obtenerEstadoPorNombre("Cancelada");
 

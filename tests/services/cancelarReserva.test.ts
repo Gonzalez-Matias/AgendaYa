@@ -59,9 +59,7 @@ describe("cancelarReserva (unitario con mocks)", () => {
         new Error("Error de base de datos")
       );
 
-      await expect(cancelarReserva({ reservaId: 10 })).rejects.toThrow(
-        "Error de base de datos"
-      );
+      await expect(cancelarReserva({ reservaId: 10 })).rejects.toThrow("Error de base de datos");
     });
 
     it("Test 3 (Error): lanza error si la reserva ya está cancelada", async () => {
@@ -113,11 +111,7 @@ describe("cancelarReserva (unitario con mocks)", () => {
       await expect(cancelarReserva({ reservaId: 10 })).resolves.toBeUndefined();
 
       // El campo motivo es opcional: se pasa undefined al repositorio
-      expect(repositorio.cancelarReservaAtomica).toHaveBeenCalledWith(
-        10,
-        2,
-        undefined
-      );
+      expect(repositorio.cancelarReservaAtomica).toHaveBeenCalledWith(10, 2, undefined);
     });
   });
 });
