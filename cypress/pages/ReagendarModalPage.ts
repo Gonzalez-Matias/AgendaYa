@@ -6,8 +6,10 @@ export class ReagendarModalPage {
   readonly sinTurnos = '[data-cy="reagendar-sin-turnos"]';
   readonly btnConfirmar = '[data-cy="reagendar-confirmar"]';
   readonly confirmacion = '[data-cy="reagendar-confirmacion"]';
+  readonly btnConfirmarCancelar = '[data-cy="reagendar-confirmar-cancelar"]';
   readonly btnConfirmarFinal = '[data-cy="reagendar-confirmar-final"]';
   readonly btnCerrar = '[data-cy="reagendar-close"]';
+  readonly btnCancelar = '[data-cy="reagendar-cancelar"]';
   readonly error = '[data-cy="reagendar-error"]';
   readonly exito = '[data-cy="reagendar-exito"]';
   readonly mesAnterior = '[data-cy="reagendar-mes-anterior"]';
@@ -90,6 +92,19 @@ export class ReagendarModalPage {
   confirmarCambio() {
     cy.get(this.confirmacion, { timeout: 10000 }).should("be.visible");
     cy.get(this.btnConfirmarFinal).should("not.be.disabled").click();
+    return this;
+  }
+
+  /** Cancela el diálogo de doble verificación y vuelve al modal principal. */
+  cancelarConfirmacion() {
+    cy.get(this.confirmacion, { timeout: 10000 }).should("be.visible");
+    cy.get(this.btnConfirmarCancelar).click();
+    return this;
+  }
+
+  /** Cancela el reagendamiento desde el pie del modal y lo cierra. */
+  cancelar() {
+    cy.get(this.btnCancelar).should("not.be.disabled").click();
     return this;
   }
 
