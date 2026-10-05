@@ -1,15 +1,13 @@
 import { prisma, cleanDB } from "../helpers";
 import prismaRepo from "../../src/repositories/db";
-import { findReservasActivasEnRango } from "../../src/repositories/reserva";
+import {
+  createReservaConHistorial,
+  findReservasActivasEnRango,
+} from "../../src/repositories/reserva";
 
 describe("findReservasActivasEnRango (repositorio)", () => {
   beforeEach(async () => {
     await cleanDB();
-  });
-
-  afterAll(async () => {
-    await prisma.$disconnect();
-    await prismaRepo.$disconnect();
   });
 
   async function crearAdmin(email: string) {
@@ -198,4 +196,67 @@ describe("findReservasActivasEnRango (repositorio)", () => {
     expect(resultado).toHaveLength(1);
     expect(resultado[0].fechaHoraInicio.toISOString()).toBe(desde.toISOString());
   });
+});
+
+describe("createReservaConHistorial (repositorio)", () => {
+  beforeEach(async () => {
+    await cleanDB();
+  });
+
+  /** Base mínima: estados + administrador + tipo de evento. */
+  async function crearBase() {
+    const estados: Record<string, number> = {};
+    for (const nombre of ["Confirmada", "PendienteDeConfirmacion", "Cancelada", "Completada"]) {
+      const estado = await prisma.estadoReserva.create({ data: { nombre } });
+      estados[nombre] = estado.id;
+    }
+    const admin = await prisma.usuarioAdministrador.create({
+      data: { email: "admin@test.com", nombre: "Admin Test" },
+    });
+    const tipoEvento = await prisma.tipoEvento.create({
+      data: {
+        nombre: "Reunión",
+        duracion: 30,
+        antelacionMinima: 1,
+        administradorId: admin.id,
+      },
+    });
+    return { estados, admin, tipoEvento };
+  }
+
+  it("debería crear la reserva y su registro de historial en la misma transacción", async () => {
+    const { estados, admin, tipoEvento } = await crearBase();
+
+    const reserva = await createReservaConHistorial(
+      {
+        fechaHoraInicio: new Date("2026-08-03T10:00:00Z"),
+        duracion: 30,
+        nombreInvitado: "Juan Pérez",
+        emailInvitado: "juan@test.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+      },
+      estados.Confirmada,
+      "Reserva creada"
+    );
+
+    expect(reserva.estadoReserva.nombre).toBe("Confirmada");
+    expect(reserva.tipoEvento.nombre).toBe("Reunión");
+    expect(reserva.administrador.email).toBe("admin@test.com");
+
+    const historial = await prisma.reservaEstadoHistorial.findMany({
+      where: { reservaId: reserva.id },
+    });
+    expect(historial).toHaveLength(1);
+    expect(historial[0].estadoReservaId).toBe(estados.Confirmada);
+    expect(historial[0].motivo).toBe("Reserva creada");
+
+    const guardada = await prisma.reserva.findUnique({ where: { id: reserva.id } });
+    expect(guardada?.estadoReservaId).toBe(estados.Confirmada);
+  });
+});
+
+afterAll(async () => {
+  await prisma.$disconnect();
+  await prismaRepo.$disconnect();
 });
