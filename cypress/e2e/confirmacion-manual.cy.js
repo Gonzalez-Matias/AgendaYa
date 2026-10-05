@@ -162,6 +162,7 @@ describe("US_018 - Confirmación Manual de Reservas (E2E)", () => {
   });
 
   it("Debe permitir al Administrador confirmar manualmente una reserva pendiente", () => {
+
     // Arrange: Verificar que exista la tarjeta de reserva
     cy.get('[data-cy^="reserva-card"]').first().should("exist");
 

@@ -14,14 +14,20 @@ export async function POST(request: NextRequest) {
     }
 
     if (!fechaDesde || !fechaHasta) {
-      return NextResponse.json({ error: "fechaDesde y fechaHasta son requeridos" }, { status: 400 });
+      return NextResponse.json(
+        { error: "fechaDesde y fechaHasta son requeridos" },
+        { status: 400 }
+      );
     }
 
     const inicio = new Date(fechaDesde);
     const fin = new Date(fechaHasta);
 
     if (isNaN(inicio.getTime()) || isNaN(fin.getTime())) {
-      return NextResponse.json({ error: "fechaDesde y fechaHasta deben ser fechas válidas" }, { status: 400 });
+      return NextResponse.json(
+        { error: "fechaDesde y fechaHasta deben ser fechas válidas" },
+        { status: 400 }
+      );
     }
 
     if (modoVista === "lista") {

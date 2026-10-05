@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test": "jest --runInBand",
     "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cypress:run": "cypress run",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
@@ -34,7 +36,12 @@
     "eslint-config-next": "15.5.19",
     "jest": "^30.4.2",
     "jest-html-reporter": "^4.4.0",
+    "mochawesome": "^8.1.1",
+    "mochawesome-merge": "^4.4.1",
+    "mochawesome-report-generator": "^6.3.2",
+    "prettier": "^3.9.9",
     "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^9.1.0"
   }
 }

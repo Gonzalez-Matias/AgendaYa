@@ -13,7 +13,7 @@
   max-height: 90vh;
   background: white;
   border-radius: 8px;
-  outline: 1px solid #C3C5D9;
+  outline: 1px solid #c3c5d9;
   outline-offset: -1px;
   box-shadow: 0px 4px 24px rgba(0, 0, 0, 0.08);
   display: flex;
@@ -77,7 +77,7 @@
 }
 
 .closeBtn:hover {
-  background: #F2F4F6;
+  background: #f2f4f6;
 }
 
 .title {
@@ -85,7 +85,7 @@
   font-size: 18px;
   font-weight: 600;
   line-height: 24px;
-  color: #191C1E;
+  color: #191c1e;
 }
 
 .body {
@@ -127,7 +127,7 @@
 .dateText {
   font-size: 14px;
   font-weight: 500;
-  color: #191C1E;
+  color: #191c1e;
   line-height: 20px;
 }
 
@@ -147,7 +147,7 @@
 .participantName {
   font-size: 14px;
   font-weight: 400;
-  color: #191C1E;
+  color: #191c1e;
   line-height: 20px;
 }
 
@@ -168,7 +168,7 @@
 .estadoLabel {
   font-size: 14px;
   font-weight: 500;
-  color: #191C1E;
+  color: #191c1e;
   line-height: 20px;
 }
 
@@ -183,8 +183,8 @@
   align-items: center;
   gap: 6px;
   padding: 4px 12px;
-  background: #DCFCE7;
-  border: 1px solid #4CAF50;
+  background: #dcfce7;
+  border: 1px solid #4caf50;
   border-radius: 12px;
   font-size: 11px;
   font-weight: 500;
@@ -195,7 +195,7 @@
 }
 
 .confirmBtn:hover {
-  background: #BBF7D0;
+  background: #bbf7d0;
 }
 
 .confirmBtn:disabled {
@@ -206,13 +206,13 @@
 .notaText {
   font-size: 14px;
   font-weight: 400;
-  color: #191C1E;
+  color: #191c1e;
   line-height: 22.75px;
 }
 
 .footer {
   padding: 16px 24px;
-  border-top: 1px solid #C3C5D9;
+  border-top: 1px solid #c3c5d9;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -230,19 +230,19 @@
   background: white;
   font-size: 12px;
   font-weight: 600;
-  color: #BA1A1A;
+  color: #ba1a1a;
   letter-spacing: 0.6px;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .cancelBtn:hover:not(:disabled) {
-  background: #FEF2F2;
+  background: #fef2f2;
 }
 
 .cancelBtn:disabled {
-  color: #9CA3AF;
-  border-color: #D1D5DB;
+  color: #9ca3af;
+  border-color: #d1d5db;
   cursor: not-allowed;
 }
 
@@ -254,14 +254,14 @@
   background: white;
   font-size: 12px;
   font-weight: 600;
-  color: #191C1E;
+  color: #191c1e;
   letter-spacing: 0.6px;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .reagendarBtn:hover {
-  background: #F2F4F6;
+  background: #f2f4f6;
 }
 
 .completarBtn {
@@ -273,7 +273,7 @@
   padding: 10px 24px;
   border: none;
   border-radius: 8px;
-  background: #003EC7;
+  background: #003ec7;
   font-size: 12px;
   font-weight: 600;
   color: white;
@@ -284,11 +284,11 @@
 }
 
 .completarBtn:hover:not(:disabled) {
-  background: #002F9E;
+  background: #002f9e;
 }
 
 .completarBtn:disabled {
-  background: #9CA3AF;
+  background: #9ca3af;
   cursor: not-allowed;
 }
 
@@ -301,5 +301,5 @@
 .error {
   padding: 40px;
   text-align: center;
-  color: #BA1A1A;
+  color: #ba1a1a;
 }

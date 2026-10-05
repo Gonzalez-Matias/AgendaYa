@@ -8,7 +8,16 @@ interface SidebarProps {
   reservas: ReservaVista[];
 }
 
-const DOT_COLORS = ["#003EC7", "#9C27B0", "#4CAF50", "#E0E3E5", "#F59E0B", "#EF4444", "#3B82F6", "#10B981"];
+const DOT_COLORS = [
+  "#003EC7",
+  "#9C27B0",
+  "#4CAF50",
+  "#E0E3E5",
+  "#F59E0B",
+  "#EF4444",
+  "#3B82F6",
+  "#10B981",
+];
 
 const STATE_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
   Confirmada: { label: "Confirmada", bg: "#DCFCE7", text: "#166534" },
@@ -33,7 +42,10 @@ export function Sidebar({ reservas }: SidebarProps) {
       <div className={styles.summaryList}>
         {[...tipoCounts.entries()].map(([tipo, count], idx) => (
           <div key={tipo} className={styles.summaryItem}>
-            <div className={styles.dot} style={{ background: DOT_COLORS[idx % DOT_COLORS.length] }} />
+            <div
+              className={styles.dot}
+              style={{ background: DOT_COLORS[idx % DOT_COLORS.length] }}
+            />
             <span className={styles.summaryLabel}>
               {tipo} [{count}]
             </span>
@@ -50,7 +62,13 @@ export function Sidebar({ reservas }: SidebarProps) {
 
       <span className={styles.sectionTitle}>Estados</span>
       <div className={styles.stateList}>
-        {["Confirmada", "PendienteDeConfirmacion", "PendienteDeReagendar", "Cancelada", "Completada"].map((estado) => {
+        {[
+          "Confirmada",
+          "PendienteDeConfirmacion",
+          "PendienteDeReagendar",
+          "Cancelada",
+          "Completada",
+        ].map((estado) => {
           const count = estadoCounts.get(estado) || 0;
           const cfg = STATE_CONFIG[estado];
           if (!cfg) return null;

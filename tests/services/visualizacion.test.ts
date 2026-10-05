@@ -1,10 +1,7 @@
 // tests/visualizacion.test.ts
 // Tests para M05-RF06: Seleccionar modo de visualización de agenda
 
-import {
-  getModoVistaDefault,
-  cambiarModoVista,
-} from "../../src/services/visualizacion";
+import { getModoVistaDefault, cambiarModoVista } from "../../src/services/visualizacion";
 
 describe("M05-RF06 - Modo de visualización de agenda", () => {
   test("La vista por defecto al ingresar a la sección debe ser calendario", () => {

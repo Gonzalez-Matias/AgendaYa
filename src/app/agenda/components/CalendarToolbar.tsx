@@ -14,7 +14,20 @@ interface CalendarToolbarProps {
   onChangeSubVista: (sub: "semanal" | "mensual") => void;
 }
 
-const MESES_CORTOS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+const MESES_CORTOS = [
+  "Ene",
+  "Feb",
+  "Mar",
+  "Abr",
+  "May",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dic",
+];
 
 function getWeekRange(date: Date): { start: Date; end: Date } {
   const d = new Date(date);
@@ -62,9 +75,8 @@ export function CalendarToolbar({
     setShowPicker(false);
   }
 
-  const monthTitle = subVista === "semanal"
-    ? getWeekTitle(fechaActual)
-    : getMonthTitle(fechaActual);
+  const monthTitle =
+    subVista === "semanal" ? getWeekTitle(fechaActual) : getMonthTitle(fechaActual);
 
   return (
     <div className={styles.toolbar}>
@@ -114,8 +126,16 @@ export function CalendarToolbar({
       </div>
 
       <div className={styles.navArrows}>
-        <button className={styles.arrowBtn} onClick={() => onChangeFecha(-1)} data-cy="toolbar-prev">◀</button>
-        <button className={styles.arrowBtn} onClick={() => onChangeFecha(1)} data-cy="toolbar-next">▶</button>
+        <button
+          className={styles.arrowBtn}
+          onClick={() => onChangeFecha(-1)}
+          data-cy="toolbar-prev"
+        >
+          ◀
+        </button>
+        <button className={styles.arrowBtn} onClick={() => onChangeFecha(1)} data-cy="toolbar-next">
+          ▶
+        </button>
       </div>
 
       <div className={styles.toggles}>
