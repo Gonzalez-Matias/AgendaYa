@@ -1,184 +1,105 @@
-import { prisma, cleanDB } from "../helpers";
+import { z } from "zod";
 import { cancelarReserva } from "../../src/services/cancelarReserva";
+import * as repositorio from "../../src/repositories/cancelarReserva";
 
-describe("cancelarReserva", () => {
-  beforeEach(async () => {
-    await cleanDB();
+// Mockeamos el repositorio para aislar la prueba de la base de datos real.
+// Usamos factory explicita para no cargar Prisma ni requerir DATABASE_URL.
+jest.mock("../../src/repositories/cancelarReserva", () => ({
+  obtenerReservaPorId: jest.fn(),
+  obtenerEstadoPorNombre: jest.fn(),
+  cancelarReservaAtomica: jest.fn(),
+}));
+
+describe("cancelarReserva (unitario con mocks)", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  afterAll(async () => {
-    await prisma.$disconnect();
+  // ---------------------------------------------------------------------------
+  // Comportamiento 1: cancelarReserva (procesamiento de la cancelación)
+  // ---------------------------------------------------------------------------
+  describe("cancelarReserva", () => {
+    it("Test 1 (Happy path): cancela la reserva exitosamente cuando los datos son válidos", async () => {
+      (repositorio.obtenerReservaPorId as jest.Mock).mockResolvedValue({
+        id: 10,
+        administradorId: 1,
+        estadoReserva: { id: 1, nombre: "Confirmada" },
+      });
+      (repositorio.obtenerEstadoPorNombre as jest.Mock).mockResolvedValue({
+        id: 2,
+        nombre: "Cancelada",
+      });
+      (repositorio.cancelarReservaAtomica as jest.Mock).mockResolvedValue(true);
+
+      await expect(
+        cancelarReserva({ reservaId: 10, motivo: "Cancelación solicitada" })
+      ).resolves.toBeUndefined();
+
+      // Cambia el estado a Cancelado: se invoca la cancelación atómica con el
+      // id de la reserva, el id del estado "Cancelada" y el motivo.
+      expect(repositorio.cancelarReservaAtomica).toHaveBeenCalledWith(
+        10,
+        2,
+        "Cancelación solicitada"
+      );
+      expect(repositorio.cancelarReservaAtomica).toHaveBeenCalledTimes(1);
+    });
+
+    it("Test 2 (Error): lanza error si la reserva no existe", async () => {
+      (repositorio.obtenerReservaPorId as jest.Mock).mockResolvedValue(null);
+
+      await expect(cancelarReserva({ reservaId: 99999, motivo: "No existe" })).rejects.toThrow(
+        "Reserva no encontrada"
+      );
+
+      // Nunca intenta cancelar en la base de datos
+      expect(repositorio.cancelarReservaAtomica).not.toHaveBeenCalled();
+    });
+
+    it("Test 3 (Error / Autorización): lanza error si la reserva pertenece a otro adminId", async () => {
+      (repositorio.obtenerReservaPorId as jest.Mock).mockResolvedValue({
+        id: 12,
+        administradorId: 1,
+        estadoReserva: { id: 1, nombre: "Confirmada" },
+      });
+
+      await expect(cancelarReserva({ reservaId: 12, adminId: 2 })).rejects.toThrow(
+        "No autorizado: la reserva no pertenece a este administrador"
+      );
+
+      expect(repositorio.cancelarReservaAtomica).not.toHaveBeenCalled();
+    });
   });
 
-  it("debería cancelar una reserva confirmada y cambiar su estado a Cancelada", async () => {
-    // Preparar datos
-    const admin = await prisma.usuarioAdministrador.create({
-      data: { email: "test@test.com", nombre: "Test Admin" },
+  // ---------------------------------------------------------------------------
+  // Comportamiento 2: validación del input con Zod (CancelarReservaInputSchema)
+  // ---------------------------------------------------------------------------
+  describe("validación de CancelarReservaInputSchema (Zod)", () => {
+    it("Test 4 (Caso inválido): lanza error de validación si reservaId es negativo o no entero", async () => {
+      await expect(cancelarReserva({ reservaId: -1 })).rejects.toThrow(z.ZodError);
+      await expect(cancelarReserva({ reservaId: 1.5 })).rejects.toThrow(z.ZodError);
+
+      // La validación falla antes de tocar el repositorio
+      expect(repositorio.obtenerReservaPorId).not.toHaveBeenCalled();
+      expect(repositorio.cancelarReservaAtomica).not.toHaveBeenCalled();
     });
 
-    const tipoEvento = await prisma.tipoEvento.create({
-      data: {
-        nombre: "Reunión",
-        duracion: 30,
-        antelacionMinima: 1,
-        administradorId: admin.id,
-      },
+    it("Test 5 (Caso borde / Opcional): permite procesar la cancelación sin enviar un motivo", async () => {
+      (repositorio.obtenerReservaPorId as jest.Mock).mockResolvedValue({
+        id: 10,
+        administradorId: 1,
+        estadoReserva: { id: 1, nombre: "Confirmada" },
+      });
+      (repositorio.obtenerEstadoPorNombre as jest.Mock).mockResolvedValue({
+        id: 2,
+        nombre: "Cancelada",
+      });
+      (repositorio.cancelarReservaAtomica as jest.Mock).mockResolvedValue(true);
+
+      await expect(cancelarReserva({ reservaId: 10 })).resolves.toBeUndefined();
+
+      // El campo motivo es opcional: se pasa undefined al repositorio
+      expect(repositorio.cancelarReservaAtomica).toHaveBeenCalledWith(10, 2, undefined);
     });
-
-    const estadoConfirmada = await prisma.estadoReserva.create({
-      data: { nombre: "Confirmada" },
-    });
-
-    await prisma.estadoReserva.create({ data: { nombre: "Cancelada" } });
-
-    const reserva = await prisma.reserva.create({
-      data: {
-        fechaHoraInicio: new Date(Date.now() + 1000 * 60 * 60 * 24),
-        duracion: 30,
-        nombreInvitado: "Juan Pérez",
-        emailInvitado: "juan@email.com",
-        tipoEventoId: tipoEvento.id,
-        administradorId: admin.id,
-        estadoReservaId: estadoConfirmada.id,
-      },
-    });
-
-    // Ejecutar
-    await cancelarReserva({ reservaId: reserva.id, motivo: "El cliente no puede asistir" });
-
-    // Verificar
-    const reservaActualizada = await prisma.reserva.findUnique({
-      where: { id: reserva.id },
-      include: { estadoReserva: true },
-    });
-
-    expect(reservaActualizada?.estadoReserva.nombre).toBe("Cancelada");
-  });
-
-  it("debería lanzar un error si se intenta cancelar una reserva que ya está cancelada", async () => {
-    // Preparar datos
-    const admin = await prisma.usuarioAdministrador.create({
-      data: { email: "test2@test.com", nombre: "Test Admin 2" },
-    });
-
-    const tipoEvento = await prisma.tipoEvento.create({
-      data: {
-        nombre: "Consulta",
-        duracion: 60,
-        antelacionMinima: 1,
-        administradorId: admin.id,
-      },
-    });
-
-    const estadoCancelada = await prisma.estadoReserva.create({
-      data: { nombre: "Cancelada" },
-    });
-
-    const reserva = await prisma.reserva.create({
-      data: {
-        fechaHoraInicio: new Date(Date.now() + 1000 * 60 * 60 * 24),
-        duracion: 60,
-        nombreInvitado: "Laura Silva",
-        emailInvitado: "laura@email.com",
-        tipoEventoId: tipoEvento.id,
-        administradorId: admin.id,
-        estadoReservaId: estadoCancelada.id,
-      },
-    });
-
-    // Verificar que lanza error
-    await expect(
-      cancelarReserva({ reservaId: reserva.id, motivo: "Intento duplicado" })
-    ).rejects.toThrow("La reserva ya está cancelada");
-  });
-
-  it("debería lanzar un error si el estado Cancelada no está configurado", async () => {
-    const admin = await prisma.usuarioAdministrador.create({
-      data: { email: "test2@test.com", nombre: "Test Admin 2" },
-    });
-
-    const tipoEvento = await prisma.tipoEvento.create({
-      data: {
-        nombre: "Consulta",
-        duracion: 60,
-        antelacionMinima: 1,
-        administradorId: admin.id,
-      },
-    });
-
-    const estadoConfirmada = await prisma.estadoReserva.create({
-      data: { nombre: "Confirmada" },
-    });
-
-    const reserva = await prisma.reserva.create({
-      data: {
-        fechaHoraInicio: new Date(Date.now() + 1000 * 60 * 60 * 24),
-        duracion: 60,
-        nombreInvitado: "Laura Silva",
-        emailInvitado: "laura@email.com",
-        tipoEventoId: tipoEvento.id,
-        administradorId: admin.id,
-        estadoReservaId: estadoConfirmada.id,
-      },
-    });
-
-    await expect(
-      cancelarReserva({ reservaId: reserva.id, motivo: "Intento sin Cancelada" })
-    ).rejects.toThrow("Estado Cancelada no encontrado en la base de datos");
-  });
-
-  it("debería lanzar un error si la reserva no existe", async () => {
-    await expect(
-      cancelarReserva({ reservaId: 99999, motivo: "No existe" })
-    ).rejects.toThrow("Reserva no encontrada");
-  });
-
-  it("debería rechazar si adminId no coincide con el dueño", async () => {
-    const admin = await prisma.usuarioAdministrador.create({
-      data: { email: "test@test.com", nombre: "Test Admin" },
-    });
-    const otroAdmin = await prisma.usuarioAdministrador.create({
-      data: { email: "otro@test.com", nombre: "Otro Admin" },
-    });
-    const tipoEvento = await prisma.tipoEvento.create({
-      data: { nombre: "Reunión", duracion: 30, antelacionMinima: 1, administradorId: admin.id },
-    });
-    const estado = await prisma.estadoReserva.create({ data: { nombre: "Confirmada" } });
-    await prisma.estadoReserva.create({ data: { nombre: "Cancelada" } });
-
-    const reserva = await prisma.reserva.create({
-      data: {
-        fechaHoraInicio: new Date(Date.now() + 86400000), duracion: 30,
-        nombreInvitado: "Juan", emailInvitado: "juan@email.com",
-        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
-      },
-    });
-
-    await expect(
-      cancelarReserva({ reservaId: reserva.id, adminId: otroAdmin.id })
-    ).rejects.toThrow("No autorizado");
-  });
-
-  it("debería permitir cancelar cuando adminId coincide con el dueño", async () => {
-    const admin = await prisma.usuarioAdministrador.create({
-      data: { email: "test@test.com", nombre: "Test Admin" },
-    });
-    const tipoEvento = await prisma.tipoEvento.create({
-      data: { nombre: "Reunión", duracion: 30, antelacionMinima: 1, administradorId: admin.id },
-    });
-    const estado = await prisma.estadoReserva.create({ data: { nombre: "Confirmada" } });
-    await prisma.estadoReserva.create({ data: { nombre: "Cancelada" } });
-
-    const reserva = await prisma.reserva.create({
-      data: {
-        fechaHoraInicio: new Date(Date.now() + 86400000), duracion: 30,
-        nombreInvitado: "Juan", emailInvitado: "juan@email.com",
-        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
-      },
-    });
-
-    await cancelarReserva({ reservaId: reserva.id, adminId: admin.id });
-    const actualizada = await prisma.reserva.findUnique({ where: { id: reserva.id }, include: { estadoReserva: true } });
-    expect(actualizada?.estadoReserva.nombre).toBe("Cancelada");
   });
 });

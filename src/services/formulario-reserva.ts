@@ -38,8 +38,6 @@ export function validarNombre(nombre: string): boolean {
  * Determina el estado de la reserva según el tipo de evento.
  * M04-RF05: Si es automático → "Confirmada". Si es manual → "Pendiente".
  */
-export function determinarEstadoReserva(
-  tipoEvento: TipoEvento
-): EstadoReserva {
+export function determinarEstadoReserva(tipoEvento: TipoEvento): EstadoReserva {
   return tipoEvento.confirmacionAutomatica ? "Confirmada" : "Pendiente";
 }

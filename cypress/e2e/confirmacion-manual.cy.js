@@ -173,32 +173,35 @@ describe("US_018 - Confirmación Manual de Reservas (E2E)", () => {
         });
     });
 
-    it("Debe permitir al Administrador confirmar manualmente una reserva pendiente", () => {
+    it(
+        "Debe permitir al Administrador confirmar manualmente una reserva pendiente",
+        () => {
 
-        // Arrange: Verificar que exista la tarjeta de reserva
-        cy.get('[data-cy^="reserva-card"]')
-            .first()
-            .should("exist");
+            // Arrange: Verificar que exista la tarjeta de reserva
+            cy.get('[data-cy^="reserva-card"]')
+                .first()
+                .should("exist");
 
-        // Verificar que la reserva se encuentre pendiente
-        cy.get('[data-cy^="reserva-estado"]')
-            .first()
-            .should("contain", "Pendiente");
+            // Verificar que la reserva se encuentre pendiente
+            cy.get('[data-cy^="reserva-estado"]')
+                .first()
+                .should("contain", "Pendiente");
 
-        // Act: El Administrador presiona el botón para confirmar la reserva
-        cy.get('[data-cy^="btn-confirmar"]')
-            .first()
-            .click();
+            // Act: El Administrador presiona el botón para confirmar la reserva
+            cy.get('[data-cy^="btn-confirmar"]')
+                .first()
+                .click();
 
-        // Assert: Verificar que el estado cambie a "Confirmada"
-        cy.get('[data-cy^="reserva-estado"]')
-            .first()
-            .should("contain", "Confirmada");
+            // Assert: Verificar que el estado cambie a "Confirmada"
+            cy.get('[data-cy^="reserva-estado"]')
+                .first()
+                .should("contain", "Confirmada");
 
-        // Assert: Verificar que se muestre el mensaje de éxito
-        cy.get('[data-cy="toast-mensaje"]')
-            .should("be.visible")
-            .and("contain", "Reserva confirmada");
-    });
+            // Assert: Verificar que se muestre el mensaje de éxito
+            cy.get('[data-cy="toast-mensaje"]')
+                .should("be.visible")
+                .and("contain", "Reserva confirmada");
+        }
+    );
 
 });

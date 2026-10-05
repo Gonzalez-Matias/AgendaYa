@@ -10,7 +10,8 @@ export interface ReservaVista {
   nombreInvitado: string;
   emailInvitado: string;
   tipoEvento: string;
-  estado: "Confirmada" | "PendienteDeConfirmacion" | "PendienteDeReagendar" | "Cancelada" | "Completada";
+  estado:
+    "Confirmada" | "PendienteDeConfirmacion" | "PendienteDeReagendar" | "Cancelada" | "Completada";
   colorFondo: string;
 }
 
@@ -19,8 +20,6 @@ const ObtenerReservasInputSchema = z.object({
   fechaDesde: z.date(),
   fechaHasta: z.date(),
 });
-
-type ObtenerReservasInput = z.infer<typeof ObtenerReservasInputSchema>;
 
 /**
  * Retorna el modo de vista por defecto al ingresar a la sección.
@@ -34,10 +33,7 @@ export function getModoVistaDefault(): ModoVista {
  * Cambia el modo de vista actual al modo seleccionado por el administrador.
  * No recarga datos, solo cambia la representación.
  */
-export function cambiarModoVista(
-  vistaActual: ModoVista,
-  nuevaVista: ModoVista
-): ModoVista {
+export function cambiarModoVista(vistaActual: ModoVista, nuevaVista: ModoVista): ModoVista {
   return nuevaVista;
 }
 
