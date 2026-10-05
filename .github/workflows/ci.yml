@@ -62,6 +62,26 @@ jobs:
         run: npm run build
 
   # ---------------------------------------------------------------------------
+  # Nomenclatura de la rama origen en PRs hacia develop: feature/*, fix/* o chore/*
+  # (solo corre en pull_request con base develop; en push y en PRs hacia main no aplica)
+  # ---------------------------------------------------------------------------
+  pr-branch-name:
+    name: pr-branch-name
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.base_ref == 'develop'
+
+    steps:
+      - name: Validar nomenclatura de la rama origen
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          if [[ ! "$BRANCH" =~ ^(feature|fix|chore)/.+ ]]; then
+            echo "::error::La rama '$BRANCH' no cumple la nomenclatura exigida para develop (feature/*, fix/*, chore/*)"
+            exit 1
+          fi
+          echo "Rama '$BRANCH' válida"
+
+  # ---------------------------------------------------------------------------
   # Tests unitarios (Jest) contra PostgreSQL
   # ---------------------------------------------------------------------------
   unit-tests:
