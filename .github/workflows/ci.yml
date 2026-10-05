@@ -75,8 +75,28 @@ jobs:
         env:
           BRANCH: ${{ github.head_ref }}
         run: |
-          if [[ ! "$BRANCH" =~ ^(feature|fix|chore)/.+ ]]; then
-            echo "::error::La rama '$BRANCH' no cumple la nomenclatura exigida para develop (feature/*, fix/*, chore/*)"
+          if [[ ! "$BRANCH" =~ ^(feature|fix|chore)/.+ && "$BRANCH" != "main" ]]; then
+            echo "::error::La rama '$BRANCH' no cumple la nomenclatura exigida para develop (feature/, fix/, chore/*, o main para back-merge)"
+            exit 1
+          fi
+          echo "Rama '$BRANCH' válida"
+
+  # ---------------------------------------------------------------------------
+  # Origen de los PRs hacia main: solo develop (release) o hotfix/*
+  # (solo corre en pull_request con base main; en push y en PRs hacia develop no aplica)
+  # ---------------------------------------------------------------------------
+  branch-policy:
+    name: branch-policy
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+
+    steps:
+      - name: Validar rama origen hacia main
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          if [[ "$BRANCH" != "develop" && ! "$BRANCH" =~ ^hotfix/.+ ]]; then
+            echo "::error::Hacia main solo se permite develop o hotfix/*. Origen: '$BRANCH'"
             exit 1
           fi
           echo "Rama '$BRANCH' válida"
