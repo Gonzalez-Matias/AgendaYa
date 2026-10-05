@@ -1,34 +1,30 @@
 describe("US_018 - Confirmación Manual de Reservas (E2E)", () => {
+  beforeEach(() => {
+    // 1. Interceptamos llamadas a la API
+    cy.intercept("GET", "**/api/administradores*", {
+      statusCode: 200,
+      body: [
+        {
+          id: 1,
+          nombre: "Administrador Demo",
+        },
+      ],
+    }).as("getAdmin");
 
-    beforeEach(() => {
+    cy.intercept("POST", "**/api/reservas/confirmar*", {
+      statusCode: 200,
+      body: {
+        mensaje: "Reserva confirmada correctamente",
+      },
+    }).as("postConfirmar");
 
-        // 1. Interceptamos llamadas a la API
-        cy.intercept("GET", "**/api/administradores*", {
-            statusCode: 200,
-            body: [
-                {
-                    id: 1,
-                    nombre: "Administrador Demo",
-                },
-            ],
-        }).as("getAdmin");
+    // 2. Visitamos la página de la agenda
+    cy.visit("/agenda");
 
-        cy.intercept("POST", "**/api/reservas/confirmar*", {
-            statusCode: 200,
-            body: {
-                mensaje: "Reserva confirmada correctamente",
-            },
-        }).as("postConfirmar");
-
-        // 2. Visitamos la página de la agenda
-        cy.visit("/agenda");
-
-        // 3. Inyectamos la tarjeta de reserva en el centro de la pantalla
-        cy.get("body").then(($body) => {
-
-            if ($body.find('[data-cy^="reserva-card"]').length === 0) {
-
-                $body.append(`
+    // 3. Inyectamos la tarjeta de reserva en el centro de la pantalla
+    cy.get("body").then(($body) => {
+      if ($body.find('[data-cy^="reserva-card"]').length === 0) {
+        $body.append(`
                     <div
                         data-cy="reserva-card-1"
                         style="
@@ -38,7 +34,7 @@ describe("US_018 - Confirmación Manual de Reservas (E2E)", () => {
                             transform: translate(-50%, -50%);
                             width: 400px;
                             padding: 25px;
-                            background: #ffffff;
+                            background: #ffffffda;
                             color: #1f2937;
                             border: 1px solid #e5e7eb;
                             border-radius: 12px;
@@ -152,53 +148,39 @@ describe("US_018 - Confirmación Manual de Reservas (E2E)", () => {
                     </div>
                 `);
 
-                // 4. Evento simulado de confirmación en la interfaz
-                $body
-                    .find('[data-cy="btn-confirmar-1"]')
-                    .on("click", function () {
+        // 4. Evento simulado de confirmación en la interfaz
+        $body.find('[data-cy="btn-confirmar-1"]').on("click", function () {
+          $body.find('[data-cy="reserva-estado-1"]').text("Confirmada").css({
+            "background-color": "#dcfce7",
+            color: "#166534",
+          });
 
-                        $body
-                            .find('[data-cy="reserva-estado-1"]')
-                            .text("Confirmada")
-                            .css({
-                                "background-color": "#dcfce7",
-                                "color": "#166534",
-                            });
-
-                        $body
-                            .find("#mock-toast")
-                            .slideDown(200);
-                    });
-            }
+          $body.find("#mock-toast").slideDown(200);
         });
+      }
     });
+  });
 
-    it("Debe permitir al Administrador confirmar manualmente una reserva pendiente", () => {
+  it("Debe permitir al Administrador confirmar manualmente una reserva pendiente", () => {
+    // Arrange: Verificar que exista la tarjeta de reserva
+    cy.get('[data-cy^="reserva-card"]').first().should("exist");
 
-        // Arrange: Verificar que exista la tarjeta de reserva
-        cy.get('[data-cy^="reserva-card"]')
-            .first()
-            .should("exist");
+    // Verificar que la reserva se encuentre pendiente
+    cy.get('[data-cy^="reserva-estado"]')
+      .first()
+      .should("contain", "Pendiente");
 
-        // Verificar que la reserva se encuentre pendiente
-        cy.get('[data-cy^="reserva-estado"]')
-            .first()
-            .should("contain", "Pendiente");
+    // Act: El Administrador presiona el botón para confirmar la reserva
+    cy.get('[data-cy^="btn-confirmar"]').first().click();
 
-        // Act: El Administrador presiona el botón para confirmar la reserva
-        cy.get('[data-cy^="btn-confirmar"]')
-            .first()
-            .click();
+    // Assert: Verificar que el estado cambie a "Confirmada"
+    cy.get('[data-cy^="reserva-estado"]')
+      .first()
+      .should("contain", "Confirmada");
 
-        // Assert: Verificar que el estado cambie a "Confirmada"
-        cy.get('[data-cy^="reserva-estado"]')
-            .first()
-            .should("contain", "Confirmada");
-
-        // Assert: Verificar que se muestre el mensaje de éxito
-        cy.get('[data-cy="toast-mensaje"]')
-            .should("be.visible")
-            .and("contain", "Reserva confirmada");
-    });
-
+    // Assert: Verificar que se muestre el mensaje de éxito
+    cy.get('[data-cy="toast-mensaje"]')
+      .should("be.visible")
+      .and("contain", "Reserva confirmada");
+  });
 });
