@@ -21,7 +21,7 @@ export async function cancelarReserva(input: CancelarReservaInput) {
   const { reservaId, motivo, adminId } = CancelarReservaInputSchema.parse(input);
 
   const reserva = await obtenerReservaPorId(reservaId);
-  
+
   if (!reserva) {
     throw new Error("Reserva no encontrada");
   }
@@ -30,8 +30,12 @@ export async function cancelarReserva(input: CancelarReservaInput) {
     throw new Error("No autorizado: la reserva no pertenece a este administrador");
   }
 
+  if (reserva.estadoReserva.nombre === "Cancelada") {
+  throw new Error("La reserva ya está cancelada");
+}
+
   const estadoCancelada = await obtenerEstadoPorNombre("Cancelada");
-  
+
   if (!estadoCancelada) {
     throw new Error("Estado Cancelada no encontrado en la base de datos");
   }

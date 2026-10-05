@@ -10,7 +10,6 @@ import {
 } from "../src/services/formulario-reserva";
 
 describe("M04-RF04 y M04-RF05 - Formulario y confirmación de reserva", () => {
-
   // TEST 1: Email inválido debe fallar
   test("Email con formato inválido debe retornar false", () => {
     expect(validarEmail("usuario@")).toBe(false);
@@ -49,5 +48,4 @@ describe("M04-RF04 y M04-RF05 - Formulario y confirmación de reserva", () => {
     };
     expect(determinarEstadoReserva(tipoEvento)).toBe("Pendiente");
   });
-
 });

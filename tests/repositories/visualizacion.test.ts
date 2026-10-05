@@ -49,7 +49,11 @@ describe("visualizacion repository", () => {
         },
       });
 
-      const resultado = await findReservasByAdmin(admin.id, hoy, new Date(mañana.getTime() + 86400000));
+      const resultado = await findReservasByAdmin(
+        admin.id,
+        hoy,
+        new Date(mañana.getTime() + 86400000)
+      );
 
       expect(resultado).toHaveLength(1);
       expect(resultado[0].nombreInvitado).toBe("Juan Pérez");
@@ -127,7 +131,11 @@ describe("visualizacion repository", () => {
         },
       });
 
-      const resultado = await findReservasByAdmin(admin1.id, hoy, new Date(mañana.getTime() + 86400000));
+      const resultado = await findReservasByAdmin(
+        admin1.id,
+        hoy,
+        new Date(mañana.getTime() + 86400000)
+      );
 
       expect(resultado).toHaveLength(1);
       expect(resultado[0].nombreInvitado).toBe("Reserva Admin 1");
@@ -168,7 +176,11 @@ describe("visualizacion repository", () => {
         },
       });
 
-      const resultado = await findReservasByAdmin(admin.id, hoy, new Date(mañana.getTime() + 86400000));
+      const resultado = await findReservasByAdmin(
+        admin.id,
+        hoy,
+        new Date(mañana.getTime() + 86400000)
+      );
 
       expect(resultado[0].estadoReserva.nombre).toBe("Confirmada");
       expect(resultado[0].tipoEvento.nombre).toBe("Reunión");
@@ -214,8 +226,20 @@ describe("visualizacion repository", () => {
         });
       }
 
-      const pagina1 = await findReservasByAdminYPagina(admin.id, hoy, new Date(mañana.getTime() + 86400000), 1, 10);
-      const pagina2 = await findReservasByAdminYPagina(admin.id, hoy, new Date(mañana.getTime() + 86400000), 2, 10);
+      const pagina1 = await findReservasByAdminYPagina(
+        admin.id,
+        hoy,
+        new Date(mañana.getTime() + 86400000),
+        1,
+        10
+      );
+      const pagina2 = await findReservasByAdminYPagina(
+        admin.id,
+        hoy,
+        new Date(mañana.getTime() + 86400000),
+        2,
+        10
+      );
 
       expect(pagina1).toHaveLength(10);
       expect(pagina2).toHaveLength(5);

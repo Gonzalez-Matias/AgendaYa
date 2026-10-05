@@ -2,7 +2,7 @@
   background: white;
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
   border-radius: 8px;
-  outline: 1px solid #C3C5D9;
+  outline: 1px solid #c3c5d9;
   outline-offset: -1px;
   display: flex;
   flex-direction: column;
@@ -11,15 +11,15 @@
 
 .header {
   display: flex;
-  background: #F7F9FB;
-  border-bottom: 1px solid #C3C5D9;
+  background: #f7f9fb;
+  border-bottom: 1px solid #c3c5d9;
   flex-shrink: 0;
 }
 
 .timeCorner {
   width: 72px;
-  background: #F2F4F6;
-  border-right: 1px solid #C3C5D9;
+  background: #f2f4f6;
+  border-right: 1px solid #c3c5d9;
   flex-shrink: 0;
 }
 
@@ -45,21 +45,21 @@
 }
 
 .dayNameToday {
-  color: #003EC7;
+  color: #003ec7;
   font-weight: 700;
 }
 
 .dayNumber {
   font-size: 18px;
   font-weight: 600;
-  color: #191C1E;
+  color: #191c1e;
   line-height: 24px;
 }
 
 .dayNumberToday {
   width: 32px;
   height: 32px;
-  background: #003EC7;
+  background: #003ec7;
   border-radius: 12px;
   color: white;
   display: flex;
@@ -87,7 +87,7 @@
   display: flex;
   align-items: flex-start;
   padding-top: 24px;
-  background: #F2F4F6;
+  background: #f2f4f6;
   border-right: 1px solid rgba(195, 197, 217, 0.3);
   border-bottom: 1px solid rgba(195, 197, 217, 0.3);
 }
@@ -95,7 +95,7 @@
 .timeLabel {
   font-size: 12px;
   font-weight: 400;
-  color: #6B7280;
+  color: #6b7280;
   line-height: 16px;
 }
 
@@ -161,15 +161,15 @@
   overflow: hidden;
   cursor: pointer;
   z-index: 1;
-  background: #F3F4F6 !important;
-  border-left: 4px dashed #EF4444 !important;
+  background: #f3f4f6 !important;
+  border-left: 4px dashed #ef4444 !important;
   opacity: 0.7;
 }
 
 .eventCardCancelled .eventTime,
 .eventCardCancelled .eventName {
   text-decoration: line-through;
-  color: #9CA3AF !important;
+  color: #9ca3af !important;
 }
 
 .eventTime {

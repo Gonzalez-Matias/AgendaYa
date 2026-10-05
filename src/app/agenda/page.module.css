@@ -2,14 +2,14 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #F7F9FB;
+  background: #f7f9fb;
 }
 
 .header {
   height: 64px;
   padding: 0 24px;
   background: white;
-  border-bottom: 1px solid #C3C5D9;
+  border-bottom: 1px solid #c3c5d9;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -25,7 +25,7 @@
 .logoIcon {
   width: 32px;
   height: 32px;
-  background: #003EC7;
+  background: #003ec7;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -35,7 +35,7 @@
 .logoText {
   font-size: 18px;
   font-weight: 700;
-  color: #003EC7;
+  color: #003ec7;
   font-family: var(--font-geist-sans), Inter, sans-serif;
 }
 
@@ -56,15 +56,15 @@
 }
 
 .navItem:hover {
-  background: #F2F4F6;
+  background: #f2f4f6;
 }
 
 .navItemActive {
-  background: #D0E1FB;
+  background: #d0e1fb;
 }
 
 .navItemActive:hover {
-  background: #C5D8F8;
+  background: #c5d8f8;
 }
 
 .navLabel {
@@ -75,7 +75,7 @@
 }
 
 .navLabelActive {
-  color: #54647A;
+  color: #54647a;
   font-weight: 700;
 }
 
@@ -88,9 +88,9 @@
 .userIcon {
   width: 32px;
   height: 32px;
-  background: #E0E3E5;
+  background: #e0e3e5;
   border-radius: 12px;
-  outline: 1px solid #C3C5D9;
+  outline: 1px solid #c3c5d9;
   outline-offset: -1px;
   display: flex;
   align-items: center;

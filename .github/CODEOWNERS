@@ -1,4 +1,3 @@
-.github/              @Gonzalez-Matias
-prisma/schema.prisma  @Gonzalez-Matias
-prisma/seed.ts        @Gonzalez-Matias
-.coderabbit.yaml      @Gonzalez-Matias
+.github/              @Gonzalez-Matias @JPManucha
+prisma/schema.prisma  @Gonzalez-Matias @JPManucha
+prisma/seed.ts        @Gonzalez-Matias @JPManucha

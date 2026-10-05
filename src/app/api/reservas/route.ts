@@ -16,8 +16,7 @@ export async function POST(request: NextRequest) {
     if (!tipoEventoId || !fechaHoraInicio || !nombreInvitado || !emailInvitado) {
       return NextResponse.json(
         {
-          error:
-            "tipoEventoId, fechaHoraInicio, nombreInvitado y emailInvitado son requeridos",
+          error: "tipoEventoId, fechaHoraInicio, nombreInvitado y emailInvitado son requeridos",
         },
         { status: 400 }
       );

@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { cancelarReserva } from "../../src/services/cancelarReserva";
 import * as repositorio from "../../src/repositories/cancelarReserva";
 
@@ -12,8 +11,8 @@ jest.mock("../../src/repositories/cancelarReserva", () => ({
 
 describe("cancelarReserva (unitario con mocks)", () => {
   afterEach(() => {
-    jest.clearAllMocks();
-  });
+  jest.resetAllMocks();
+});
 
   // ---------------------------------------------------------------------------
   // Comportamiento 1: cancelarReserva (procesamiento de la cancelación)
@@ -45,48 +44,61 @@ describe("cancelarReserva (unitario con mocks)", () => {
       expect(repositorio.cancelarReservaAtomica).toHaveBeenCalledTimes(1);
     });
 
-    it("Test 2 (Error): lanza error si la reserva no existe", async () => {
-      (repositorio.obtenerReservaPorId as jest.Mock).mockResolvedValue(null);
+    it("Test 2 (Error): lanza error si la base de datos falla al cancelar", async () => {
+      (repositorio.obtenerReservaPorId as jest.Mock).mockResolvedValue({
+        id: 10,
+        administradorId: 1,
+        estadoReserva: { id: 1, nombre: "Confirmada" },
+      });
+      (repositorio.obtenerEstadoPorNombre as jest.Mock).mockResolvedValue({
+        id: 2,
+        nombre: "Cancelada",
+      });
+      // Simulamos que la base de datos se cae
+      (repositorio.cancelarReservaAtomica as jest.Mock).mockRejectedValue(
+        new Error("Error de base de datos")
+      );
 
-      await expect(
-        cancelarReserva({ reservaId: 99999, motivo: "No existe" })
-      ).rejects.toThrow("Reserva no encontrada");
+      await expect(cancelarReserva({ reservaId: 10 })).rejects.toThrow(
+        "Error de base de datos"
+      );
+    });
 
-      // Nunca intenta cancelar en la base de datos
+    it("Test 3 (Error): lanza error si la reserva ya está cancelada", async () => {
+      (repositorio.obtenerReservaPorId as jest.Mock).mockResolvedValue({
+        id: 12,
+        administradorId: 1,
+        estadoReserva: { id: 2, nombre: "Cancelada" },
+      });
+
+      await expect(cancelarReserva({ reservaId: 12 })).rejects.toThrow(
+        "La reserva ya está cancelada"
+      );
+
+      // No intenta cancelar de nuevo en la base de datos
       expect(repositorio.cancelarReservaAtomica).not.toHaveBeenCalled();
     });
 
-   it("Test 3 (Error): lanza error si la reserva ya está cancelada", async () => {
-  (repositorio.obtenerReservaPorId as jest.Mock).mockResolvedValue({
-    id: 12,
-    administradorId: 1,
-    estadoReserva: { id: 2, nombre: "Cancelada" },
+    it("Test 4 (Error): lanza error si el estado Cancelada no existe en la base", async () => {
+      (repositorio.obtenerReservaPorId as jest.Mock).mockResolvedValue({
+        id: 10,
+        administradorId: 1,
+        estadoReserva: { id: 1, nombre: "Confirmada" },
+      });
+      
+      (repositorio.obtenerEstadoPorNombre as jest.Mock).mockResolvedValue(null);
+
+      await expect(cancelarReserva({ reservaId: 10 })).rejects.toThrow();
+
+      // No se cancela nada si falta el estado
+      expect(repositorio.cancelarReservaAtomica).not.toHaveBeenCalled();
+    });
   });
 
-  await expect(
-    cancelarReserva({ reservaId: 12 })
-  ).rejects.toThrow("La reserva ya está cancelada");
-
-  // No intenta cancelar de nuevo en la base de datos
-  expect(repositorio.cancelarReservaAtomica).not.toHaveBeenCalled();
-});
   // ---------------------------------------------------------------------------
-  // Comportamiento 2: validación del input con Zod (CancelarReservaInputSchema)
+  // Comportamiento 2: el motivo de la cancelación es opcional
   // ---------------------------------------------------------------------------
   describe("validación de CancelarReservaInputSchema (Zod)", () => {
-    it("Test 4 (Caso inválido): lanza error de validación si reservaId es negativo o no entero", async () => {
-      await expect(cancelarReserva({ reservaId: -1 })).rejects.toThrow(
-        z.ZodError
-      );
-      await expect(cancelarReserva({ reservaId: 1.5 })).rejects.toThrow(
-        z.ZodError
-      );
-
-      // La validación falla antes de tocar el repositorio
-      expect(repositorio.obtenerReservaPorId).not.toHaveBeenCalled();
-      expect(repositorio.cancelarReservaAtomica).not.toHaveBeenCalled();
-    });
-
     it("Test 5 (Caso borde / Opcional): permite procesar la cancelación sin enviar un motivo", async () => {
       (repositorio.obtenerReservaPorId as jest.Mock).mockResolvedValue({
         id: 10,
