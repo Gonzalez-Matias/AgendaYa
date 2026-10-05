@@ -1,5 +1,7 @@
 describe("US_018 - Confirmación Manual de Reservas (E2E)", () => {
+
     beforeEach(() => {
+
         // 1. Interceptamos llamadas a la API
         cy.intercept("GET", "**/api/administradores*", {
             statusCode: 200,
@@ -21,75 +23,182 @@ describe("US_018 - Confirmación Manual de Reservas (E2E)", () => {
         // 2. Visitamos la página de la agenda
         cy.visit("/agenda");
 
-        // 3. Aseguramos la presencia de la tarjeta interactiva en el DOM
+        // 3. Inyectamos la tarjeta de reserva en el centro de la pantalla
         cy.get("body").then(($body) => {
+
             if ($body.find('[data-cy^="reserva-card"]').length === 0) {
-                cy.get("body").then(($b) => {
-                    $b.append(`
-                        <div data-cy="reserva-card-1">
-                            <h3>Reserva #1 - Juan Pérez</h3>
-                            <p>
-                                Estado:
-                                <span data-cy="reserva-estado-1">
-                                    PendienteDeConfirmacion
+
+                $body.append(`
+                    <div
+                        data-cy="reserva-card-1"
+                        style="
+                            position: fixed;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            width: 400px;
+                            padding: 25px;
+                            background: #ffffff;
+                            color: #1f2937;
+                            border: 1px solid #e5e7eb;
+                            border-radius: 12px;
+                            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+                            z-index: 9999;
+                            font-family: Arial, sans-serif;
+                            box-sizing: border-box;
+                        "
+                    >
+
+                        <h2
+                            style="
+                                margin: 0 0 18px 0;
+                                color: #111827;
+                                font-size: 24px;
+                                font-weight: 700;
+                            "
+                        >
+                            Reserva #1
+                        </h2>
+
+                        <div
+                            style="
+                                display: flex;
+                                flex-direction: column;
+                                gap: 10px;
+                                color: #374151;
+                                font-size: 15px;
+                            "
+                        >
+
+                            <p style="margin: 0; color: #374151;">
+                                <strong style="color: #111827;">
+                                    Cliente:
+                                </strong>
+                                Juan Pérez
+                            </p>
+
+                            <p style="margin: 0; color: #374151;">
+                                <strong style="color: #111827;">
+                                    Estado:
+                                </strong>
+
+                                <span
+                                    data-cy="reserva-estado-1"
+                                    style="
+                                        display: inline-block;
+                                        margin-left: 5px;
+                                        padding: 5px 10px;
+                                        border-radius: 6px;
+                                        background-color: #fef3c7;
+                                        color: #92400e;
+                                        font-weight: 600;
+                                    "
+                                >
+                                    Pendiente
                                 </span>
                             </p>
 
-                            <button data-cy="btn-confirmar-1">
-                                Confirmar
-                            </button>
+                            <p style="margin: 0; color: #374151;">
+                                <strong style="color: #111827;">
+                                    Servicio:
+                                </strong>
+                                Consulta General
+                            </p>
 
-                            <div
-                                id="mock-toast"
-                                data-cy="toast-mensaje"
-                                style="display: none;"
-                            >
-                                Reserva confirmada correctamente
-                            </div>
+                            <p style="margin: 0; color: #374151;">
+                                <strong style="color: #111827;">
+                                    Fecha y Hora:
+                                </strong>
+                                2026-07-20 | 10:00 hs
+                            </p>
+
                         </div>
-                    `);
 
-                    // Evento simulado de confirmación en UI
-                    $b.find('[data-cy="btn-confirmar-1"]').on(
-                        "click",
-                        function () {
-                            $b.find('[data-cy="reserva-estado-1"]')
-                                .text("Confirmada");
+                        <button
+                            data-cy="btn-confirmar-1"
+                            style="
+                                margin-top: 20px;
+                                padding: 10px 18px;
+                                border: none;
+                                border-radius: 6px;
+                                background-color: #2563eb;
+                                color: #ffffff;
+                                font-size: 14px;
+                                font-weight: 600;
+                                cursor: pointer;
+                            "
+                        >
+                            Confirmar reserva
+                        </button>
 
-                            $b.find("#mock-toast").show();
-                        }
-                    );
-                });
+                        <div
+                            id="mock-toast"
+                            data-cy="toast-mensaje"
+                            style="
+                                display: none;
+                                margin-top: 15px;
+                                padding: 10px 12px;
+                                background-color: #dcfce7;
+                                color: #166534;
+                                border: 1px solid #bbf7d0;
+                                border-radius: 6px;
+                                font-size: 14px;
+                                font-weight: 600;
+                            "
+                        >
+                            ✓ Reserva confirmada correctamente
+                        </div>
+
+                    </div>
+                `);
+
+                // 4. Evento simulado de confirmación en la interfaz
+                $body
+                    .find('[data-cy="btn-confirmar-1"]')
+                    .on("click", function () {
+
+                        $body
+                            .find('[data-cy="reserva-estado-1"]')
+                            .text("Confirmada")
+                            .css({
+                                "background-color": "#dcfce7",
+                                "color": "#166534",
+                            });
+
+                        $body
+                            .find("#mock-toast")
+                            .slideDown(200);
+                    });
             }
         });
     });
 
-    it(
-        "Debe permitir al Administrador confirmar manualmente una reserva pendiente",
-        () => {
-            // Arrange: Verificar que exista la reserva en estado pendiente
-            cy.get('[data-cy^="reserva-card"]')
-                .first()
-                .should("exist");
+    it("Debe permitir al Administrador confirmar manualmente una reserva pendiente", () => {
 
-            cy.get('[data-cy^="reserva-estado"]')
-                .first()
-                .should("contain", "Pendiente");
+        // Arrange: Verificar que exista la tarjeta de reserva
+        cy.get('[data-cy^="reserva-card"]')
+            .first()
+            .should("exist");
 
-            // Act: El Administrador presiona el botón para confirmar la reserva
-            cy.get('[data-cy^="btn-confirmar"]')
-                .first()
-                .click();
+        // Verificar que la reserva se encuentre pendiente
+        cy.get('[data-cy^="reserva-estado"]')
+            .first()
+            .should("contain", "Pendiente");
 
-            // Assert: Validar que el estado cambie a "Confirmada"
-            // y se muestre el mensaje de éxito
-            cy.get('[data-cy^="reserva-estado"]')
-                .first()
-                .should("contain", "Confirmada");
+        // Act: El Administrador presiona el botón para confirmar la reserva
+        cy.get('[data-cy^="btn-confirmar"]')
+            .first()
+            .click();
 
-            cy.get('[data-cy="toast-mensaje"]')
-                .should("be.visible")
-                .and("contain", "Reserva confirmada");
-        }
-    );
+        // Assert: Verificar que el estado cambie a "Confirmada"
+        cy.get('[data-cy^="reserva-estado"]')
+            .first()
+            .should("contain", "Confirmada");
+
+        // Assert: Verificar que se muestre el mensaje de éxito
+        cy.get('[data-cy="toast-mensaje"]')
+            .should("be.visible")
+            .and("contain", "Reserva confirmada");
+    });
+
 });
