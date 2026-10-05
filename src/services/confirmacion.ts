@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-  findReservaById,
-  confirmarReservaEnTransaccion,
-} from "../repositories/confirmarReserva";
+import { findReservaById, confirmarReservaEnTransaccion } from "../repositories/confirmarReserva";
 import { findEstadoByNombre } from "../repositories/reserva";
 
 const ConfirmarReservaInputSchema = z.object({

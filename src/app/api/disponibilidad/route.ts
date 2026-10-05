@@ -7,7 +7,10 @@ export async function POST(request: NextRequest) {
     const { tipoEventoId, fechaDesde, fechaHasta } = body;
 
     if (!tipoEventoId || !fechaDesde || !fechaHasta) {
-      return NextResponse.json({ error: "tipoEventoId, fechaDesde y fechaHasta son requeridos" }, { status: 400 });
+      return NextResponse.json(
+        { error: "tipoEventoId, fechaDesde y fechaHasta son requeridos" },
+        { status: 400 }
+      );
     }
 
     const resultado = await consultarDisponibilidad({

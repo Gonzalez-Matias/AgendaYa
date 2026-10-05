@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { prisma, cleanDB } from "../helpers";
 import prismaRepo from "../../src/repositories/db";
 import { reagendarReserva, ReagendarError } from "../../src/services/reagendarReserva";
@@ -229,9 +230,13 @@ describe("reagendarReserva", () => {
 
     const reserva = await prisma.reserva.create({
       data: {
-        fechaHoraInicio: new Date("2026-08-01T10:00:00Z"), duracion: 30,
-        nombreInvitado: "Juan", emailInvitado: "juan@test.com",
-        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
+        fechaHoraInicio: new Date("2026-08-01T10:00:00Z"),
+        duracion: 30,
+        nombreInvitado: "Juan",
+        emailInvitado: "juan@test.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+        estadoReservaId: estado.id,
       },
     });
 
@@ -255,9 +260,13 @@ describe("reagendarReserva", () => {
 
     const reserva = await prisma.reserva.create({
       data: {
-        fechaHoraInicio: new Date("2026-08-01T10:00:00Z"), duracion: 30,
-        nombreInvitado: "Juan", emailInvitado: "juan@test.com",
-        tipoEventoId: tipoEvento.id, administradorId: admin.id, estadoReservaId: estado.id,
+        fechaHoraInicio: new Date("2026-08-01T10:00:00Z"),
+        duracion: 30,
+        nombreInvitado: "Juan",
+        emailInvitado: "juan@test.com",
+        tipoEventoId: tipoEvento.id,
+        administradorId: admin.id,
+        estadoReservaId: estado.id,
       },
     });
 
@@ -268,5 +277,17 @@ describe("reagendarReserva", () => {
     });
 
     expect(resultado.reserva.estadoReserva.nombre).toBe("Confirmada");
+  });
+
+  it("rechaza el reagendado cuando nuevaFechaHoraInicio no es una fecha válida (validación de entrada)", async () => {
+    await expect(
+      reagendarReserva({
+        reservaId: 1,
+        nuevaFechaHoraInicio: "2026-08-01T14:59:00Z" as unknown as Date,
+      })
+    ).rejects.toThrow(z.ZodError);
+
+    // La validación corta antes de persistir nada
+    expect(await prisma.reserva.count()).toBe(0);
   });
 });

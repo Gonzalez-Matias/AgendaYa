@@ -27,17 +27,50 @@ interface DetalleReservaProps {
 }
 
 const DIAS_LARGOS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-const MESES_LARGOS = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+const MESES_LARGOS = [
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
+];
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; outline: string }> = {
-  Confirmada: { label: "Confirmada", color: "#166534", bg: "#DCFCE7", outline: "#4CAF50" },
-  PendienteDeConfirmacion: { label: "Pendiente de confirmación", color: "#854D0E", bg: "#EAD48E", outline: "#EAB308" },
-  PendienteDeReagendar: { label: "Pendiente de reagendar", color: "#9A3412", bg: "#FED7AA", outline: "#F97316" },
-  Cancelada: { label: "Cancelada", color: "#991B1B", bg: "#FEE2E2", outline: "#EF4444" },
-  Completada: { label: "Completada", color: "#4B5563", bg: "#F3F4F6", outline: "#6B7280" },
-};
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; outline: string }> =
+  {
+    Confirmada: { label: "Confirmada", color: "#166534", bg: "#DCFCE7", outline: "#4CAF50" },
+    PendienteDeConfirmacion: {
+      label: "Pendiente de confirmación",
+      color: "#854D0E",
+      bg: "#EAD48E",
+      outline: "#EAB308",
+    },
+    PendienteDeReagendar: {
+      label: "Pendiente de reagendar",
+      color: "#9A3412",
+      bg: "#FED7AA",
+      outline: "#F97316",
+    },
+    Cancelada: { label: "Cancelada", color: "#991B1B", bg: "#FEE2E2", outline: "#EF4444" },
+    Completada: { label: "Completada", color: "#4B5563", bg: "#F3F4F6", outline: "#6B7280" },
+  };
 
-const TIPO_COLORS = ["#003EC7", "#9C27B0", "#4CAF50", "#6B7280", "#F59E0B", "#EF4444", "#3B82F6", "#10B981"];
+const TIPO_COLORS = [
+  "#003EC7",
+  "#9C27B0",
+  "#4CAF50",
+  "#6B7280",
+  "#F59E0B",
+  "#EF4444",
+  "#3B82F6",
+  "#10B981",
+];
 
 function formatDuration(mins: number): string {
   const h = Math.floor(mins / 60);
@@ -61,12 +94,20 @@ function formatFullDate(dateStr: string): string {
   return `${DIAS_LARGOS[d.getDay()]}, ${MESES_LARGOS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
-export function DetalleReserva({ reservaId, adminId, adminNombre, onClose, onAction }: DetalleReservaProps) {
+export function DetalleReserva({
+  reservaId,
+  adminId,
+  adminNombre,
+  onClose,
+  onAction,
+}: DetalleReservaProps) {
   const [detalle, setDetalle] = useState<DetalleReservaData | null>(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
   const [procesando, setProcesando] = useState(false);
-  const [accionPendiente, setAccionPendiente] = useState<"confirmar" | "cancelar" | "completar" | null>(null);
+  const [accionPendiente, setAccionPendiente] = useState<
+    "confirmar" | "cancelar" | "completar" | null
+  >(null);
   const [mostrarReagendar, setMostrarReagendar] = useState(false);
 
   useEffect(() => {
@@ -98,7 +139,9 @@ export function DetalleReserva({ reservaId, adminId, adminNombre, onClose, onAct
       <div className={styles.overlay} onClick={onClose}>
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <div className={styles.error}>{error || "Reserva no encontrada"}</div>
-          <button className={styles.closeBtn} onClick={onClose}>✕</button>
+          <button className={styles.closeBtn} onClick={onClose}>
+            ✕
+          </button>
         </div>
       </div>
     );
@@ -179,23 +222,42 @@ export function DetalleReserva({ reservaId, adminId, adminNombre, onClose, onAct
   }
 
   return (
-<div className={styles.overlay} onClick={onClose} data-cy="detalle-modal">
-        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-          <div className={styles.header}>
-            <div className={styles.headerLeft}>
-              <div className={styles.dot} style={{ background: tipoColor }} />
-              <span className={styles.tipoLabel}>{detalle.tipoEvento.nombre}</span>
-              <span className={styles.statusBadge} style={{ background: st.bg, color: st.color, outline: `1px solid ${st.outline}` }} data-cy="detalle-estado">
-                {st.label}
-              </span>
-            </div>
-            <button className={styles.closeBtn} onClick={onClose} data-cy="detalle-close">✕</button>
+    <div className={styles.overlay} onClick={onClose} data-cy="detalle-modal">
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.header}>
+          <div className={styles.headerLeft}>
+            <div className={styles.dot} style={{ background: tipoColor }} />
+            <span className={styles.tipoLabel}>{detalle.tipoEvento.nombre}</span>
+            <span
+              className={styles.statusBadge}
+              style={{ background: st.bg, color: st.color, outline: `1px solid ${st.outline}` }}
+              data-cy="detalle-estado"
+            >
+              {st.label}
+            </span>
           </div>
+          <button className={styles.closeBtn} onClick={onClose} data-cy="detalle-close">
+            ✕
+          </button>
+        </div>
 
-        <div className={styles.title}>{detalle.tipoEvento.nombre} - {detalle.nombreInvitado}</div>
+        <div className={styles.title}>
+          {detalle.tipoEvento.nombre} - {detalle.nombreInvitado}
+        </div>
 
         {error && (
-          <div data-cy="detalle-error" style={{ margin: "0 24px", padding: "12px 16px", background: "#FEE2E2", borderRadius: "6px", color: "#991B1B", fontSize: "13px", fontWeight: 500 }}>
+          <div
+            data-cy="detalle-error"
+            style={{
+              margin: "0 24px",
+              padding: "12px 16px",
+              background: "#FEE2E2",
+              borderRadius: "6px",
+              color: "#991B1B",
+              fontSize: "13px",
+              fontWeight: 500,
+            }}
+          >
             {error}
           </div>
         )}
@@ -204,14 +266,25 @@ export function DetalleReserva({ reservaId, adminId, adminNombre, onClose, onAct
           <div className={styles.section}>
             <div className={styles.sectionIcon}>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <rect x="2" y="3" width="16" height="15" rx="2" stroke="#434656" strokeWidth="1.5" />
+                <rect
+                  x="2"
+                  y="3"
+                  width="16"
+                  height="15"
+                  rx="2"
+                  stroke="#434656"
+                  strokeWidth="1.5"
+                />
                 <path d="M2 7h16" stroke="#434656" strokeWidth="1.5" />
                 <path d="M6 1v4M14 1v4" stroke="#434656" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
             </div>
             <div className={styles.sectionContent}>
               <div className={styles.dateText}>{formatFullDate(detalle.fechaHoraInicio)}</div>
-              <div className={styles.timeText}>{formatTime(detalle.fechaHoraInicio)} - {formatTime(detalle.fechaHoraFin)} ({formatDuration(detalle.duracion)})</div>
+              <div className={styles.timeText}>
+                {formatTime(detalle.fechaHoraInicio)} - {formatTime(detalle.fechaHoraFin)} (
+                {formatDuration(detalle.duracion)})
+              </div>
             </div>
           </div>
 
@@ -219,9 +292,19 @@ export function DetalleReserva({ reservaId, adminId, adminNombre, onClose, onAct
             <div className={styles.sectionIcon}>
               <svg width="22" height="16" viewBox="0 0 22 16" fill="none">
                 <circle cx="8" cy="5" r="3.5" stroke="#434656" strokeWidth="1.5" />
-                <path d="M1 15c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="#434656" strokeWidth="1.5" strokeLinecap="round" />
+                <path
+                  d="M1 15c0-3.3 2.7-6 6-6s6 2.7 6 6"
+                  stroke="#434656"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
                 <circle cx="16" cy="5" r="2.5" stroke="#434656" strokeWidth="1.5" />
-                <path d="M15 15c0-2.5 1.5-4.5 4-5" stroke="#434656" strokeWidth="1.5" strokeLinecap="round" />
+                <path
+                  d="M15 15c0-2.5 1.5-4.5 4-5"
+                  stroke="#434656"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
               </svg>
             </div>
             <div className={styles.sectionContent}>
@@ -239,17 +322,35 @@ export function DetalleReserva({ reservaId, adminId, adminNombre, onClose, onAct
           <div className={styles.section}>
             <div className={styles.sectionIcon}>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M3 17V3l14 7-14 7z" stroke="#434656" strokeWidth="1.5" strokeLinejoin="round" />
+                <path
+                  d="M3 17V3l14 7-14 7z"
+                  stroke="#434656"
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                />
               </svg>
             </div>
             <div className={styles.sectionContent}>
               <div className={styles.estadoRow}>
                 <span className={styles.estadoLabel}>Estado:</span>
-                <span className={styles.estadoText} style={{ color: st.color }}>{st.label}</span>
+                <span className={styles.estadoText} style={{ color: st.color }}>
+                  {st.label}
+                </span>
                 {isPendiente && (
-                  <button data-cy="btn-confirmar" className={styles.confirmBtn} onClick={() => setAccionPendiente("confirmar")} disabled={procesando}>
+                  <button
+                    data-cy="btn-confirmar"
+                    className={styles.confirmBtn}
+                    onClick={() => setAccionPendiente("confirmar")}
+                    disabled={procesando}
+                  >
                     <svg width="13" height="12" viewBox="0 0 13 12" fill="none">
-                      <path d="M1 6l4 4 7-7" stroke="#166534" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path
+                        d="M1 6l4 4 7-7"
+                        stroke="#166534"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                     Confirmar
                   </button>
@@ -262,8 +363,21 @@ export function DetalleReserva({ reservaId, adminId, adminNombre, onClose, onAct
             <div className={styles.section}>
               <div className={styles.sectionIcon}>
                 <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
-                  <rect x="1" y="1" width="14" height="18" rx="2" stroke="#434656" strokeWidth="1.5" />
-                  <path d="M5 6h6M5 10h6M5 14h3" stroke="#434656" strokeWidth="1.5" strokeLinecap="round" />
+                  <rect
+                    x="1"
+                    y="1"
+                    width="14"
+                    height="18"
+                    rx="2"
+                    stroke="#434656"
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M5 6h6M5 10h6M5 14h3"
+                    stroke="#434656"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
                 </svg>
               </div>
               <div className={styles.sectionContent}>
@@ -274,20 +388,48 @@ export function DetalleReserva({ reservaId, adminId, adminNombre, onClose, onAct
         </div>
 
         <div className={styles.footer}>
-          <button data-cy="btn-cancelar" className={styles.cancelBtn} onClick={() => setAccionPendiente("cancelar")} disabled={procesando || isFinalizada}>
+          <button
+            data-cy="btn-cancelar"
+            className={styles.cancelBtn}
+            onClick={() => setAccionPendiente("cancelar")}
+            disabled={procesando || isFinalizada}
+          >
             <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-              <path d="M4 4l9 9M13 4l-9 9" stroke="#BA1A1A" strokeWidth="1.5" strokeLinecap="round" />
+              <path
+                d="M4 4l9 9M13 4l-9 9"
+                stroke="#BA1A1A"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </svg>
             Cancelar
           </button>
-          <button data-cy="btn-reagendar" className={styles.reagendarBtn} onClick={() => setMostrarReagendar(true)} disabled={procesando || isFinalizada}>Reagendar</button>
-          <button data-cy="btn-completar" className={styles.completarBtn} onClick={() => setAccionPendiente("completar")} disabled={procesando || !isConfirmada}>
-<svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-                <circle cx="8.5" cy="8.5" r="7" stroke="white" strokeWidth="1.5" />
-                <path d="M5 8.5l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Completada
-            </button>
+          <button
+            data-cy="btn-reagendar"
+            className={styles.reagendarBtn}
+            onClick={() => setMostrarReagendar(true)}
+            disabled={procesando || isFinalizada}
+          >
+            Reagendar
+          </button>
+          <button
+            data-cy="btn-completar"
+            className={styles.completarBtn}
+            onClick={() => setAccionPendiente("completar")}
+            disabled={procesando || !isConfirmada}
+          >
+            <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
+              <circle cx="8.5" cy="8.5" r="7" stroke="white" strokeWidth="1.5" />
+              <path
+                d="M5 8.5l2.5 2.5 4.5-4.5"
+                stroke="white"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Completada
+          </button>
         </div>
       </div>
 
@@ -295,7 +437,13 @@ export function DetalleReserva({ reservaId, adminId, adminNombre, onClose, onAct
         <ConfirmDialog
           variant={accionPendiente}
           eventTitle={`${detalle.tipoEvento.nombre} - ${detalle.nombreInvitado}`}
-          onConfirm={accionPendiente === "confirmar" ? () => handleConfirmar() : accionPendiente === "cancelar" ? handleCancelar : handleCompletar}
+          onConfirm={
+            accionPendiente === "confirmar"
+              ? () => handleConfirmar()
+              : accionPendiente === "cancelar"
+                ? handleCancelar
+                : handleCompletar
+          }
           onCancel={() => setAccionPendiente(null)}
           loading={procesando}
         />
