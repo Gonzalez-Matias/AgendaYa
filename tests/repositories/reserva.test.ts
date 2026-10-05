@@ -1,6 +1,9 @@
 import { prisma, cleanDB } from "../helpers";
 import prismaRepo from "../../src/repositories/db";
-import { createReservaConHistorial, findReservasActivasEnRango } from "../../src/repositories/reserva";
+import {
+  createReservaConHistorial,
+  findReservasActivasEnRango,
+} from "../../src/repositories/reserva";
 
 describe("findReservasActivasEnRango (repositorio)", () => {
   beforeEach(async () => {
