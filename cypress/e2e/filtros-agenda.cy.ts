@@ -17,8 +17,13 @@ describe("AgendaYA - Filtro de reservas por estado (M05)", () => {
     cy.get(agendaPage.loading).should("not.exist");
   });
 
+  function filtrarPorEstado(valor: string) {
+    cy.get('[data-cy="filtro-estado"]').click();
+    cy.get(`[data-cy="filtro-opcion-${valor}"]`).click();
+  }
+
   it("debería enviar el estado elegido a la API y marcar el filtro activo", () => {
-    cy.get('[data-cy="filtro-estado"]').select("Confirmada");
+    filtrarPorEstado("Confirmada");
     cy.wait("@cargar").then((interception) => {
       expect(interception.request.body.filtros.estado).to.eq("Confirmada");
     });
@@ -28,7 +33,7 @@ describe("AgendaYA - Filtro de reservas por estado (M05)", () => {
   });
 
   it("debería mostrar solo reservas del estado elegido", () => {
-    cy.get('[data-cy="filtro-estado"]').select("Confirmada");
+    filtrarPorEstado("Confirmada");
     cy.wait("@cargar");
     cy.get(agendaPage.loading).should("not.exist");
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import styles from "./FiltrosAgenda.module.css";
 
 export const ESTADOS_FILTRO = [
@@ -17,24 +18,49 @@ interface FiltrosAgendaProps {
 }
 
 export function FiltrosAgenda({ estado, onChange }: FiltrosAgendaProps) {
+  const [abierto, setAbierto] = useState(false);
+  const actual = ESTADOS_FILTRO.find((opcion) => opcion.value === estado) ?? ESTADOS_FILTRO[0];
+
+  function seleccionar(value: string) {
+    onChange(value);
+    setAbierto(false);
+  }
+
   return (
     <div className={styles.filtros}>
-      <label className={styles.label} htmlFor="filtro-estado">
-        Filtrar por estado
-      </label>
-      <select
-        id="filtro-estado"
-        data-cy="filtro-estado"
-        className={styles.select}
-        value={estado}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {ESTADOS_FILTRO.map((opcion) => (
-          <option key={opcion.value} value={opcion.value}>
-            {opcion.label}
-          </option>
-        ))}
-      </select>
+      <span className={styles.label}>Filtrar por estado</span>
+
+      <div className={styles.dropdown}>
+        <button
+          type="button"
+          data-cy="filtro-estado"
+          className={styles.trigger}
+          onClick={() => setAbierto((valor) => !valor)}
+        >
+          {actual.label}
+        </button>
+
+        {abierto && (
+          <>
+            <div className={styles.overlay} onClick={() => setAbierto(false)} />
+            <div className={styles.menu} data-cy="filtro-menu">
+              {ESTADOS_FILTRO.map((opcion) => (
+                <button
+                  key={opcion.value}
+                  type="button"
+                  data-cy={`filtro-opcion-${opcion.value || "todos"}`}
+                  className={`${styles.opcion} ${
+                    opcion.value === estado ? styles.opcionActiva : ""
+                  }`}
+                  onClick={() => seleccionar(opcion.value)}
+                >
+                  {opcion.label}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
 
       {estado ? (
         <span className={styles.chip} data-cy="filtro-activo">
