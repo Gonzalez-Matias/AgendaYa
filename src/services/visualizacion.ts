@@ -1,5 +1,13 @@
 import { z } from "zod";
 import { findReservasByAdmin } from "../repositories/visualizacion";
+import type { FiltrosVista } from "../types/reserva";
+
+const FiltrosVistaSchema = z
+  .object({
+    estado: z.string().min(1).optional(),
+    tipoEventoId: z.number().int().positive().optional(),
+  })
+  .optional();
 
 export type ModoVista = "calendario" | "lista";
 
@@ -131,14 +139,17 @@ function obtenerColorEstado(estado: string): string {
 export async function obtenerReservasPorRango(
   administradorId: number,
   fechaDesde: Date,
-  fechaHasta: Date
+  fechaHasta: Date,
+  filtros?: FiltrosVista
 ): Promise<ReservaVista[]> {
   const datos = ObtenerReservasInputSchema.parse({ administradorId, fechaDesde, fechaHasta });
+  const filtrosValidados = FiltrosVistaSchema.parse(filtros);
 
   const reservas = await findReservasByAdmin(
     datos.administradorId,
     datos.fechaDesde,
-    datos.fechaHasta
+    datos.fechaHasta,
+    filtrosValidados
   );
 
   return reservas.map((reserva) => {

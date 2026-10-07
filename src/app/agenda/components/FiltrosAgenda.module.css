@@ -1,0 +1,37 @@
+.filtros {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: #434656;
+}
+
+.select {
+  padding: 6px 10px;
+  border: 1px solid #c3c5d9;
+  border-radius: 6px;
+  background: white;
+  font-size: 13px;
+  color: #191c1e;
+  cursor: pointer;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #003ec7;
+}
+
+.chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e0e7ff;
+  color: #003ec7;
+  font-size: 11px;
+  font-weight: 600;
+}

@@ -1,9 +1,20 @@
 import prisma from "./db";
+import type { Prisma } from "../generated/prisma/client";
+import type { FiltrosVista } from "../types/reserva";
+
+/** Arma las condiciones de filtrado opcionales de la vista de agenda. */
+function filtrosWhere(filtros?: FiltrosVista): Prisma.ReservaWhereInput {
+  const where: Prisma.ReservaWhereInput = {};
+  if (filtros?.estado) where.estadoReserva = { nombre: filtros.estado };
+  if (filtros?.tipoEventoId) where.tipoEventoId = filtros.tipoEventoId;
+  return where;
+}
 
 export async function findReservasByAdmin(
   administradorId: number,
   fechaDesde: Date,
-  fechaHasta: Date
+  fechaHasta: Date,
+  filtros?: FiltrosVista
 ) {
   return prisma.reserva.findMany({
     where: {
@@ -12,6 +23,7 @@ export async function findReservasByAdmin(
         gte: fechaDesde,
         lte: fechaHasta,
       },
+      ...filtrosWhere(filtros),
     },
     include: {
       estadoReserva: true,
@@ -26,7 +38,8 @@ export async function findReservasByAdminYPagina(
   fechaDesde: Date,
   fechaHasta: Date,
   pagina: number,
-  porPagina: number
+  porPagina: number,
+  filtros?: FiltrosVista
 ) {
   const skip = (pagina - 1) * porPagina;
 
@@ -37,6 +50,7 @@ export async function findReservasByAdminYPagina(
         gte: fechaDesde,
         lte: fechaHasta,
       },
+      ...filtrosWhere(filtros),
     },
     include: {
       estadoReserva: true,
@@ -45,5 +59,21 @@ export async function findReservasByAdminYPagina(
     orderBy: { fechaHoraInicio: "asc" },
     skip,
     take: porPagina,
+  });
+}
+
+/** Cuenta las reservas de un administrador en el rango, respetando los filtros de la vista. */
+export async function contarReservasByAdmin(
+  administradorId: number,
+  fechaDesde: Date,
+  fechaHasta: Date,
+  filtros?: FiltrosVista
+) {
+  return prisma.reserva.count({
+    where: {
+      administradorId,
+      fechaHoraInicio: { gte: fechaDesde, lte: fechaHasta },
+      ...filtrosWhere(filtros),
+    },
   });
 }

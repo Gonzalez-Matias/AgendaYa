@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { obtenerReservasPorRango } from "@/services/visualizacion";
 import type { ReservaVista } from "@/services/visualizacion";
-import { findReservasByAdminYPagina } from "@/repositories/visualizacion";
-import prisma from "@/repositories/db";
+import { contarReservasByAdmin, findReservasByAdminYPagina } from "@/repositories/visualizacion";
+import type { FiltrosVista } from "@/types/reserva";
+
+const COOKIE_FILTRO_ESTADO = "agenda_filtro_estado";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { administradorId, fechaDesde, fechaHasta, modoVista, pagina, porPagina } = body;
+    const { administradorId, fechaDesde, fechaHasta, modoVista, pagina, porPagina, filtros } = body;
 
     if (!administradorId) {
       return NextResponse.json({ error: "administradorId es requerido" }, { status: 400 });
@@ -30,15 +32,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // La agenda recuerda el último filtro de estado del administrador (cookie).
+    const estadoRecordado = request.cookies.get(COOKIE_FILTRO_ESTADO)?.value;
+    const filtrosEfectivos: FiltrosVista = {
+      estado: filtros?.estado ?? estadoRecordado,
+      tipoEventoId: filtros?.tipoEventoId,
+    };
+
     if (modoVista === "lista") {
       const porPaginaNum = Math.max(1, Number(porPagina) || 10);
       const paginaNum = Math.max(1, Number(pagina) || 1);
 
       const [reservas, total] = await Promise.all([
-        findReservasByAdminYPagina(administradorId, inicio, fin, paginaNum, porPaginaNum),
-        prisma.reserva.count({
-          where: { administradorId, fechaHoraInicio: { gte: inicio, lte: fin } },
-        }),
+        findReservasByAdminYPagina(
+          administradorId,
+          inicio,
+          fin,
+          paginaNum,
+          porPaginaNum,
+          filtrosEfectivos
+        ),
+        contarReservasByAdmin(administradorId, inicio, fin, filtrosEfectivos),
       ]);
 
       return NextResponse.json({
@@ -61,7 +75,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const reservas = await obtenerReservasPorRango(administradorId, inicio, fin);
+    const reservas = await obtenerReservasPorRango(administradorId, inicio, fin, filtrosEfectivos);
     return NextResponse.json({ reservas, total: reservas.length, totalPaginas: 1 });
   } catch (error) {
     console.error("Error al obtener reservas:", error);

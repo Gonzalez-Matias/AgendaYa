@@ -11,6 +11,11 @@ export interface DetalleReserva {
   estado: { id: number; nombre: string };
 }
 
+export interface FiltrosVista {
+  estado?: string;
+  tipoEventoId?: number;
+}
+
 export interface ReagendarReservaInput {
   reservaId: number;
   nuevaFechaHoraInicio: Date;
