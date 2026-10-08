@@ -7,6 +7,7 @@ import { CalendarioSemanal } from "./components/CalendarioSemanal";
 import { ListaReservas } from "./components/ListaReservas";
 import { DetalleReserva } from "./components/DetalleReserva";
 import { Sidebar } from "./components/Sidebar";
+import { FiltrosAgenda } from "./components/FiltrosAgenda";
 import type { ModoVista, ReservaVista } from "@/services/visualizacion";
 import styles from "./page.module.css";
 
@@ -19,6 +20,7 @@ export default function AgendaPage() {
   const [adminNombre, setAdminNombre] = useState("");
   const [cargando, setCargando] = useState(true);
   const [reservaSeleccionada, setReservaSeleccionada] = useState<number | null>(null);
+  const [filtroEstado, setFiltroEstado] = useState("");
 
   useEffect(() => {
     fetch("/api/administradores")
@@ -62,6 +64,7 @@ export default function AgendaPage() {
           fechaDesde: desde.toISOString(),
           fechaHasta: hasta.toISOString(),
           modoVista,
+          filtros: { estado: filtroEstado || undefined },
         }),
       });
 
@@ -74,12 +77,19 @@ export default function AgendaPage() {
     } finally {
       setCargando(false);
     }
-  }, [adminId, fechaActual, subVista, modoVista]);
+  }, [adminId, fechaActual, subVista, modoVista, filtroEstado]);
 
   useEffect(() => {
     if (!adminId) return;
     cargarReservas();
   }, [adminId, cargarReservas]);
+
+  function aplicarFiltro(estado: string) {
+    setFiltroEstado(estado);
+    if (estado) {
+      document.cookie = `agenda_filtro_estado=${estado}; path=/; max-age=31536000`;
+    }
+  }
 
   function cambiarFecha(delta: number) {
     setFechaActual((prev) => {
@@ -147,6 +157,8 @@ export default function AgendaPage() {
         <div
           className={`${styles.main} ${modoVista === "calendario" && subVista === "semanal" ? styles.mainFull : ""}`}
         >
+          <FiltrosAgenda estado={filtroEstado} onChange={aplicarFiltro} />
+
           <CalendarToolbar
             fechaActual={fechaActual}
             modoVista={modoVista}
