@@ -55,3 +55,9 @@ coverage/
 cypress/reports/
 cypress/screenshots/
 cypress/videos/
+
+# agent skills
+.agents/
+skills-lock.json
+AGENTS.md
+.opencode

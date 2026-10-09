@@ -4,8 +4,6 @@ import type { ReservaVista } from "@/services/visualizacion";
 import { contarReservasByAdmin, findReservasByAdminYPagina } from "@/repositories/visualizacion";
 import type { FiltrosVista } from "@/types/reserva";
 
-const COOKIE_FILTRO_ESTADO = "agenda_filtro_estado";
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -32,10 +30,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // La agenda recuerda el último filtro de estado del administrador (cookie).
-    const estadoRecordado = request.cookies.get(COOKIE_FILTRO_ESTADO)?.value;
     const filtrosEfectivos: FiltrosVista = {
-      estado: filtros?.estado ?? estadoRecordado,
+      estado: filtros?.estado,
       tipoEventoId: filtros?.tipoEventoId,
     };
 
