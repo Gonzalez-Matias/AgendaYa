@@ -8,6 +8,7 @@ import { ListaReservas } from "./components/ListaReservas";
 import { DetalleReserva } from "./components/DetalleReserva";
 import { Sidebar } from "./components/Sidebar";
 import { FiltrosAgenda } from "./components/FiltrosAgenda";
+import { guardarFiltroEstado, leerFiltroEstadoGuardado } from "./filtroEstado";
 import type { ModoVista, ReservaVista } from "@/services/visualizacion";
 import styles from "./page.module.css";
 
@@ -21,6 +22,12 @@ export default function AgendaPage() {
   const [cargando, setCargando] = useState(true);
   const [reservaSeleccionada, setReservaSeleccionada] = useState<number | null>(null);
   const [filtroEstado, setFiltroEstado] = useState("");
+  const [filtroInicializado, setFiltroInicializado] = useState(false);
+
+  useEffect(() => {
+    setFiltroEstado(leerFiltroEstadoGuardado());
+    setFiltroInicializado(true);
+  }, []);
 
   useEffect(() => {
     fetch("/api/administradores")
@@ -80,15 +87,13 @@ export default function AgendaPage() {
   }, [adminId, fechaActual, subVista, modoVista, filtroEstado]);
 
   useEffect(() => {
-    if (!adminId) return;
+    if (!adminId || !filtroInicializado) return;
     cargarReservas();
-  }, [adminId, cargarReservas]);
+  }, [adminId, filtroInicializado, cargarReservas]);
 
   function aplicarFiltro(estado: string) {
     setFiltroEstado(estado);
-    if (estado) {
-      document.cookie = `agenda_filtro_estado=${estado}; path=/; max-age=31536000`;
-    }
+    guardarFiltroEstado(estado);
   }
 
   function cambiarFecha(delta: number) {

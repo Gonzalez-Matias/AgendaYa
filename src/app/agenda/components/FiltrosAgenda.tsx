@@ -1,16 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { ESTADOS_FILTRO } from "../filtroEstado";
 import styles from "./FiltrosAgenda.module.css";
 
-export const ESTADOS_FILTRO = [
-  { value: "", label: "Todos" },
-  { value: "Confirmada", label: "Confirmada" },
-  { value: "PendienteDeConfirmacion", label: "Pendiente de confirmación" },
-  { value: "PendienteDeReagendar", label: "Pendiente de reagendar" },
-  { value: "Cancelada", label: "Cancelada" },
-  { value: "Completada", label: "Completada" },
-] as const;
+export { ESTADOS_FILTRO };
 
 interface FiltrosAgendaProps {
   estado: string;
